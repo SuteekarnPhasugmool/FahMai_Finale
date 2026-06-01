@@ -1,0 +1,7 @@
+position_level_code,rank,default_signing_authority_thb
+IC,1,0.00
+Lead,2,25000.00
+Manager,3,100000.00
+Director,4,500000.00
+VP,5,1000000.00
+C-level,6,5000000.00

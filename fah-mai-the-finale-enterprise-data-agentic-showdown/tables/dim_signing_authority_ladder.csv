@@ -1,0 +1,8 @@
+ladder_row_id,policy_version_id,position_level_code,dept_code,amount_ceiling_thb,min_co_signers,co_signer_min_position_level_code,description_th
+1,5,IC,,0.00,1,Manager,smoke approval ladder row
+2,5,Manager,,100000.00,0,,smoke approval ladder row
+3,6,IC,,0.00,1,Manager,smoke approval ladder row
+4,6,IC,SUP,5000.00,0,,smoke approval ladder row
+5,6,Manager,,100000.00,0,,smoke approval ladder row
+6,6,Director,,500000.00,0,,smoke approval ladder row
+7,6,C-level,,5000000.00,0,,smoke approval ladder row

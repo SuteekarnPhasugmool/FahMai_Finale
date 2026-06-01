@@ -1,0 +1,8 @@
+campaign_id,start_timestamp,end_timestamp,scope_filter,description_th,description_en
+SF-LAUNCH-2568,2025-07-15T00:00:00+07:00,2025-07-31T23:59:59+07:00,sku-list:[SF-Galaxy-Pro-2568],SF Galaxy Pro 2568 launch promo,SF Galaxy Pro 2568 launch promo
+MEGA-1111-2567,2024-11-11T00:00:00+07:00,2024-11-12T23:59:59+07:00,all,11.11 มหกรรมลดราคา 2567,11.11 Mega Sale 2567
+MEGA-1212-2567,2024-12-12T00:00:00+07:00,2024-12-13T23:59:59+07:00,all,12.12 มหกรรมลดราคา 2567,12.12 Mega Sale 2567
+MEGA-1111-2568,2025-11-10T00:00:00+07:00,2025-11-12T23:59:59+07:00,all,11.11 มหกรรมลดราคา 2568,11.11 Mega Sale 2568
+MEGA-1212-2568,2025-12-11T00:00:00+07:00,2025-12-13T23:59:59+07:00,all,12.12 มหกรรมลดราคา 2568,12.12 Mega Sale 2568
+CLEAR-EOY-2567,2024-12-20T00:00:00+07:00,2024-12-31T23:59:59+07:00,"sku-list:[DN-LT-010,WK-SW-004,AW-MN-001]",เคลียร์สต็อกสิ้นปี 2567,Year-end Clearance 2567
+CLEAR-EOY-2568,2025-12-20T00:00:00+07:00,2025-12-31T23:59:59+07:00,"sku-list:[DN-LT-010,WK-SW-004,AW-MN-001]",เคลียร์สต็อกสิ้นปี 2568,Year-end Clearance 2568

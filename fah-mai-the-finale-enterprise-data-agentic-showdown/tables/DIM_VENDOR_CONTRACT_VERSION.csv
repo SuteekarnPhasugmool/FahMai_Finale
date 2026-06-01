@@ -1,0 +1,23 @@
+contract_version_id,vendor_id,version_number,effective_date,end_date,contract_pdf_filename,amendment_summary
+1,V-013,1,2024-01-01,2025-04-01,contracts/V-013-v1.pdf,
+2,V-013,2,2025-04-01,2025-07-01,contracts/V-013-v2.pdf,Fee-floor amendment
+3,V-013,3,2025-07-01,2025-10-01,contracts/V-013-v3.pdf,Yearly rate ladder
+4,V-013,4,2025-10-01,,contracts/V-013-v4.pdf,Compliance amendment
+5,V-002,1,2024-01-01,2025-06-01,contracts/V-002-v1.pdf,
+6,V-002,2,2025-06-01,2025-09-01,contracts/V-002-v2.pdf,Warranty service carve
+7,V-002,3,2025-09-01,2025-12-01,contracts/V-002-v3.pdf,Parts pricing update
+8,V-002,4,2025-12-01,,contracts/V-002-v4.pdf,Compliance amendment
+9,V-006,1,2024-01-01,2024-07-01,contracts/V-006-v1.pdf,
+10,V-006,2,2024-07-01,2025-04-01,contracts/V-006-v2.pdf,Mid-year rate update
+11,V-006,3,2025-04-01,2025-10-01,contracts/V-006-v3.pdf,Extended SLA terms
+12,V-006,4,2025-10-01,,contracts/V-006-v4.pdf,Peak-season surcharge
+13,V-001,1,2024-01-01,2024-09-01,contracts/V-001-v1.pdf,
+14,V-001,2,2024-09-01,2025-04-01,contracts/V-001-v2.pdf,Price update
+15,V-001,3,2025-04-01,2025-10-01,contracts/V-001-v3.pdf,Warranty extension
+16,V-001,4,2025-10-01,,contracts/V-001-v4.pdf,Compliance amendment
+17,V-014,1,2024-01-01,2024-09-01,contracts/V-014-v1.pdf,
+18,V-014,2,2024-09-01,2025-02-01,contracts/V-014-v2.pdf,Final extension
+19,V-014,3,2025-02-01,2025-03-31,contracts/V-014-v3.pdf,Termination amendment
+20,V-018,1,2025-04-01,2025-08-01,contracts/V-018-v1.pdf,
+21,V-018,2,2025-08-01,2025-11-01,contracts/V-018-v2.pdf,Rate-card update
+22,V-018,3,2025-11-01,,contracts/V-018-v3.pdf,Peak-season surcharge

@@ -1,0 +1,15 @@
+account_id,bank,account_number,account_role,associated_branch_code,currency,opening_balance_thb,statement_cadence
+KBANK-OPER,KBank,001-1-00001-1,operating,,THB,10000000.00,monthly
+SCB-OPER,SCB,002-1-00001-2,operating,,THB,5000000.00,monthly
+BBL-OPER,BBL,003-1-00001-3,operating,,THB,3000000.00,monthly
+OPER-BKK-CTW,KBank,100-1-10000-1,operating,BKK-CTW,THB,1000000.00,monthly
+OPER-BKK-EMSP,SCB,101-2-10001-2,operating,BKK-EMSP,THB,1000000.00,monthly
+OPER-BKK-PKT,BBL,102-3-10002-3,operating,BKK-PKT,THB,1000000.00,monthly
+OPER-BKK-R9,KBank,103-1-10003-4,operating,BKK-R9,THB,1000000.00,monthly
+OPER-BKK-SIAM,SCB,104-2-10004-5,operating,BKK-SIAM,THB,1000000.00,monthly
+OPER-CNX-MAYA,BBL,105-3-10005-6,operating,CNX-MAYA,THB,1000000.00,monthly
+OPER-HKT-FEST,KBank,106-1-10006-7,operating,HKT-FEST,THB,1000000.00,monthly
+OPER-KKC-CTRL,SCB,107-2-10007-8,operating,KKC-CTRL,THB,1000000.00,monthly
+OPER-PTY-CTRL,BBL,108-3-10008-9,operating,PTY-CTRL,THB,1000000.00,monthly
+OPER-REMOTE,KBank,109-1-10009-1,operating,REMOTE,THB,1000000.00,monthly
+OPER-UDN-CTRL,SCB,110-2-10010-2,operating,UDN-CTRL,THB,1000000.00,monthly

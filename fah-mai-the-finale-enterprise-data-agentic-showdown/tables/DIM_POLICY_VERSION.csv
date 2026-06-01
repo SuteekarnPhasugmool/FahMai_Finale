@@ -1,0 +1,13 @@
+policy_version_id,policy_class,policy_variable,scope_filter,value_numeric,value_text,policy_value_table_ref,effective_date,end_date,policy_doc_filename
+1,return,return_window_days,global,14,,,2024-01-01,2025-03-01,
+2,return,return_window_days,global,21,,,2025-03-01,,
+3,membership,point_earning_rate_per_thb,global,0.0100,,,2024-01-01,2025-04-01,
+4,membership,point_earning_rate_per_thb,global,0.0125,,,2025-04-01,,
+5,signing_authority,refund_signing_authority_ladder,global,,,dim_signing_authority_ladder,2024-01-01,2025-02-15,
+6,signing_authority,refund_signing_authority_ladder,global,,,dim_signing_authority_ladder,2025-02-15,,
+7,warranty,care_plus_sku_tier_table,global,,,dim_care_plus_sku_tier,2025-05-01,,
+8,warranty,warranty_routing,global,,novatech_service,,2025-06-01,,
+9,shipping,free_shipping_threshold_thb,global,500,,,2024-01-01,2025-04-01,
+10,shipping,free_shipping_threshold_thb,global,199,,,2025-04-01,,
+11,refund,refund_threshold_thb,global,2000,,,2024-01-01,2025-03-15,
+12,refund,refund_threshold_thb,global,5000,,,2025-03-15,,

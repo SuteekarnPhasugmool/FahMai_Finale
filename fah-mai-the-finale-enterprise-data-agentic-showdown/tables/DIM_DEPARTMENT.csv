@@ -1,0 +1,10 @@
+dept_code,dept_name_th,dept_name_en,dept_type
+CEO,Executive,Executive,corporate
+B2B,B2B,B2B,corporate
+SUP,Customer Support,Customer Support,corporate
+RET,Retail,Retail,corporate
+FIN,Finance,Finance,corporate
+MKT,Marketing,Marketing,corporate
+HR,Human Resources,Human Resources,corporate
+OPS,Operations,Operations,corporate
+SF,SaiFah Division,SaiFah Division,product_division

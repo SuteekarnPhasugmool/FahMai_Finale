@@ -1,0 +1,7 @@
+vendor_id,name_th,name_en,category,role,payment_terms,invoice_cadence,is_partner_brand,is_component_supplier,start_date,end_date
+V-001,NovaTech,NovaTech,consumer_brand,partner_brand,NET-30,monthly,true,false,2023-01-01,
+V-002,NovaTech Service,NovaTech Service,consumer_brand,warranty_partner,NET-30,monthly,true,false,2023-01-01,
+V-006,VeloShip,VeloShip,logistics,carrier,NET-15,weekly,false,false,2023-01-01,
+V-013,PayWise,PayWise,payments,processor,NET-30,monthly,false,false,2023-01-01,
+V-014,LegacyShip,LegacyShip,logistics,carrier,NET-15,weekly,false,false,2023-01-01,2025-03-31
+V-018,NorthernShip,NorthernShip,logistics,carrier,NET-15,weekly,false,false,2025-04-01,

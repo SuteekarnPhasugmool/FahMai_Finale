@@ -1,0 +1,24 @@
+# Local/generated databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Python/cache artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS/editor noise
+.DS_Store
+
+# Local secrets
+.env
+*.env
+
+# Keep the structured table bundle, but skip the very large unstructured corpus.
+fah-mai-the-finale-enterprise-data-agentic-showdown/docs/
+fah-mai-the-finale-enterprise-data-agentic-showdown/logs/
+fah-mai-the-finale-enterprise-data-agentic-showdown/renders/
+fah-mai-the-finale-enterprise-data-agentic-showdown/reports/

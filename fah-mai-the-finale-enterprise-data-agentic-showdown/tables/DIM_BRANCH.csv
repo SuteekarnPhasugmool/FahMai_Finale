@@ -1,0 +1,12 @@
+branch_code,name_th,name_en,branch_type,is_service_center,retail_floor_coefficient,traffic_share_pct,employee_headcount_share_pct
+BKK-R9,HQ Ratchada 9,Bangkok Ratchada 9 HQ,hq,true,0.20,0.08,0.18
+BKK-SIAM,FahMai Siam,FahMai Siam,branch,true,1.00,0.16,0.08
+BKK-PKT,FahMai Phuket Road,FahMai Phuket Road,branch,false,1.00,0.10,0.06
+BKK-CTW,FahMai Central World,FahMai Central World,branch,true,1.20,0.12,0.07
+CNX-MAYA,FahMai Chiang Mai Maya,FahMai Chiang Mai Maya,branch,true,1.00,0.09,0.06
+HKT-FEST,FahMai Phuket Festival,FahMai Phuket Festival,branch,true,1.00,0.07,0.05
+KKC-CTRL,FahMai Khon Kaen Central,FahMai Khon Kaen Central,branch,true,1.00,0.06,0.05
+UDN-CTRL,FahMai Udon Central,FahMai Udon Central,branch,false,0.90,0.05,0.04
+BKK-EMSP,FahMai EM Sphere,FahMai EM Sphere,branch,true,1.30,0.10,0.07
+PTY-CTRL,FahMai Pattaya Central,FahMai Pattaya Central,branch,true,1.00,0.09,0.06
+REMOTE,Remote / Online,Remote / Online,remote,false,0.00,0.08,0.20

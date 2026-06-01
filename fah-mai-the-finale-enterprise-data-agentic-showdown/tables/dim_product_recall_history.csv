@@ -1,0 +1,4 @@
+history_id,sku_id,status,transition_date
+1,NT-LT-001,normal,2024-01-01
+2,NT-LT-001,active,2025-09-10
+3,NT-LT-001,completed,2025-10-15

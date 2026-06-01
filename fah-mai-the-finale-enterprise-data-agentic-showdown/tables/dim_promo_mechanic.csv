@@ -1,0 +1,9 @@
+promo_mechanic_id,campaign_id,discount_type,discount_value,point_multiplier,min_basket_thb,description_th
+1,SF-LAUNCH-2568,pct_off,0.0500,,,5 percent off launch units
+2,SF-LAUNCH-2568,point_multiplier,,2.00,,Double loyalty points
+3,MEGA-1111-2567,pct_off,0.1200,,,11.11 มหกรรม ลด 12%
+4,MEGA-1212-2567,pct_off,0.1500,,,12.12 มหกรรม ลด 15%
+5,MEGA-1111-2568,pct_off,0.1800,,,11.11 มหกรรม ลด 18%
+6,MEGA-1212-2568,pct_off,0.2000,,,12.12 มหกรรม ลด 20%
+7,CLEAR-EOY-2567,pct_off,0.3000,,,เคลียร์สต็อกสิ้นปี ลด 30%
+8,CLEAR-EOY-2568,pct_off,0.3000,,,เคลียร์สต็อกสิ้นปี ลด 30%
