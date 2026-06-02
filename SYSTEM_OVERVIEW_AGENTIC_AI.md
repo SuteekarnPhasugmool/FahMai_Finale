@@ -322,7 +322,19 @@ SQL
 rows จาก SQL result
 ```
 
-แล้วให้ LLM จัดรูปคำตอบตามโจทย์ เช่น tuple, list, top-N, หรือข้อความสรุปสั้น ๆ
+ระบบจะ infer answer contract จากตัวคำถามก่อน เช่น:
+
+```text
+tuple
+exact N values
+top-N ranking
+specific ID/code fields
+name fields
+percentage
+short direct answer
+```
+
+แล้วให้ LLM จัดรูปคำตอบตามโจทย์ เช่น tuple, list, top-N, หรือข้อความสรุปสั้น ๆ โดยไม่ force เป็น tuple ถ้าโจทย์ไม่ได้ขอ
 
 บาง benchmark format ที่ชัดเจนมาก เช่น tuple 12 เดือนของ `L3-Q-MED-019` จะถูกจัดการแบบ deterministic ก่อนเรียก LLM:
 

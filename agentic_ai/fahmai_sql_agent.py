@@ -963,6 +963,50 @@ def deterministic_final_answer(question: str, rows: list[sqlite3.Row]) -> str | 
     return None
 
 
+def infer_answer_contract(question: str) -> str:
+    """Infer the requested final-answer shape from the question text."""
+    q = normalize(question)
+    contract: list[str] = []
+
+    if "tuple" in q:
+        contract.append("The user explicitly requested a tuple. Output a tuple in the requested order.")
+        tuple_count = re.search(r"tuple\s+(\d+)", q)
+        if tuple_count:
+            contract.append(f"The tuple should contain {tuple_count.group(1)} values if the rows support it.")
+    else:
+        contract.append("The user did not explicitly request a tuple, so do not output a tuple.")
+
+    if any(term in q for term in ("top ", "top-", "อันดับแรก", "สูงสุด", "ต่ำสุด")):
+        contract.append("If this is a ranking question, answer with the requested ranked item(s) and their metric values.")
+
+    value_count_patterns = [
+        r"ขอตัวเลข\s+(\d+)\s+ค่า",
+        r"ครบ\s+(\d+)\s+อย่าง",
+        r"ตอบ\s+(\d+)\s+ค่า",
+        r"(\d+)-tuple",
+    ]
+    for pattern in value_count_patterns:
+        match = re.search(pattern, q)
+        if match:
+            contract.append(f"The question asks for {match.group(1)} values; include exactly those requested values when possible.")
+            break
+
+    if any(term in q for term in ("ขอชื่อ", "ระบุชื่อ", "ชื่อ-นามสกุล")):
+        contract.append("Include the requested name fields, not only IDs.")
+    if any(term in q for term in ("customer_id", "employee_id", "vendor_id", "sku_id", "branch_code", "txn_id")):
+        contract.append("Include the explicitly requested ID/code fields.")
+    if any(term in q for term in ("เปอร์เซ็นต์", "percentage", "pct", "%")):
+        contract.append("Include percentages with a clear percent sign or label.")
+    if "เรียง" in q or "ตามลำดับ" in q:
+        contract.append("Preserve the order requested by the question.")
+    if "table" in q or "ตาราง" in q:
+        contract.append("A compact markdown table is acceptable only because the user requested table-like output.")
+    else:
+        contract.append("Prefer a concise direct answer, not a markdown table.")
+
+    return "\n".join(f"- {item}" for item in contract)
+
+
 def synthesize_final_answer(
     *,
     question: str,
@@ -977,18 +1021,23 @@ def synthesize_final_answer(
         return deterministic
 
     rows_json = json.dumps(rows_to_jsonable(rows), ensure_ascii=False, default=str)
+    answer_contract = infer_answer_contract(question)
     system_prompt = """
 You are the final-answer formatter for a data QA pipeline.
 Use only the SQL result rows provided. Do not invent numbers.
 Answer in Thai unless the user explicitly asks otherwise.
-Match the requested output shape exactly: tuple, list, top-N rows, short paragraph, or specific fields.
-If the question asks for a tuple, output the tuple clearly and in the requested order.
+Infer the requested output shape from the user's question: tuple, exact N values, list, ranking, specific fields, short paragraph, or table.
+If the user asks for a tuple, output the tuple clearly and in the requested order.
+If the user does not ask for a tuple, do not output a tuple.
 If rows are empty, say that no matching rows were found.
 Do not include markdown tables unless the user asks for a table.
 """.strip()
     user_prompt = f"""
 Question:
 {question}
+
+Answer contract inferred from the question:
+{answer_contract}
 
 SQL:
 {sql}

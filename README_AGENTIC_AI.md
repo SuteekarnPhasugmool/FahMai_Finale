@@ -74,7 +74,7 @@ python3 agentic_ai/fahmai_sql_agent.py \
   --answer-format both
 ```
 
-For `L3-Q-MED-019`, the SQL result is a month-by-month table and the final answer is formatted as the requested 12-value tuple.
+For `L3-Q-MED-019`, the SQL result is a month-by-month table and the final answer is formatted as the requested 12-value tuple. Other questions are formatted dynamically from the wording of the question, so the agent will not force tuple output unless the question asks for a tuple.
 
 Use fallback if the LLM API is unavailable:
 
@@ -134,5 +134,5 @@ python3 agentic_ai/fahmai_sql_agent.py --rebuild-db "ยอดขายตาม
 - Versioned/history dimensions are joined only where the row path is clear. For `dim_product_recall_history`, the warranty view uses the latest recall row per SKU to avoid fan-out.
 - In `--planner llm` mode, the LLM does not write raw SQL. It returns structured JSON with `view_name`, `metric`, `group_by`, `year`, `branch_codes`, and `channel`; Python validates those fields and generates the final SQL.
 - In `--planner llm-sql` mode, the LLM writes one read-only SQLite `SELECT` from the full schema. Python validates that it is read-only, applies a small alias repair layer for common friendly names, and retries with the LLM if SQLite reports a column/syntax error.
-- `--answer-format table` keeps the raw table output. `--answer-format final` returns only the post-processed final answer. `--answer-format both` prints both the table and the final answer. Final-answer synthesis uses the question, SQL, and rows only; some exact benchmark formats such as 12-month tuples are handled deterministically.
+- `--answer-format table` keeps the raw table output. `--answer-format final` returns only the post-processed final answer. `--answer-format both` prints both the table and the final answer. Final-answer synthesis uses the question, SQL, and rows only; it infers the requested answer shape dynamically. Some exact benchmark formats such as explicitly requested 12-month tuples are handled deterministically.
 - `questions.csv` contains some questions that require narrative files, logs, chat transcripts, or prompt-injection resistance. The SQL agent is best for DIM/FACT table questions; document/log/chat questions need a retrieval layer over `docs/`, `logs/`, and `reports/`.
