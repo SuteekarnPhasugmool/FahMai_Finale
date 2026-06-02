@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run every benchmark question through the FahMai SQL agent and save final answers."""
+"""Run every benchmark question through the FahMai SQL agent and save markdown tables."""
 
 from __future__ import annotations
 
@@ -22,11 +22,11 @@ from fahmai_sql_agent import (
     ensure_views,
     execute_sql,
     llm_generate_sql,
+    markdown_table,
     plan_query,
     repair_known_empty_result_sql,
     repair_known_sql_aliases,
     repair_sql_with_llm,
-    synthesize_final_answer,
 )
 
 
@@ -164,7 +164,7 @@ def main() -> int:
             print(f"[{index}/{len(questions)}] run {question_id}", file=sys.stderr, flush=True)
             try:
                 with question_timeout(args.question_timeout):
-                    sql, rows = generate_rows(
+                    _, rows = generate_rows(
                         conn=conn,
                         question=question,
                         api_url=args.llm_api_url,
@@ -174,14 +174,7 @@ def main() -> int:
                         limit=args.limit,
                         query_timeout=args.query_timeout,
                     )
-                    answer = synthesize_final_answer(
-                        question=question,
-                        sql=sql,
-                        rows=rows,
-                        api_url=args.llm_api_url,
-                        api_key=args.llm_api_key,
-                        model=args.llm_model,
-                    )
+                    answer = markdown_table(rows)
             except Exception as exc:
                 answer = f"ERROR: {type(exc).__name__}: {exc}"
                 print(f"[{index}/{len(questions)}] error {question_id}: {exc}", file=sys.stderr, flush=True)

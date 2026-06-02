@@ -37,8 +37,7 @@ CSV tables
   -> repair SQL or fallback to rules
   -> execute on SQLite
   -> print SQL + result table
-  -> optionally synthesize final answer in the shape requested by the question
-  -> optionally write batch final answers to CSV
+  -> optionally write batch markdown tables to CSV
 ```
 
 ## Enterprise AI-Safe Redaction Layer
@@ -352,57 +351,9 @@ name_en
 
 อีกเคสที่ repair คือ query `DIM_POLICY_VERSION` แล้วได้ no rows เพราะ LLM filter `policy_class` แคบเกินไป ทั้งที่ตัว specific policy อยู่ใน `policy_variable`
 
-## Answer Post-Processing
+## Markdown Table Output
 
-เดิม pipeline ให้ผลลัพธ์เป็น table จาก SQL เท่านั้น แต่คำถามจริงบางข้อระบุรูปแบบคำตอบ เช่น:
-
-```text
-ตอบเป็น tuple 12 ค่าตามลำดับเดือนมกราคมถึงธันวาคม
-```
-
-ระบบจึงเพิ่ม option:
-
-```bash
---answer-format table
---answer-format final
---answer-format both
-```
-
-ความหมาย:
-
-| Option | Output |
-|---|---|
-| `table` | แสดง SQL result table แบบเดิม |
-| `final` | แสดงเฉพาะคำตอบสุดท้ายที่ post-process แล้ว |
-| `both` | แสดงทั้ง table และ final answer |
-
-final answer synthesis ใช้ข้อมูลแค่:
-
-```text
-question
-SQL
-rows จาก SQL result
-```
-
-ระบบจะ infer answer contract จากตัวคำถามก่อน เช่น:
-
-```text
-tuple
-exact N values
-top-N ranking
-specific ID/code fields
-name fields
-percentage
-short direct answer
-```
-
-แล้วให้ LLM จัดรูปคำตอบตามโจทย์ เช่น tuple, list, top-N, หรือข้อความสรุปสั้น ๆ โดยไม่ force เป็น tuple ถ้าโจทย์ไม่ได้ขอ
-
-บาง benchmark format ที่ชัดเจนมาก เช่น tuple 12 เดือนของ `L3-Q-MED-019` จะถูกจัดการแบบ deterministic ก่อนเรียก LLM:
-
-```text
-(109, 109, 109, 109, 109, 109, 110, 110, 110, 110, 110, 110)
-```
+pipeline ตอนนี้จบที่ markdown result table จาก SQL เท่านั้น ไม่มี final-answer formatter stage และไม่มี LLM รอบสองสำหรับจัดรูปคำตอบ
 
 ตัวอย่าง:
 
@@ -410,8 +361,7 @@ short direct answer
 python3 agentic_ai/fahmai_sql_agent.py \
   --planner llm-sql \
   --question-id L3-Q-MED-019 \
-  --limit 50 \
-  --answer-format both
+  --limit 50
 ```
 
 ## ใช้งานกับ questions.csv
@@ -433,7 +383,7 @@ python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-EASY
 python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-MED-001
 ```
 
-รันทุกคำถามแล้วเก็บ final answer เป็น CSV:
+รันทุกคำถามแล้วเก็บ markdown table result เป็น CSV:
 
 ```bash
 python3 agentic_ai/run_all_questions.py \
@@ -448,6 +398,8 @@ output มี 3 columns:
 ```text
 id,question,answer
 ```
+
+ใน batch output นี้ column `answer` คือ markdown table จาก SQL result ไม่ใช่คำตอบที่ผ่าน final-answer formatter
 
 ถ้าไม่ต้องการทับไฟล์เดิม ให้ใช้ชื่อไฟล์ใหม่ใน `--output` และไม่ใส่ `--overwrite`
 

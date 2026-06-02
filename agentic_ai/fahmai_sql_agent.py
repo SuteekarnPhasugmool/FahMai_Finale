@@ -359,6 +359,15 @@ def call_chat_completion(
         "max_tokens": max_tokens,
         "temperature": temperature,
     }
+    if os.environ.get("FAHMAI_SHOW_LLM_PROMPTS", "").lower() in {"1", "true", "yes", "on"}:
+        print("\n===== LLM REQUEST PROMPT =====", file=sys.stderr)
+        print(f"model: {model}", file=sys.stderr)
+        print(f"temperature: {temperature}", file=sys.stderr)
+        print(f"max_tokens: {max_tokens}", file=sys.stderr)
+        for idx, message in enumerate(messages, start=1):
+            print(f"\n--- message {idx}: {message.get('role', 'unknown')} ---", file=sys.stderr)
+            print(message.get("content", ""), file=sys.stderr)
+        print("===== END LLM REQUEST PROMPT =====\n", file=sys.stderr)
     data = json.dumps(payload).encode("utf-8")
     req = request.Request(
         api_url,
@@ -955,137 +964,6 @@ def markdown_table(rows: Iterable[sqlite3.Row]) -> str:
     return "\n".join(lines)
 
 
-def rows_to_jsonable(rows: Iterable[sqlite3.Row], max_rows: int = 200) -> list[dict]:
-    json_rows: list[dict] = []
-    for idx, row in enumerate(rows):
-        if idx >= max_rows:
-            break
-        json_rows.append({key: row[key] for key in row.keys()})
-    return json_rows
-
-
-def deterministic_final_answer(question: str, rows: list[sqlite3.Row]) -> str | None:
-    """Handle a few exact benchmark formats without spending an LLM call."""
-    q = normalize(question)
-    if "tuple 12" in q and "distinct" in q and "sku" in q and "แต่ละเดือน" in q:
-        month_count: dict[int, int] = {}
-        for row in rows:
-            data = {key: row[key] for key in row.keys()}
-            month_value = data.get("month") or data.get("event_month") or data.get("sales_month")
-            count_value = (
-                data.get("distinct_sku_count")
-                or data.get("sku_count")
-                or data.get("count_distinct_sku_id")
-                or data.get("COUNT(DISTINCT sku_id)")
-            )
-            if month_value is None or count_value is None:
-                continue
-            month_text = str(month_value)
-            month_num = int(month_text[-2:]) if "-" in month_text else int(month_text)
-            month_count[month_num] = int(count_value)
-        if len(month_count) == 12:
-            values = tuple(month_count[month] for month in range(1, 13))
-            return str(values)
-    return None
-
-
-def infer_answer_contract(question: str) -> str:
-    """Infer the requested final-answer shape from the question text."""
-    q = normalize(question)
-    contract: list[str] = []
-
-    if "tuple" in q:
-        contract.append("The user explicitly requested a tuple. Output a tuple in the requested order.")
-        tuple_count = re.search(r"tuple\s+(\d+)", q)
-        if tuple_count:
-            contract.append(f"The tuple should contain {tuple_count.group(1)} values if the rows support it.")
-    else:
-        contract.append("The user did not explicitly request a tuple, so do not output a tuple.")
-
-    if any(term in q for term in ("top ", "top-", "อันดับแรก", "สูงสุด", "ต่ำสุด")):
-        contract.append("If this is a ranking question, answer with the requested ranked item(s) and their metric values.")
-
-    value_count_patterns = [
-        r"ขอตัวเลข\s+(\d+)\s+ค่า",
-        r"ครบ\s+(\d+)\s+อย่าง",
-        r"ตอบ\s+(\d+)\s+ค่า",
-        r"(\d+)-tuple",
-    ]
-    for pattern in value_count_patterns:
-        match = re.search(pattern, q)
-        if match:
-            contract.append(f"The question asks for {match.group(1)} values; include exactly those requested values when possible.")
-            break
-
-    if any(term in q for term in ("ขอชื่อ", "ระบุชื่อ", "ชื่อ-นามสกุล")):
-        contract.append("Include the requested name fields, not only IDs.")
-    if any(term in q for term in ("customer_id", "employee_id", "vendor_id", "sku_id", "branch_code", "txn_id")):
-        contract.append("Include the explicitly requested ID/code fields.")
-    if any(term in q for term in ("เปอร์เซ็นต์", "percentage", "pct", "%")):
-        contract.append("Include percentages with a clear percent sign or label.")
-    if "เรียง" in q or "ตามลำดับ" in q:
-        contract.append("Preserve the order requested by the question.")
-    if "table" in q or "ตาราง" in q:
-        contract.append("A compact markdown table is acceptable only because the user requested table-like output.")
-    else:
-        contract.append("Prefer a concise direct answer, not a markdown table.")
-
-    return "\n".join(f"- {item}" for item in contract)
-
-
-def synthesize_final_answer(
-    *,
-    question: str,
-    sql: str,
-    rows: list[sqlite3.Row],
-    api_url: str,
-    api_key: str,
-    model: str,
-) -> str:
-    deterministic = deterministic_final_answer(question, rows)
-    if deterministic is not None:
-        return deterministic
-
-    rows_json = json.dumps(rows_to_jsonable(rows), ensure_ascii=False, default=str)
-    answer_contract = infer_answer_contract(question)
-    system_prompt = """
-You are the final-answer formatter for a data QA pipeline.
-Use only the SQL result rows provided. Do not invent numbers.
-Answer in Thai unless the user explicitly asks otherwise.
-Infer the requested output shape from the user's question: tuple, exact N values, list, ranking, specific fields, short paragraph, or table.
-If the user asks for a tuple, output the tuple clearly and in the requested order.
-If the user does not ask for a tuple, do not output a tuple.
-If rows are empty, say that no matching rows were found.
-Do not include markdown tables unless the user asks for a table.
-""".strip()
-    user_prompt = f"""
-Question:
-{question}
-
-Answer contract inferred from the question:
-{answer_contract}
-
-SQL:
-{sql}
-
-Rows as JSON:
-{rows_json}
-
-Final answer:
-""".strip()
-    return call_chat_completion(
-        api_url=api_url,
-        api_key=api_key,
-        model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=0.0,
-        max_tokens=1024,
-    ).strip()
-
-
 def print_agent_output(
     *,
     planner: str,
@@ -1094,10 +972,6 @@ def print_agent_output(
     rows: list[sqlite3.Row],
     rationale: str | None,
     question_id: str | None,
-    answer_format: str,
-    api_url: str,
-    api_key: str | None,
-    model: str,
     view_name: str | None = None,
 ) -> None:
     print(f"Planner: {planner}")
@@ -1111,25 +985,8 @@ def print_agent_output(
     print()
     print("SQL:")
     print(sql)
-
-    if answer_format in {"table", "both"}:
-        print()
-        print(markdown_table(rows))
-
-    if answer_format in {"final", "both"}:
-        if not api_key:
-            raise ValueError("--answer-format final/both requires --llm-api-key or THAILLM_API_KEY.")
-        final_answer = synthesize_final_answer(
-            question=question,
-            sql=sql,
-            rows=rows,
-            api_url=api_url,
-            api_key=api_key,
-            model=model,
-        )
-        print()
-        print("Final Answer:")
-        print(final_answer)
+    print()
+    print(markdown_table(rows))
 
 
 def main() -> int:
@@ -1147,12 +1004,6 @@ def main() -> int:
     parser.add_argument("--fallback-to-rules", action="store_true", help="If LLM planning fails, use deterministic rule planning.")
     parser.add_argument("--question-id", help="Load a question from questions.csv by id, e.g. L3-Q-EASY-001.")
     parser.add_argument("--questions-csv", type=Path, default=DEFAULT_QUESTIONS_CSV, help="questions.csv path for --question-id.")
-    parser.add_argument(
-        "--answer-format",
-        choices=("table", "final", "both"),
-        default="table",
-        help="Output raw result table, synthesized final answer, or both. Default: table.",
-    )
     parser.add_argument("--rebuild-db", action="store_true", help="Delete and rebuild the generated SQLite DB from CSV files.")
     args = parser.parse_args()
 
@@ -1173,10 +1024,6 @@ def main() -> int:
                 rows=rows,
                 rationale=None,
                 question_id=None,
-                answer_format=args.answer_format,
-                api_url=args.llm_api_url,
-                api_key=args.llm_api_key,
-                model=args.llm_model,
             )
             return 0
 
@@ -1248,10 +1095,6 @@ def main() -> int:
                 rows=rows,
                 rationale=rationale,
                 question_id=args.question_id,
-                answer_format=args.answer_format,
-                api_url=args.llm_api_url,
-                api_key=args.llm_api_key,
-                model=args.llm_model,
             )
             return 0
 
@@ -1284,10 +1127,6 @@ def main() -> int:
             rows=rows,
             rationale=plan.rationale,
             question_id=args.question_id,
-            answer_format=args.answer_format,
-            api_url=args.llm_api_url,
-            api_key=args.llm_api_key,
-            model=args.llm_model,
             view_name=plan.view_name,
         )
         return 0

@@ -23,7 +23,7 @@ This adds a small prompt-to-SQL agent over FahMai's structured FACT/DIM data.
 
 - `agentic_ai/run_all_questions.py`
   - Batch runner for `questions.csv`.
-  - Writes `id,question,answer` rows to a CSV such as `final_answers.csv`.
+  - Writes `id,question,answer` rows to a CSV such as `final_answers.csv`, where `answer` contains the markdown table result.
   - Supports resume by skipping question IDs already present in the output file.
   - Adds per-question and per-query timeouts for long benchmark runs.
 
@@ -95,17 +95,14 @@ python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-EASY
 python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-MED-001
 ```
 
-Ask for a post-processed final answer instead of only a result table:
+The pipeline now ends at the markdown result table. There is no final-answer formatter stage:
 
 ```bash
 python3 agentic_ai/fahmai_sql_agent.py \
   --planner llm-sql \
   --question-id L3-Q-MED-019 \
-  --limit 50 \
-  --answer-format both
+  --limit 50
 ```
-
-For `L3-Q-MED-019`, the SQL result is a month-by-month table and the final answer is formatted as the requested 12-value tuple. Other questions are formatted dynamically from the wording of the question, so the agent will not force tuple output unless the question asks for a tuple.
 
 Use fallback if the LLM API is unavailable:
 
@@ -137,7 +134,7 @@ Rebuild the generated DB from CSV:
 python3 agentic_ai/fahmai_sql_agent.py --rebuild-db "ยอดขายตามสาขาปี 2025"
 ```
 
-Run every question in `questions.csv` and write post-processed final answers to a new CSV without overwriting the committed `final_answers.csv`:
+Run every question in `questions.csv` and write markdown table results to a new CSV without overwriting the committed `final_answers.csv`:
 
 ```bash
 python3 agentic_ai/run_all_questions.py \
@@ -178,5 +175,5 @@ python3 agentic_ai/run_all_questions.py \
 - In `--planner llm` mode, the LLM does not write raw SQL. It returns structured JSON with `view_name`, `metric`, `group_by`, `year`, `branch_codes`, and `channel`; Python validates those fields and generates the final SQL.
 - In `--planner llm-sql` mode, the LLM writes one read-only SQLite `SELECT` from the full schema. Python validates that it is read-only, validates table/column resolution with SQLite `EXPLAIN QUERY PLAN`, applies a small alias repair layer for common friendly names, and retries with the LLM if SQLite reports a column/syntax error.
 - Long-running queries can be interrupted by the batch runner with `--query-timeout`.
-- `--answer-format table` keeps the raw table output. `--answer-format final` returns only the post-processed final answer. `--answer-format both` prints both the table and the final answer. Final-answer synthesis uses the question, SQL, and rows only; it infers the requested answer shape dynamically. Some exact benchmark formats such as explicitly requested 12-month tuples are handled deterministically.
+- The pipeline intentionally stops at the markdown table returned from SQL. It does not run a final-answer formatter LLM stage.
 - `questions.csv` contains some questions that require narrative files, logs, chat transcripts, or prompt-injection resistance. The SQL agent is best for DIM/FACT table questions; document/log/chat questions need a retrieval layer over `docs/`, `logs/`, and `reports/`.
