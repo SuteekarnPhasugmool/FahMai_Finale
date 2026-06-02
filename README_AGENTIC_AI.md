@@ -150,7 +150,7 @@ Latest benchmark-style rerun:
 export THAILLM_API_KEY="your-token"
 
 python3 agentic_ai/run_all_questions.py \
-  --output final_answers_new_run.csv \
+  --output final_answers_dynamic_template_check_v2.csv \
   --overwrite \
   --fallback-to-rules \
   --question-timeout 120 \
@@ -158,7 +158,7 @@ python3 agentic_ai/run_all_questions.py \
 ```
 
 The latest strict check against `fahmai_easy_xhard_gt.csv` is saved in
-`easy_xhard_accuracy_report_new_run.csv`:
+`easy_xhard_accuracy_report_dynamic_template_check_v2.csv`:
 
 | Level | Correct | Total | Accuracy |
 |---|---:|---:|---:|

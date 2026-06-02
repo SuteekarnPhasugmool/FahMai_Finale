@@ -20,9 +20,9 @@
 | `README_AGENTIC_AI.md` | quick start และตัวอย่างคำสั่งใช้งาน |
 | `questions.csv` | ชุดคำถามจริงสำหรับทดสอบ agent |
 | `final_answers.csv` | output batch run ล่าสุดในรูปแบบ `id,question,answer` |
-| `final_answers_new_run.csv` | output rerun ล่าสุด 100 ข้อในรูปแบบ markdown table |
+| `final_answers_dynamic_template_check_v2.csv` | output rerun ล่าสุด 100 ข้อในรูปแบบ markdown table |
 | `fahmai_easy_xhard_gt.csv` | ground truth สำหรับประเมิน EASY ถึง XHARD |
-| `easy_xhard_accuracy_report_new_run.csv` | report ตรวจคำตอบล่าสุดเทียบ ground truth แบบ strict |
+| `easy_xhard_accuracy_report_dynamic_template_check_v2.csv` | report ตรวจคำตอบล่าสุดเทียบ ground truth แบบ strict |
 | `fahmai_agentic.db` | SQLite database ที่ agent สร้างจาก CSV และใช้ query |
 
 ## Data Flow
@@ -426,13 +426,13 @@ python3 agentic_ai/run_all_questions.py \
   --query-timeout 30
 ```
 
-รันรอบล่าสุดที่ใช้สร้าง `final_answers_new_run.csv`:
+รันรอบล่าสุดที่ใช้สร้าง `final_answers_dynamic_template_check_v2.csv`:
 
 ```bash
 export THAILLM_API_KEY="your-token"
 
 python3 agentic_ai/run_all_questions.py \
-  --output final_answers_new_run.csv \
+  --output final_answers_dynamic_template_check_v2.csv \
   --overwrite \
   --fallback-to-rules \
   --question-timeout 120 \
@@ -451,7 +451,7 @@ id,question,answer
 
 ## Latest Accuracy Check
 
-ตรวจ `final_answers_new_run.csv` เทียบกับ `fahmai_easy_xhard_gt.csv` ด้วยเกณฑ์ strict:
+ตรวจ `final_answers_dynamic_template_check_v2.csv` เทียบกับ `fahmai_easy_xhard_gt.csv` ด้วยเกณฑ์ strict:
 
 ```text
 คำตอบต้องมีสาระสำคัญครบตาม ground truth
@@ -471,7 +471,7 @@ partial answer ยังนับเป็น wrong
 report อยู่ที่:
 
 ```text
-easy_xhard_accuracy_report_new_run.csv
+easy_xhard_accuracy_report_dynamic_template_check_v2.csv
 ```
 
 ข้อสังเกต: EASY/MED เป็นคำถาม structured table จึงตอบได้ดีหลังเพิ่ม deterministic templates ส่วน HARD/XHARD หลายข้อ ground truth ต้องใช้ evidence นอก SQL tables เช่น policy memo, logs, reports, chat, recall/warranty trail และ reconciliation logic หลายขั้น จึงควรเพิ่ม retrieval/reconciliation layer ก่อนคาดหวัง accuracy สูงในกลุ่มนี้

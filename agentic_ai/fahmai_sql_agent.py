@@ -313,6 +313,62 @@ def extract_dates(question: str) -> list[str]:
     return dates
 
 
+def extract_years(question: str) -> list[int]:
+    years: list[int] = []
+    for match in re.finditer(r"\b(20\d{2}|25\d{2})\b", question):
+        year = normalize_year(int(match.group(1)))
+        if year not in years:
+            years.append(year)
+    return years
+
+
+def extract_top_n(question: str, default: int | None = None) -> int | None:
+    patterns = (
+        r"\btop\s+(\d+)\b",
+        r"\b(\d+)\s*อันดับ\b",
+        r"\bอันดับ(?:แรก|สูงสุด)\s*(\d+)\b",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, question, flags=re.IGNORECASE)
+        if match:
+            return max(1, min(int(match.group(1)), 100))
+    return default
+
+
+def extract_code_after(label: str, question: str) -> str | None:
+    match = re.search(rf"{re.escape(label)}\s*=\s*([A-Za-z0-9_.-]+)", question, flags=re.IGNORECASE)
+    return match.group(1) if match else None
+
+
+def extract_sku_ids(question: str) -> list[str]:
+    candidates = re.findall(r"\b[A-Z][A-Za-z0-9]*(?:-[A-Za-z0-9]+){1,5}\b", question)
+    excluded_prefixes = ("L3-Q-",)
+    excluded_values = {"KBANK-OPER"}
+    sku_ids: list[str] = []
+    for candidate in candidates:
+        if candidate in excluded_values or candidate.startswith(excluded_prefixes):
+            continue
+        if re.fullmatch(r"[A-Z]{3}-[A-Z0-9]{2,5}", candidate):
+            continue
+        if candidate not in sku_ids:
+            sku_ids.append(candidate)
+    return sku_ids
+
+
+def sql_quote(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def date_filter_sql(column: str, years: list[int]) -> str:
+    if not years:
+        return ""
+    years = sorted(set(years))
+    if len(years) == 1:
+        year = years[0]
+        return f"{column} BETWEEN '{year}-01-01' AND '{year}-12-31'"
+    return f"{column} BETWEEN '{min(years)}-01-01' AND '{max(years)}-12-31'"
+
+
 def deterministic_sql_for_question(question: str) -> tuple[str, str] | None:
     """Intent templates for common benchmark-style table questions.
 
@@ -322,6 +378,7 @@ def deterministic_sql_for_question(question: str) -> tuple[str, str] | None:
     """
     q = normalize(question)
     dates = extract_dates(question)
+    years = extract_years(question)
 
     def policy_lookup(policy_variable: str, target_date: str, before: bool = False) -> str:
         if before:
@@ -357,16 +414,22 @@ LIMIT 1
         )
 
     if "return_window_days" in q or ("คืนสินค้าได้ภายใน" in q and "นโยบาย" in q):
-        target_date = dates[-1] if dates else "2025-02-15"
+        if not dates:
+            return None
+        target_date = dates[-1]
         return policy_lookup("return_window_days", target_date), "Deterministic intent: policy effective-date lookup."
 
     if "point_earning_rate_per_thb" in q:
-        target_date = dates[-1] if dates else "2025-04-01"
+        if not dates:
+            return None
+        target_date = dates[-1]
         before = "ก่อน" in q
         return policy_lookup("point_earning_rate_per_thb", target_date, before=before), "Deterministic intent: point earning policy lookup."
 
     if "refund_threshold_thb" in q or "refund threshold" in q or "เพดานวงเงินคืนเงิน" in q:
-        target_date = dates[-1] if dates else "2025-04-01"
+        if not dates:
+            return None
+        target_date = dates[-1]
         return policy_lookup("refund_threshold_thb", target_date), "Deterministic intent: refund threshold policy lookup."
 
     if "loyalty_tier" in q and ("สูงที่สุด" in q or "tier สูงสุด" in q):
@@ -386,6 +449,35 @@ END DESC
 LIMIT 1
 """.strip(),
             "Deterministic intent: highest loyalty tier by business order.",
+        )
+
+    if (
+        ("shipping" in q or "shipment" in q or "ขนส่ง" in q or "จัดการ" in q)
+        and ("vendor" in q or "ผู้ให้บริการ" in q or "รับผิดชอบ" in q or "จัดการ" in q)
+        and ("share" in q or "percent" in q or "percentage" in q or "%" in q or "สัดส่วน" in q or "ทั้งหมด" in q)
+    ):
+        return (
+            """
+WITH vendor_counts AS (
+  SELECT
+    v.name_en,
+    COUNT(*) AS total_shipments
+  FROM FACT_SHIPPING s
+  JOIN DIM_VENDOR v ON s.vendor_id = v.vendor_id
+  GROUP BY v.name_en
+),
+total AS (
+  SELECT SUM(total_shipments) AS all_shipments FROM vendor_counts
+)
+SELECT
+  vc.name_en,
+  vc.total_shipments,
+  100.0 * vc.total_shipments / t.all_shipments AS vendor_share_pct
+FROM vendor_counts vc
+CROSS JOIN total t
+ORDER BY vc.total_shipments DESC, vc.name_en
+""".strip(),
+            "Deterministic intent: shipping vendor count and share.",
         )
 
     if "single largest deposit" in q or ("largest deposit" in q and "fact_bank_transaction" in q):
@@ -446,13 +538,14 @@ GROUP BY ld.bank_txn_id
         )
 
     if "b2b" in q and "จ่ายเงินช้าที่สุด" in q:
+        payment_date_filter = date_filter_sql("payment_received_date", years)
+        payment_date_predicate = f"\n    AND {payment_date_filter}" if payment_date_filter else ""
         return (
-            """
+            f"""
 WITH latest_received AS (
   SELECT MAX(payment_received_date) AS max_received_date
   FROM FACT_SALES
-  WHERE is_b2b = 1
-    AND payment_received_date BETWEEN '2025-01-01' AND '2025-12-31'
+  WHERE is_b2b = 1{payment_date_predicate}
 ),
 candidate AS (
   SELECT
@@ -476,15 +569,17 @@ LIMIT 1
         )
 
     if "stockout" in q and "closing_units" in q:
+        stockout_date_filter = date_filter_sql("ims.business_event_date", years)
+        stockout_date_predicate = f"\n  AND {stockout_date_filter}" if stockout_date_filter else ""
         return (
-            """
+            f"""
 SELECT
   ims.sku_id,
   COUNT(*) AS stockout_events,
   COUNT(DISTINCT ims.branch_code) AS affected_retail_branches
 FROM FACT_INVENTORY_MONTHLY_SNAPSHOT ims
 JOIN DIM_BRANCH b ON ims.branch_code = b.branch_code
-WHERE substr(ims.business_event_date, 1, 4) = '2025'
+WHERE 1 = 1{stockout_date_predicate}
   AND ims.closing_units = 0
   AND b.branch_type = 'branch'
 GROUP BY ims.sku_id
@@ -494,16 +589,18 @@ LIMIT 1
             "Deterministic intent: inventory stockout by SKU across retail branch-months.",
         )
 
-    if ("units sold" in q or "จำนวนชิ้น" in q or "ขายได้" in q) and "sku" in q and "2024" in q and "2025" in q:
+    if ("units sold" in q or "จำนวนชิ้น" in q or "ขายได้" in q) and "sku" in q and len(years) >= 1:
+        yearly_date_filter = date_filter_sql("business_event_date", years)
+        yearly_date_predicate = f"\n  WHERE {yearly_date_filter}" if yearly_date_filter else ""
         return (
-            """
+            f"""
 WITH yearly_units AS (
   SELECT
     substr(business_event_date, 1, 4) AS sales_year,
     sku_id,
     SUM(quantity) AS total_units_sold
   FROM FACT_SALES_LINE_ITEM
-  WHERE business_event_date BETWEEN '2024-01-01' AND '2025-12-31'
+  {yearly_date_predicate}
   GROUP BY sales_year, sku_id
 ),
 ranked AS (
@@ -521,42 +618,57 @@ ORDER BY sales_year
         )
 
     if "11.11" in q and "mega" in q and "redemption" in q:
+        campaign_ids = [
+            candidate
+            for candidate in re.findall(r"\b[A-Z0-9]+(?:[.-][A-Z0-9]+)+\b", question.upper())
+            if "1111" in candidate
+        ]
+        campaign_filter = (
+            "campaign_id IN (" + ", ".join(sql_quote(campaign_id) for campaign_id in campaign_ids) + ")"
+            if campaign_ids
+            else "campaign_id LIKE '%1111%'"
+        )
         return (
-            """
+            f"""
 SELECT
   campaign_id,
   COUNT(*) AS redemption_count,
   SUM(discount_applied_thb) AS discount_total_thb
 FROM FACT_PROMO_REDEMPTION
-WHERE campaign_id IN ('MEGA-1111-2567', 'MEGA-1111-2568')
+WHERE {campaign_filter}
 GROUP BY campaign_id
 ORDER BY campaign_id
 """.strip(),
             "Deterministic intent: campaign redemption comparison.",
         )
 
-    if "b2b" in q and "5 อันดับ" in q and "ปี 2024" in q and "net_total_thb" in q:
+    if "b2b" in q and ("อันดับ" in q or "top" in q) and years and "net_total_thb" in q:
+        top_n = extract_top_n(question, default=5) or 5
+        b2b_date_filter = date_filter_sql("business_event_date", years)
         return (
-            """
+            f"""
 SELECT customer_id, SUM(net_total_thb) AS net_total_thb
 FROM FACT_SALES
 WHERE is_b2b = 1
-  AND business_event_date BETWEEN '2024-01-01' AND '2024-12-31'
+  AND {b2b_date_filter}
 GROUP BY customer_id
 ORDER BY net_total_thb DESC
-LIMIT 5
+LIMIT {top_n}
 """.strip(),
             "Deterministic intent: top-N B2B customers by yearly net sales.",
         )
 
     if "credit volume" in q and "kbank-oper" in q:
+        excluded_account = extract_code_after("account_id", question) or "KBANK-OPER"
+        credit_date_filter = date_filter_sql("business_event_date", years)
+        credit_date_predicate = f"\n  AND {credit_date_filter}" if credit_date_filter else ""
         return (
-            """
+            f"""
 SELECT account_id, SUM(amount_thb) AS credit_volume_thb
 FROM FACT_BANK_TRANSACTION
 WHERE amount_thb > 0
-  AND account_id <> 'KBANK-OPER'
-  AND business_event_date BETWEEN '2024-01-01' AND '2025-12-31'
+  AND account_id <> {sql_quote(excluded_account)}
+  {credit_date_predicate}
 GROUP BY account_id
 ORDER BY credit_volume_thb DESC
 LIMIT 1
@@ -564,24 +676,34 @@ LIMIT 1
             "Deterministic intent: credit volume by bank account excluding central operating account.",
         )
 
-    if "top 3 sku" in q and "line_total_thb" in q:
+    if ("top" in q or "อันดับ" in q) and "sku" in q and "line_total_thb" in q:
+        top_n = extract_top_n(question, default=3) or 3
         return (
-            """
+            f"""
 SELECT li.sku_id, p.brand_family, SUM(li.line_total_thb) AS gross_revenue_thb
 FROM FACT_SALES_LINE_ITEM li
 JOIN DIM_PRODUCT p ON li.sku_id = p.sku_id
 GROUP BY li.sku_id, p.brand_family
 ORDER BY gross_revenue_thb DESC
-LIMIT 3
+LIMIT {top_n}
 """.strip(),
             "Deterministic intent: top SKU gross revenue from line items.",
         )
 
     if "basket size" in q and "pre-launch" in q and "offline" in q and "online" in q:
+        sku_ids = extract_sku_ids(question)
+        if not sku_ids:
+            return None
+        sku_id = sku_ids[0]
         return (
-            """
+            f"""
 WITH launch AS (
-  SELECT launch_date FROM DIM_PRODUCT WHERE sku_id = 'SF-Galaxy-Pro-2568'
+  SELECT launch_date
+  FROM DIM_PRODUCT
+  WHERE sku_id = {sql_quote(sku_id)}
+     OR sku_id LIKE {sql_quote(sku_id + "-%")}
+  ORDER BY launch_date DESC
+  LIMIT 1
 ),
 bucketed AS (
   SELECT
@@ -599,8 +721,10 @@ ORDER BY CASE channel_group WHEN 'offline' THEN 1 ELSE 2 END
         )
 
     if "recall" in q and "dim_product_recall_history" in q:
-        sku_match = re.search(r"\b[A-Z]{2}-[A-Z]{2}-\d{3}\b", question)
-        sku_id = sku_match.group(0) if sku_match else "NT-LT-001"
+        sku_ids = extract_sku_ids(question)
+        if not sku_ids:
+            return None
+        sku_id = sku_ids[0]
         return (
             f"""
 SELECT
@@ -608,25 +732,28 @@ SELECT
   status,
   transition_date
 FROM dim_product_recall_history
-WHERE sku_id = '{sku_id}'
+WHERE sku_id = {sql_quote(sku_id)}
 ORDER BY transition_date
 """.strip(),
             "Deterministic intent: product recall status history.",
         )
 
     if "return rate" in q or ("อัตราการคืน" in q and "สาขา" in q):
+        return_rate_filter = date_filter_sql("business_event_date", years)
+        sales_date_predicate = f"\n  WHERE {return_rate_filter}" if return_rate_filter else ""
+        return_date_predicate = f"\n  WHERE {return_rate_filter}" if return_rate_filter else ""
         return (
-            """
+            f"""
 WITH sales AS (
   SELECT branch_code, COUNT(DISTINCT txn_id) AS sales_transactions
   FROM FACT_SALES
-  WHERE business_event_date BETWEEN '2025-01-01' AND '2025-12-31'
+  {sales_date_predicate}
   GROUP BY branch_code
 ),
 returns AS (
   SELECT branch_code, COUNT(DISTINCT return_id) AS return_events
   FROM FACT_RETURN
-  WHERE business_event_date BETWEEN '2025-01-01' AND '2025-12-31'
+  {return_date_predicate}
   GROUP BY branch_code
 ),
 rates AS (
@@ -652,8 +779,10 @@ SELECT * FROM ranked_low
         )
 
     if "วันใดของสัปดาห์" in q and "return" in q and "b2c" in q:
+        b2c_return_filter = date_filter_sql("r.business_event_date", years)
+        b2c_return_predicate = f"\n  AND {b2c_return_filter}" if b2c_return_filter else ""
         return (
-            """
+            f"""
 SELECT
   CASE d.day_of_week
     WHEN 1 THEN 'Monday'
@@ -669,8 +798,7 @@ SELECT
 FROM FACT_RETURN r
 JOIN DIM_CUSTOMER c ON r.customer_id = c.customer_id
 JOIN DIM_DATE d ON r.business_event_date = d.date_iso
-WHERE c.customer_type = 'B2C'
-  AND r.business_event_date BETWEEN '2025-01-01' AND '2025-12-31'
+WHERE c.customer_type = 'B2C'{b2c_return_predicate}
 GROUP BY d.day_of_week
 ORDER BY return_events DESC
 LIMIT 1

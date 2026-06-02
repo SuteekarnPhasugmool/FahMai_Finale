@@ -150,13 +150,13 @@ intent-based deterministic templates before falling back to ThaiLLM. The latest
 rerun artifact is:
 
 ```text
-final_answers_new_run.csv
+final_answers_dynamic_template_check_v2.csv
 ```
 
 The strict EASY-to-XHARD ground-truth report is:
 
 ```text
-easy_xhard_accuracy_report_new_run.csv
+easy_xhard_accuracy_report_dynamic_template_check_v2.csv
 ```
 
 Latest strict accuracy:
