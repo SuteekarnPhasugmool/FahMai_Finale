@@ -326,14 +326,20 @@ def choose_view(question: str) -> ViewSpec:
 
 def extract_json_object(text: str) -> dict:
     cleaned = text.strip()
-    if cleaned.startswith("```"):
-        cleaned = re.sub(r"^```(?:json)?", "", cleaned, flags=re.IGNORECASE).strip()
-        cleaned = re.sub(r"```$", "", cleaned).strip()
-    start = cleaned.find("{")
-    end = cleaned.rfind("}")
-    if start == -1 or end == -1 or end <= start:
-        raise ValueError(f"LLM did not return a JSON object: {text[:300]}")
-    return json.loads(cleaned[start : end + 1])
+    cleaned = re.sub(r"^```(?:json)?", "", cleaned, flags=re.IGNORECASE).strip()
+    cleaned = re.sub(r"```$", "", cleaned).strip()
+
+    decoder = json.JSONDecoder()
+    for match in re.finditer(r"\{", cleaned):
+        candidate = cleaned[match.start() :]
+        try:
+            parsed, _ = decoder.raw_decode(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(parsed, dict):
+            return parsed
+
+    raise ValueError(f"LLM did not return a valid JSON object: {text[:500]}")
 
 
 def call_chat_completion(
