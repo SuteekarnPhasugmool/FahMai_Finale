@@ -420,7 +420,6 @@ Important join paths:
 - FACT_REFUND_PAID.return_id -> FACT_RETURN.return_id
 - FACT_REFUND_PAID.customer_id -> DIM_CUSTOMER.customer_id
 - FACT_REFUND_PAID.approver_employee_id -> DIM_EMPLOYEE.employee_id
-- FACT_REFUND_PAID.cosig_employee_id -> DIM_EMPLOYEE.employee_id
 - FACT_REFUND_PAID.bank_txn_id -> FACT_BANK_TRANSACTION.bank_txn_id
 - FACT_PAYROLL.employee_id -> DIM_EMPLOYEE.employee_id -> DIM_DEPARTMENT.dept_code
 - FACT_SHIPPING.vendor_id -> DIM_VENDOR.vendor_id
@@ -445,7 +444,7 @@ Date notes:
 - Dates are stored as text YYYY-MM-DD. Use substr(date_col,1,4) for calendar year and substr(date_col,1,7) for month.
 - Thai Buddhist years in questions map to Gregorian years: 2567=2024, 2568=2025.
 - DIM_DATE.fiscal_year is Buddhist Era in this dataset.
-- Empty CSV fields are stored as empty strings, not SQL NULL, in generated fahmai_agentic.db. Check both '' and NULL when needed.
+- Blank CSV fields are imported as SQL NULL in generated fahmai_agentic.db.
 
 Safety and correctness:
 - Use only SELECT queries.

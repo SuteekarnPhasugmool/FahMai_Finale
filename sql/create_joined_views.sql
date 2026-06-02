@@ -206,7 +206,6 @@ SELECT
   pm.discount_type,
   pm.discount_value,
   pm.point_multiplier,
-  pm.min_basket_thb,
   event_date.fiscal_year AS event_fiscal_year,
   event_date.fiscal_quarter AS event_fiscal_quarter,
   posting_date.fiscal_year AS posting_fiscal_year,
@@ -256,9 +255,6 @@ SELECT
   approver.first_name_en AS approver_first_name_en,
   approver.last_name_en AS approver_last_name_en,
   approver.position_level AS approver_position_level,
-  cosig.first_name_en AS cosig_first_name_en,
-  cosig.last_name_en AS cosig_last_name_en,
-  cosig.position_level AS cosig_position_level,
   ret.return_reason,
   ret.return_amount_thb,
   bt.account_id AS refund_bank_account_id,
@@ -270,7 +266,6 @@ SELECT
 FROM FACT_REFUND_PAID f
 LEFT JOIN DIM_CUSTOMER dc ON f.customer_id = dc.customer_id
 LEFT JOIN DIM_EMPLOYEE approver ON f.approver_employee_id = approver.employee_id
-LEFT JOIN DIM_EMPLOYEE cosig ON f.cosig_employee_id = cosig.employee_id
 LEFT JOIN FACT_RETURN ret ON f.return_id = ret.return_id
 LEFT JOIN FACT_BANK_TRANSACTION bt ON f.bank_txn_id = bt.bank_txn_id
 LEFT JOIN DIM_DATE event_date ON f.business_event_date = event_date.date_iso

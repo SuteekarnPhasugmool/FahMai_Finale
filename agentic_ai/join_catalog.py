@@ -179,14 +179,13 @@ VIEW_SPECS: dict[str, ViewSpec] = {
     "VW_FACT_REFUND_PAID_ENRICHED": ViewSpec(
         name="VW_FACT_REFUND_PAID_ENRICHED",
         fact_table="FACT_REFUND_PAID",
-        description="Paid refunds enriched with customer, approver, co-signer, bank transaction, return and dates.",
+        description="Paid refunds enriched with customer, approver, bank transaction, return and dates.",
         metrics=("refund_amount_thb",),
         dimensions=(
             "customer_id",
             "customer_type",
             "customer_region",
             "approver_employee_id",
-            "cosig_employee_id",
             "bank_txn_id",
             "event_fiscal_year",
             "event_fiscal_quarter",
@@ -297,4 +296,3 @@ def catalog_prompt() -> str:
         lines.append(f"  metrics: {', '.join(spec.metrics) or '(count rows only)'}")
         lines.append(f"  dimensions: {', '.join(spec.dimensions)}")
     return "\n".join(lines)
-

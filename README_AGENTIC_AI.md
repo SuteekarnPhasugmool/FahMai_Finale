@@ -118,7 +118,7 @@ python3 agentic_ai/fahmai_sql_agent.py --rebuild-db "ยอดขายตาม
 | `VW_FACT_PAYROLL_ENRICHED` | payroll + employee + employee branch + department + position level + bank transaction + pay-period dates |
 | `VW_FACT_PROMO_REDEMPTION_ENRICHED` | promo redemption + customer + campaign + promo mechanic + dates |
 | `VW_FACT_RETURN_ENRICHED` | return + product + vendor + branch + customer + approver employee + dates |
-| `VW_FACT_REFUND_PAID_ENRICHED` | refund + customer + approver + co-signer + return + bank transaction + dates |
+| `VW_FACT_REFUND_PAID_ENRICHED` | refund + customer + approver + return + bank transaction + dates |
 | `VW_FACT_BANK_TRANSACTION_ENRICHED` | bank transaction + bank account + associated branch + dates |
 | `VW_FACT_VENDOR_PAYMENT_ENRICHED` | vendor payment + vendor + contract version + signing employees + bank transaction + dates |
 | `VW_FACT_SHIPPING_ENRICHED` | shipping + vendor + origin branch + parent sale + customer + dates |
@@ -129,6 +129,7 @@ python3 agentic_ai/fahmai_sql_agent.py --rebuild-db "ยอดขายตาม
 
 - The original `fahmai_finale.db` was locked during development, so the agent defaults to a generated `fahmai_agentic.db` built from CSV files.
 - The generated DB imports booleans such as `is_partner_brand` as `BOOLEAN` with `1/0` values, numeric measures as `INTEGER` or `REAL`, blank fields as `NULL`, and date columns as `DATE` declarations with ISO text storage, which is SQLite's normal behavior.
+- Source CSV tables are cleaned by dropping columns that were blank/null in every row. See `DATA_CLEANING_LOG.md` for the exact dropped columns.
 - Year filters use the Gregorian year from `business_event_date` or `pay_period_end`, because `DIM_DATE.fiscal_year` is Buddhist Era (`2567`, `2568`).
 - The agent intentionally preserves source FACT rows with `LEFT JOIN`.
 - Versioned/history dimensions are joined only where the row path is clear. For `dim_product_recall_history`, the warranty view uses the latest recall row per SKU to avoid fan-out.

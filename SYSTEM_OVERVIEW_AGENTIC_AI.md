@@ -99,15 +99,7 @@ WHERE business_event_date BETWEEN '2025-01-01' AND '2025-12-31'
 WHERE date(business_event_date) <= date('2025-06-01')
 ```
 
-ข้อควรระวังคือ field ที่ว่างตอน import ใหม่จะเป็น `NULL` ดังนั้น query ที่เช็ค active period ควร handle `NULL`:
-
-```sql
-WHERE hire_date <= '2025-06-01'
-  AND (
-    termination_date IS NULL
-    OR termination_date > '2025-06-01'
-  )
-```
+หลัง cleanup แล้ว column ที่ว่างทั้งคอลัมน์จะถูกลบออกจาก CSV ต้นทาง เช่น `DIM_EMPLOYEE.termination_date` และ `FACT_* .effective_date` หลายตาราง ดังนั้นควรดู schema ปัจจุบันจาก `PRAGMA table_info(...)` หรือ schema prompt ก่อนเขียน SQL
 
 ## Enriched Views
 
@@ -123,7 +115,7 @@ WHERE hire_date <= '2025-06-01'
 | `VW_FACT_PAYROLL_ENRICHED` | payroll + employee + employee branch + department + position level + bank transaction + pay-period dates |
 | `VW_FACT_PROMO_REDEMPTION_ENRICHED` | promo redemption + customer + campaign + promo mechanic + dates |
 | `VW_FACT_RETURN_ENRICHED` | return + product + vendor + branch + customer + approver employee + dates |
-| `VW_FACT_REFUND_PAID_ENRICHED` | refund + customer + approver + co-signer + return + bank transaction + dates |
+| `VW_FACT_REFUND_PAID_ENRICHED` | refund + customer + approver + return + bank transaction + dates |
 | `VW_FACT_BANK_TRANSACTION_ENRICHED` | bank transaction + bank account + associated branch + dates |
 | `VW_FACT_VENDOR_PAYMENT_ENRICHED` | vendor payment + vendor + contract version + signing employees + bank transaction + dates |
 | `VW_FACT_SHIPPING_ENRICHED` | shipping + vendor + origin branch + parent sale + customer + dates |
