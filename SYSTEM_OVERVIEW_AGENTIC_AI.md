@@ -20,6 +20,9 @@
 | `README_AGENTIC_AI.md` | quick start และตัวอย่างคำสั่งใช้งาน |
 | `questions.csv` | ชุดคำถามจริงสำหรับทดสอบ agent |
 | `final_answers.csv` | output batch run ล่าสุดในรูปแบบ `id,question,answer` |
+| `final_answers_new_run.csv` | output rerun ล่าสุด 100 ข้อในรูปแบบ markdown table |
+| `fahmai_easy_xhard_gt.csv` | ground truth สำหรับประเมิน EASY ถึง XHARD |
+| `easy_xhard_accuracy_report_new_run.csv` | report ตรวจคำตอบล่าสุดเทียบ ground truth แบบ strict |
 | `fahmai_agentic.db` | SQLite database ที่ agent สร้างจาก CSV และใช้ query |
 
 ## Data Flow
@@ -31,7 +34,8 @@ CSV tables
   -> typed SQLite import
   -> create enriched views
   -> receive user prompt / question-id
-  -> planner mode
+  -> intent-based deterministic SQL template check
+  -> planner mode if no template matches
   -> generate SQL
   -> validate SELECT-only SQL + live schema
   -> repair SQL or fallback to rules
@@ -179,7 +183,33 @@ WHERE date(business_event_date) <= date('2025-06-01')
 
 ## Planner Modes
 
-Agent รองรับ 3 modes
+Agent รองรับ 3 modes และมี deterministic template layer ที่ทำงานก่อน planner mode ในทั้ง CLI เดี่ยวและ batch runner
+
+### Intent-Based Deterministic Templates
+
+ก่อนเรียก LLM ระบบจะลอง match คำถามกับ SQL template ที่ตั้งใจทำสำหรับ intent ที่พบซ้ำบ่อยใน benchmark เช่น:
+
+```text
+policy effective-date lookup
+highest loyalty tier
+largest deposit with source context
+yearly top SKU by units sold
+B2B sales ranking
+bank credit volume excluding KBANK-OPER
+branch return rate high/low
+B2C return day-of-week
+recall status history
+```
+
+template เหล่านี้ match จาก wording/intent ของคำถาม ไม่ได้ใช้ `question_id` เป็น key โดยตรง จึงลดความเสี่ยงเรื่อง hard-code เฉพาะ benchmark row แต่ยังช่วยกัน LLM สร้าง query ที่หลุด schema หรือคำนวณ pattern ง่าย ๆ ผิด
+
+ถ้า template match จะเห็น planner เป็น:
+
+```text
+Planner: deterministic-template
+```
+
+ถ้าไม่ match ระบบจึงไปต่อที่ `rules`, `llm`, หรือ `llm-sql` ตาม option ที่เลือก
 
 ### 1. `rules`
 
@@ -228,13 +258,13 @@ python3 agentic_ai/fahmai_sql_agent.py \
 
 ### 3. `llm-sql`
 
-ใช้ ThaiLLM generate SQL โดยตรงจาก full schema แต่ระบบยัง validate ว่าเป็น read-only `SELECT`
+ใช้ ThaiLLM generate SQL โดยตรงจาก full schema แต่ระบบยัง validate ว่าเป็น read-only `SELECT` หรือ read-only `WITH ... SELECT`
 
 ```text
 prompt / question-id
   -> ThaiLLM sees full schema
   -> ThaiLLM returns JSON with SQL
-  -> Python validates SELECT-only
+  -> Python validates read-only SELECT/CTE
   -> Python repairs common alias mistakes
   -> execute SQL
 ```
@@ -296,6 +326,7 @@ User-Agent: curl/8.0.0
 
 ```sql
 SELECT ...
+WITH ... SELECT ...
 ```
 
 block operation เสี่ยง เช่น:
@@ -355,6 +386,8 @@ name_en
 
 pipeline ตอนนี้จบที่ markdown result table จาก SQL เท่านั้น ไม่มี final-answer formatter stage และไม่มี LLM รอบสองสำหรับจัดรูปคำตอบ
 
+หมายเหตุเรื่อง format: ค่า float ขนาดเล็กกว่า 1 จะแสดง 4 ตำแหน่งทศนิยม เช่น `0.0125` เพื่อไม่ให้ policy rate ถูกปัดเป็น `0.01`
+
 ตัวอย่าง:
 
 ```bash
@@ -393,6 +426,19 @@ python3 agentic_ai/run_all_questions.py \
   --query-timeout 30
 ```
 
+รันรอบล่าสุดที่ใช้สร้าง `final_answers_new_run.csv`:
+
+```bash
+export THAILLM_API_KEY="your-token"
+
+python3 agentic_ai/run_all_questions.py \
+  --output final_answers_new_run.csv \
+  --overwrite \
+  --fallback-to-rules \
+  --question-timeout 120 \
+  --query-timeout 30
+```
+
 output มี 3 columns:
 
 ```text
@@ -402,6 +448,33 @@ id,question,answer
 ใน batch output นี้ column `answer` คือ markdown table จาก SQL result ไม่ใช่คำตอบที่ผ่าน final-answer formatter
 
 ถ้าไม่ต้องการทับไฟล์เดิม ให้ใช้ชื่อไฟล์ใหม่ใน `--output` และไม่ใส่ `--overwrite`
+
+## Latest Accuracy Check
+
+ตรวจ `final_answers_new_run.csv` เทียบกับ `fahmai_easy_xhard_gt.csv` ด้วยเกณฑ์ strict:
+
+```text
+คำตอบต้องมีสาระสำคัญครบตาม ground truth
+partial answer ยังนับเป็น wrong
+```
+
+ผลล่าสุด:
+
+| Level | Correct | Total | Accuracy |
+|---|---:|---:|---:|
+| EASY | 25 | 25 | 100.00% |
+| MED | 20 | 20 | 100.00% |
+| HARD | 1 | 20 | 5.00% |
+| XHARD | 0 | 20 | 0.00% |
+| Total | 46 | 85 | 54.12% |
+
+report อยู่ที่:
+
+```text
+easy_xhard_accuracy_report_new_run.csv
+```
+
+ข้อสังเกต: EASY/MED เป็นคำถาม structured table จึงตอบได้ดีหลังเพิ่ม deterministic templates ส่วน HARD/XHARD หลายข้อ ground truth ต้องใช้ evidence นอก SQL tables เช่น policy memo, logs, reports, chat, recall/warranty trail และ reconciliation logic หลายขั้น จึงควรเพิ่ม retrieval/reconciliation layer ก่อนคาดหวัง accuracy สูงในกลุ่มนี้
 
 ## Example Output
 
@@ -473,7 +546,7 @@ question
 
 1. สร้าง typed SQLite database จาก CSV
 2. สร้าง enriched FACT/DIM views
-3. ใช้ rule planner หรือ ThaiLLM planner เพื่อสร้าง SQL
+3. ใช้ intent-based deterministic templates, rule planner หรือ ThaiLLM planner เพื่อสร้าง SQL
 4. validate SQL และ execute อย่างปลอดภัย
 
 เหมาะสำหรับใช้ตอบคำถาม data analytics จาก structured tables และเป็นฐานพร้อมต่อยอดไปสู่ RAG สำหรับเอกสาร/log/chat ใน public data lake

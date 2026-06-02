@@ -19,6 +19,7 @@ from fahmai_sql_agent import (
     DEFAULT_VIEW_SQL,
     bootstrap_database,
     connect,
+    deterministic_sql_for_question,
     ensure_views,
     execute_sql,
     llm_generate_sql,
@@ -83,6 +84,11 @@ def generate_rows(
     limit: int,
     query_timeout: int,
 ) -> tuple[str, list[sqlite3.Row]]:
+    deterministic = deterministic_sql_for_question(question)
+    if deterministic:
+        sql, _ = deterministic
+        return sql, execute_sql(conn, sql, query_timeout=query_timeout)
+
     try:
         sql, _ = llm_generate_sql(question, conn, api_url=api_url, api_key=api_key, model=model)
         last_error: Exception | None = None

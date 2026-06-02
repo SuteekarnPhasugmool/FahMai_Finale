@@ -12,9 +12,9 @@ This repository still uses the friend pipeline as the primary execution path:
 CSV tables
   -> SQLite import by agentic_ai/fahmai_sql_agent.py
   -> sql/create_joined_views.sql
-  -> rules / llm / llm-sql planner
+  -> intent templates / rules / llm / llm-sql planner
   -> SQL execution
-  -> table or final-answer output
+  -> markdown table output
 ```
 
 The enterprise safety layer changes the data values, not the table structure.
@@ -57,6 +57,7 @@ This pipeline intentionally preserves the friend pipeline contract:
 - Same `fahmai_sql_agent.py` command shape.
 - Same `run_all_questions.py` batch runner.
 - Same SQLite view definitions.
+- Same markdown-table output contract in the `answer` column.
 
 Sensitive values are redacted in place so queries keep resolving. For example,
 `DIM_BANK_ACCOUNT.account_number` still exists because
@@ -127,7 +128,6 @@ Run one benchmark question through `llm-sql`:
 python3 agentic_ai/fahmai_sql_agent.py \
   --planner llm-sql \
   --question-id L3-Q-EASY-001 \
-  --answer-format both \
   --fallback-to-rules
 ```
 
@@ -142,6 +142,37 @@ python3 agentic_ai/run_all_questions.py \
 ```
 
 The batch runner should write `final_answers.csv` without SQLite schema errors.
+
+## Latest Evaluation Snapshot
+
+The current main-branch flow ends at SQL markdown tables and uses
+intent-based deterministic templates before falling back to ThaiLLM. The latest
+rerun artifact is:
+
+```text
+final_answers_new_run.csv
+```
+
+The strict EASY-to-XHARD ground-truth report is:
+
+```text
+easy_xhard_accuracy_report_new_run.csv
+```
+
+Latest strict accuracy:
+
+| Level | Correct | Total | Accuracy |
+|---|---:|---:|---:|
+| EASY | 25 | 25 | 100.00% |
+| MED | 20 | 20 | 100.00% |
+| HARD | 1 | 20 | 5.00% |
+| XHARD | 0 | 20 | 0.00% |
+| Total | 46 | 85 | 54.12% |
+
+HARD/XHARD questions often require non-table evidence such as docs, logs,
+reports, chat transcripts, rendered files, and multi-step reconciliation. The
+structured SQL pipeline should therefore be treated as the table-answering layer
+and paired with retrieval/reconciliation for those harder question families.
 
 ## Staging Branch Handoff
 

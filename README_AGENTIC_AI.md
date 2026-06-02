@@ -16,7 +16,7 @@ This adds a small prompt-to-SQL agent over FahMai's structured FACT/DIM data.
   - CLI agent that accepts Thai or English questions.
   - Builds `fahmai_agentic.db` from CSV files if needed, with typed SQLite columns inferred from names and values.
   - Creates/refreshes enriched views.
-  - Routes the prompt to a relevant view using either deterministic rules or ThaiLLM.
+  - Routes the prompt through intent-based deterministic SQL templates first, then falls back to rules or ThaiLLM.
   - Generates read-only aggregate SQL.
   - Validates generated SQL against the live SQLite schema before execution.
   - Prints the SQL and query result.
@@ -144,6 +144,30 @@ python3 agentic_ai/run_all_questions.py \
   --query-timeout 30
 ```
 
+Latest benchmark-style rerun:
+
+```bash
+export THAILLM_API_KEY="your-token"
+
+python3 agentic_ai/run_all_questions.py \
+  --output final_answers_new_run.csv \
+  --overwrite \
+  --fallback-to-rules \
+  --question-timeout 120 \
+  --query-timeout 30
+```
+
+The latest strict check against `fahmai_easy_xhard_gt.csv` is saved in
+`easy_xhard_accuracy_report_new_run.csv`:
+
+| Level | Correct | Total | Accuracy |
+|---|---:|---:|---:|
+| EASY | 25 | 25 | 100.00% |
+| MED | 20 | 20 | 100.00% |
+| HARD | 1 | 20 | 5.00% |
+| XHARD | 0 | 20 | 0.00% |
+| Total | 46 | 85 | 54.12% |
+
 ## Enriched Views
 
 | View | Main Join Coverage |
@@ -174,6 +198,7 @@ python3 agentic_ai/run_all_questions.py \
 - Versioned/history dimensions are joined only where the row path is clear. For `dim_product_recall_history`, the warranty view uses the latest recall row per SKU to avoid fan-out.
 - In `--planner llm` mode, the LLM does not write raw SQL. It returns structured JSON with `view_name`, `metric`, `group_by`, `year`, `branch_codes`, and `channel`; Python validates those fields and generates the final SQL.
 - In `--planner llm-sql` mode, the LLM writes one read-only SQLite `SELECT` from the full schema. Python validates that it is read-only, validates table/column resolution with SQLite `EXPLAIN QUERY PLAN`, applies a small alias repair layer for common friendly names, and retries with the LLM if SQLite reports a column/syntax error.
+- Intent-based deterministic templates are checked before LLM calls in both the single-question CLI and the batch runner. They are keyed by question wording/intent, not by fixed `question_id`, to reduce brittle benchmark-specific behavior.
 - Long-running queries can be interrupted by the batch runner with `--query-timeout`.
 - The pipeline intentionally stops at the markdown table returned from SQL. It does not run a final-answer formatter LLM stage.
-- `questions.csv` contains some questions that require narrative files, logs, chat transcripts, or prompt-injection resistance. The SQL agent is best for DIM/FACT table questions; document/log/chat questions need a retrieval layer over `docs/`, `logs/`, and `reports/`.
+- `questions.csv` contains some questions that require narrative files, logs, chat transcripts, or prompt-injection resistance. The SQL agent is best for DIM/FACT table questions; the latest EASY/MED results are strong, while HARD/XHARD needs a retrieval/reconciliation layer over `docs/`, `logs/`, `reports/`, chat artifacts, and rendered evidence.
