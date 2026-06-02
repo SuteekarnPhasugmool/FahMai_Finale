@@ -18,11 +18,42 @@ This adds a small prompt-to-SQL agent over FahMai's structured FACT/DIM data.
   - Creates/refreshes enriched views.
   - Routes the prompt to a relevant view using either deterministic rules or ThaiLLM.
   - Generates read-only aggregate SQL.
+  - Validates generated SQL against the live SQLite schema before execution.
   - Prints the SQL and query result.
+
+- `agentic_ai/run_all_questions.py`
+  - Batch runner for `questions.csv`.
+  - Writes `id,question,answer` rows to a CSV such as `final_answers.csv`.
+  - Supports resume by skipping question IDs already present in the output file.
+  - Adds per-question and per-query timeouts for long benchmark runs.
+
+- `scripts/build_enterprise_ai_safe_tables.py`
+  - Enterprise AI-safe redaction layer for sensitive CSV values.
+  - Preserves table names, headers, and row counts so the SQLite pipeline remains compatible.
+  - Writes an audit report to `data_governance/enterprise_ai_safe_redaction_summary.csv`.
 
 ## Run
 
 From the project root:
+
+If you need to refresh the enterprise AI-safe data layer, run the redaction step before rebuilding SQLite:
+
+```bash
+python3 scripts/build_enterprise_ai_safe_tables.py \
+  --input-dir fah-mai-the-finale-enterprise-data-agentic-showdown/tables \
+  --output-dir fah-mai-the-finale-enterprise-data-agentic-showdown/tables \
+  --overwrite
+```
+
+Then rebuild the SQLite database so it reflects the latest CSV tables:
+
+```bash
+python3 agentic_ai/fahmai_sql_agent.py \
+  --rebuild-db \
+  --sql "SELECT COUNT(*) AS n FROM VW_FACT_SALES_ENRICHED"
+```
+
+Run a question:
 
 ```bash
 python3 agentic_ai/fahmai_sql_agent.py "ยอดขายตามสาขาปี 2025" --limit 5
@@ -106,6 +137,16 @@ Rebuild the generated DB from CSV:
 python3 agentic_ai/fahmai_sql_agent.py --rebuild-db "ยอดขายตามสาขาปี 2025"
 ```
 
+Run every question in `questions.csv` and write post-processed final answers to a new CSV without overwriting the committed `final_answers.csv`:
+
+```bash
+python3 agentic_ai/run_all_questions.py \
+  --output final_answers_rerun.csv \
+  --fallback-to-rules \
+  --question-timeout 120 \
+  --query-timeout 30
+```
+
 ## Enriched Views
 
 | View | Main Join Coverage |
@@ -130,10 +171,12 @@ python3 agentic_ai/fahmai_sql_agent.py --rebuild-db "ยอดขายตาม
 - The original `fahmai_finale.db` was locked during development, so the agent defaults to a generated `fahmai_agentic.db` built from CSV files.
 - The generated DB imports booleans such as `is_partner_brand` as `BOOLEAN` with `1/0` values, numeric measures as `INTEGER` or `REAL`, blank fields as `NULL`, and date columns as `DATE` declarations with ISO text storage, which is SQLite's normal behavior.
 - Source CSV tables are cleaned by dropping columns that were blank/null in every row. See `DATA_CLEANING_LOG.md` for the exact dropped columns.
+- The current data layer also includes enterprise AI-safe redaction. See `ENTERPRISE_AI_SAFE_ANALYTICS_PIPELINE.md` and `DATA_GOVERNANCE_REDACTION_POLICY.md` for the redaction flow and policy.
 - Year filters use the Gregorian year from `business_event_date` or `pay_period_end`, because `DIM_DATE.fiscal_year` is Buddhist Era (`2567`, `2568`).
 - The agent intentionally preserves source FACT rows with `LEFT JOIN`.
 - Versioned/history dimensions are joined only where the row path is clear. For `dim_product_recall_history`, the warranty view uses the latest recall row per SKU to avoid fan-out.
 - In `--planner llm` mode, the LLM does not write raw SQL. It returns structured JSON with `view_name`, `metric`, `group_by`, `year`, `branch_codes`, and `channel`; Python validates those fields and generates the final SQL.
-- In `--planner llm-sql` mode, the LLM writes one read-only SQLite `SELECT` from the full schema. Python validates that it is read-only, applies a small alias repair layer for common friendly names, and retries with the LLM if SQLite reports a column/syntax error.
+- In `--planner llm-sql` mode, the LLM writes one read-only SQLite `SELECT` from the full schema. Python validates that it is read-only, validates table/column resolution with SQLite `EXPLAIN QUERY PLAN`, applies a small alias repair layer for common friendly names, and retries with the LLM if SQLite reports a column/syntax error.
+- Long-running queries can be interrupted by the batch runner with `--query-timeout`.
 - `--answer-format table` keeps the raw table output. `--answer-format final` returns only the post-processed final answer. `--answer-format both` prints both the table and the final answer. Final-answer synthesis uses the question, SQL, and rows only; it infers the requested answer shape dynamically. Some exact benchmark formats such as explicitly requested 12-month tuples are handled deterministically.
 - `questions.csv` contains some questions that require narrative files, logs, chat transcripts, or prompt-injection resistance. The SQL agent is best for DIM/FACT table questions; document/log/chat questions need a retrieval layer over `docs/`, `logs/`, and `reports/`.

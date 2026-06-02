@@ -11,25 +11,81 @@
 | ไฟล์ | หน้าที่ |
 |---|---|
 | `agentic_ai/fahmai_sql_agent.py` | CLI agent หลัก รับ prompt, เรียก LLM, generate/validate/execute SQL |
+| `agentic_ai/run_all_questions.py` | batch runner สำหรับรันทุกคำถามใน `questions.csv` แล้วเขียน `id,question,answer` เป็น CSV |
 | `agentic_ai/join_catalog.py` | semantic catalog ของ enriched views, metrics, dimensions และ routing keywords |
 | `sql/create_joined_views.sql` | SQL สำหรับสร้าง enriched views ที่ join FACT กับ DIM ที่เหมาะสมไว้แล้ว |
+| `scripts/build_enterprise_ai_safe_tables.py` | redaction layer สำหรับทำ CSV ให้ enterprise AI-safe โดย preserve schema และ row count |
+| `DATA_GOVERNANCE_REDACTION_POLICY.md` | นโยบายและรายการ field ที่ถูก redact |
+| `ENTERPRISE_AI_SAFE_ANALYTICS_PIPELINE.md` | เอกสาร flow ของ enterprise AI-safe layer |
 | `README_AGENTIC_AI.md` | quick start และตัวอย่างคำสั่งใช้งาน |
 | `questions.csv` | ชุดคำถามจริงสำหรับทดสอบ agent |
+| `final_answers.csv` | output batch run ล่าสุดในรูปแบบ `id,question,answer` |
 | `fahmai_agentic.db` | SQLite database ที่ agent สร้างจาก CSV และใช้ query |
 
 ## Data Flow
 
 ```text
 CSV tables
+  -> enterprise AI-safe redaction layer
+  -> cleaned/redacted CSV tables
   -> typed SQLite import
   -> create enriched views
   -> receive user prompt / question-id
   -> planner mode
   -> generate SQL
-  -> validate SELECT-only SQL
+  -> validate SELECT-only SQL + live schema
+  -> repair SQL or fallback to rules
   -> execute on SQLite
   -> print SQL + result table
   -> optionally synthesize final answer in the shape requested by the question
+  -> optionally write batch final answers to CSV
+```
+
+## Enterprise AI-Safe Redaction Layer
+
+branch ที่ merge ล่าสุดเพิ่ม layer สำหรับลด exposure ของ sensitive fields ก่อนนำข้อมูลเข้า AI/SQLite pipeline
+
+รันได้ด้วย:
+
+```bash
+python3 scripts/build_enterprise_ai_safe_tables.py \
+  --input-dir fah-mai-the-finale-enterprise-data-agentic-showdown/tables \
+  --output-dir fah-mai-the-finale-enterprise-data-agentic-showdown/tables \
+  --overwrite
+```
+
+script นี้ preserve สิ่งสำคัญสำหรับ pipeline เดิม:
+
+```text
+table names
+CSV filenames
+headers
+row counts
+join keys
+```
+
+ตัวอย่าง redaction:
+
+| Table | Column | Result |
+|---|---|---|
+| `DIM_BANK_ACCOUNT` | `account_number` | `REDACTED_ACCOUNT` |
+| `DIM_CUSTOMER` | customer name fields | `REDACTED_CUSTOMER` |
+| `DIM_CUSTOMER` | `email`, `phone` | blank |
+| `DIM_EMPLOYEE` | `email` | blank |
+| `FACT_SHIPPING` | `tracking_number` | `REDACTED_TRACKING` |
+
+audit report อยู่ที่:
+
+```text
+data_governance/enterprise_ai_safe_redaction_summary.csv
+```
+
+หลัง redaction ต้อง rebuild SQLite database เพื่อให้ `fahmai_agentic.db` sync กับ CSV ล่าสุด:
+
+```bash
+python3 agentic_ai/fahmai_sql_agent.py \
+  --rebuild-db \
+  --sql "SELECT COUNT(*) AS n FROM VW_FACT_SALES_ENRICHED"
 ```
 
 ## Database Import
@@ -257,6 +313,20 @@ DETACH
 PRAGMA
 ```
 
+นอกจากนี้ระบบใช้ SQLite schema preflight:
+
+```text
+EXPLAIN QUERY PLAN <generated SQL>
+```
+
+เพื่อให้ SQLite resolve table/column ก่อน execute จริง ถ้า LLM สร้าง column ที่ไม่มีอยู่ เช่น `employment_status_at_period_end` ระบบจะจับ error ก่อน แล้วใน `llm-sql` mode จะส่ง error กลับไปให้ LLM repair query ใหม่
+
+สำหรับ batch runner มี query timeout เพื่อกัน query หนักค้าง:
+
+```bash
+--query-timeout 30
+```
+
 ## SQL Repair Layer
 
 ใน `llm-sql` mode บางครั้ง LLM ใช้ชื่อ friendly alias ที่ไม่มีจริงบน base table เช่น:
@@ -363,6 +433,24 @@ python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-EASY
 python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-MED-001
 ```
 
+รันทุกคำถามแล้วเก็บ final answer เป็น CSV:
+
+```bash
+python3 agentic_ai/run_all_questions.py \
+  --output final_answers_rerun.csv \
+  --fallback-to-rules \
+  --question-timeout 120 \
+  --query-timeout 30
+```
+
+output มี 3 columns:
+
+```text
+id,question,answer
+```
+
+ถ้าไม่ต้องการทับไฟล์เดิม ให้ใช้ชื่อไฟล์ใหม่ใน `--output` และไม่ใส่ `--overwrite`
+
 ## Example Output
 
 คำสั่ง:
@@ -391,7 +479,7 @@ SELECT msrp_thb FROM DIM_PRODUCT WHERE sku_id = 'NT-LT-001'
 
 ## Rebuild Database
 
-ถ้าแก้ importer/schema หรืออยากสร้าง DB ใหม่:
+ถ้าแก้ CSV, เพิ่งรัน redaction, แก้ importer/schema หรืออยากสร้าง DB ใหม่:
 
 ```bash
 python3 agentic_ai/fahmai_sql_agent.py \
