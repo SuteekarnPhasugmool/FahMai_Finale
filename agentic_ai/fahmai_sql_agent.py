@@ -923,6 +923,134 @@ def markdown_table(rows: Iterable[sqlite3.Row]) -> str:
     return "\n".join(lines)
 
 
+def rows_to_jsonable(rows: Iterable[sqlite3.Row], max_rows: int = 200) -> list[dict]:
+    json_rows: list[dict] = []
+    for idx, row in enumerate(rows):
+        if idx >= max_rows:
+            break
+        json_rows.append({key: row[key] for key in row.keys()})
+    return json_rows
+
+
+def deterministic_final_answer(question: str, rows: list[sqlite3.Row]) -> str | None:
+    """Handle a few exact benchmark formats without spending an LLM call."""
+    q = normalize(question)
+    if "tuple 12" in q and "distinct" in q and "sku" in q and "แต่ละเดือน" in q:
+        month_count: dict[int, int] = {}
+        for row in rows:
+            data = {key: row[key] for key in row.keys()}
+            month_value = data.get("month") or data.get("event_month") or data.get("sales_month")
+            count_value = (
+                data.get("distinct_sku_count")
+                or data.get("sku_count")
+                or data.get("count_distinct_sku_id")
+                or data.get("COUNT(DISTINCT sku_id)")
+            )
+            if month_value is None or count_value is None:
+                continue
+            month_text = str(month_value)
+            month_num = int(month_text[-2:]) if "-" in month_text else int(month_text)
+            month_count[month_num] = int(count_value)
+        if len(month_count) == 12:
+            values = tuple(month_count[month] for month in range(1, 13))
+            return str(values)
+    return None
+
+
+def synthesize_final_answer(
+    *,
+    question: str,
+    sql: str,
+    rows: list[sqlite3.Row],
+    api_url: str,
+    api_key: str,
+    model: str,
+) -> str:
+    deterministic = deterministic_final_answer(question, rows)
+    if deterministic is not None:
+        return deterministic
+
+    rows_json = json.dumps(rows_to_jsonable(rows), ensure_ascii=False, default=str)
+    system_prompt = """
+You are the final-answer formatter for a data QA pipeline.
+Use only the SQL result rows provided. Do not invent numbers.
+Answer in Thai unless the user explicitly asks otherwise.
+Match the requested output shape exactly: tuple, list, top-N rows, short paragraph, or specific fields.
+If the question asks for a tuple, output the tuple clearly and in the requested order.
+If rows are empty, say that no matching rows were found.
+Do not include markdown tables unless the user asks for a table.
+""".strip()
+    user_prompt = f"""
+Question:
+{question}
+
+SQL:
+{sql}
+
+Rows as JSON:
+{rows_json}
+
+Final answer:
+""".strip()
+    return call_chat_completion(
+        api_url=api_url,
+        api_key=api_key,
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=0.0,
+        max_tokens=1024,
+    ).strip()
+
+
+def print_agent_output(
+    *,
+    planner: str,
+    question: str,
+    sql: str,
+    rows: list[sqlite3.Row],
+    rationale: str | None,
+    question_id: str | None,
+    answer_format: str,
+    api_url: str,
+    api_key: str | None,
+    model: str,
+    view_name: str | None = None,
+) -> None:
+    print(f"Planner: {planner}")
+    if question_id:
+        print(f"Question ID: {question_id}")
+    print(f"Question: {question}")
+    if view_name:
+        print(f"View: {view_name}")
+    if rationale:
+        print(f"Reason: {rationale}")
+    print()
+    print("SQL:")
+    print(sql)
+
+    if answer_format in {"table", "both"}:
+        print()
+        print(markdown_table(rows))
+
+    if answer_format in {"final", "both"}:
+        if not api_key:
+            raise ValueError("--answer-format final/both requires --llm-api-key or THAILLM_API_KEY.")
+        final_answer = synthesize_final_answer(
+            question=question,
+            sql=sql,
+            rows=rows,
+            api_url=api_url,
+            api_key=api_key,
+            model=model,
+        )
+        print()
+        print("Final Answer:")
+        print(final_answer)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="FahMai prompt-to-SQL agent over enriched FACT/DIM views.")
     parser.add_argument("question", nargs="*", help="Natural-language question, Thai or English.")
@@ -938,6 +1066,12 @@ def main() -> int:
     parser.add_argument("--fallback-to-rules", action="store_true", help="If LLM planning fails, use deterministic rule planning.")
     parser.add_argument("--question-id", help="Load a question from questions.csv by id, e.g. L3-Q-EASY-001.")
     parser.add_argument("--questions-csv", type=Path, default=DEFAULT_QUESTIONS_CSV, help="questions.csv path for --question-id.")
+    parser.add_argument(
+        "--answer-format",
+        choices=("table", "final", "both"),
+        default="table",
+        help="Output raw result table, synthesized final answer, or both. Default: table.",
+    )
     parser.add_argument("--rebuild-db", action="store_true", help="Delete and rebuild the generated SQLite DB from CSV files.")
     args = parser.parse_args()
 
@@ -951,10 +1085,18 @@ def main() -> int:
         if args.sql:
             sql = repair_known_sql_aliases(args.sql)
             rows = execute_sql(conn, sql)
-            print("SQL:")
-            print(sql)
-            print()
-            print(markdown_table(rows))
+            print_agent_output(
+                planner="direct-sql",
+                question=args.sql,
+                sql=sql,
+                rows=rows,
+                rationale=None,
+                question_id=None,
+                answer_format=args.answer_format,
+                api_url=args.llm_api_url,
+                api_key=args.llm_api_key,
+                model=args.llm_model,
+            )
             return 0
 
         question = load_question_by_id(args.questions_csv, args.question_id) if args.question_id else " ".join(args.question).strip()
@@ -1018,16 +1160,18 @@ def main() -> int:
                 plan, sql = plan_query(question, conn, args.limit)
                 rows = execute_sql(conn, sql)
                 rationale = plan.rationale
-            print(f"Planner: {args.planner}")
-            if args.question_id:
-                print(f"Question ID: {args.question_id}")
-            print(f"Question: {question}")
-            print(f"Reason: {rationale}")
-            print()
-            print("SQL:")
-            print(sql)
-            print()
-            print(markdown_table(rows))
+            print_agent_output(
+                planner=args.planner,
+                question=question,
+                sql=sql,
+                rows=rows,
+                rationale=rationale,
+                question_id=args.question_id,
+                answer_format=args.answer_format,
+                api_url=args.llm_api_url,
+                api_key=args.llm_api_key,
+                model=args.llm_model,
+            )
             return 0
 
         if args.planner == "llm":
@@ -1052,17 +1196,19 @@ def main() -> int:
         sql = repair_known_sql_aliases(sql)
         rows = execute_sql(conn, sql)
 
-        print(f"Planner: {args.planner}")
-        if args.question_id:
-            print(f"Question ID: {args.question_id}")
-        print(f"Question: {question}")
-        print(f"View: {plan.view_name}")
-        print(f"Reason: {plan.rationale}")
-        print()
-        print("SQL:")
-        print(sql)
-        print()
-        print(markdown_table(rows))
+        print_agent_output(
+            planner=args.planner,
+            question=question,
+            sql=sql,
+            rows=rows,
+            rationale=plan.rationale,
+            question_id=args.question_id,
+            answer_format=args.answer_format,
+            api_url=args.llm_api_url,
+            api_key=args.llm_api_key,
+            model=args.llm_model,
+            view_name=plan.view_name,
+        )
         return 0
     finally:
         conn.close()

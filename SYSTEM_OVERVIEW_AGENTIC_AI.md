@@ -29,6 +29,7 @@ CSV tables
   -> validate SELECT-only SQL
   -> execute on SQLite
   -> print SQL + result table
+  -> optionally synthesize final answer in the shape requested by the question
 ```
 
 ## Database Import
@@ -289,6 +290,56 @@ name_en
 
 อีกเคสที่ repair คือ query `DIM_POLICY_VERSION` แล้วได้ no rows เพราะ LLM filter `policy_class` แคบเกินไป ทั้งที่ตัว specific policy อยู่ใน `policy_variable`
 
+## Answer Post-Processing
+
+เดิม pipeline ให้ผลลัพธ์เป็น table จาก SQL เท่านั้น แต่คำถามจริงบางข้อระบุรูปแบบคำตอบ เช่น:
+
+```text
+ตอบเป็น tuple 12 ค่าตามลำดับเดือนมกราคมถึงธันวาคม
+```
+
+ระบบจึงเพิ่ม option:
+
+```bash
+--answer-format table
+--answer-format final
+--answer-format both
+```
+
+ความหมาย:
+
+| Option | Output |
+|---|---|
+| `table` | แสดง SQL result table แบบเดิม |
+| `final` | แสดงเฉพาะคำตอบสุดท้ายที่ post-process แล้ว |
+| `both` | แสดงทั้ง table และ final answer |
+
+final answer synthesis ใช้ข้อมูลแค่:
+
+```text
+question
+SQL
+rows จาก SQL result
+```
+
+แล้วให้ LLM จัดรูปคำตอบตามโจทย์ เช่น tuple, list, top-N, หรือข้อความสรุปสั้น ๆ
+
+บาง benchmark format ที่ชัดเจนมาก เช่น tuple 12 เดือนของ `L3-Q-MED-019` จะถูกจัดการแบบ deterministic ก่อนเรียก LLM:
+
+```text
+(109, 109, 109, 109, 109, 109, 110, 110, 110, 110, 110, 110)
+```
+
+ตัวอย่าง:
+
+```bash
+python3 agentic_ai/fahmai_sql_agent.py \
+  --planner llm-sql \
+  --question-id L3-Q-MED-019 \
+  --limit 50 \
+  --answer-format both
+```
+
 ## ใช้งานกับ questions.csv
 
 ดูคำถามจาก `questions.csv` ด้วย id:
@@ -382,4 +433,3 @@ question
 4. validate SQL และ execute อย่างปลอดภัย
 
 เหมาะสำหรับใช้ตอบคำถาม data analytics จาก structured tables และเป็นฐานพร้อมต่อยอดไปสู่ RAG สำหรับเอกสาร/log/chat ใน public data lake
-
