@@ -21,6 +21,7 @@ import os
 import re
 import sqlite3
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -451,9 +452,13 @@ Safety and correctness:
 - Prefer enriched VW_FACT_*_ENRICHED views for FACT questions when they already contain the joined dimension attributes.
 - Prefer source tables for exact question wording. Enriched views are allowed when helpful.
 - Always qualify columns with table aliases when more than one table is used.
-- Do not invent columns. Use aliases for computed outputs.
+- Do not invent columns. Every table, view, and column referenced in the SQL must appear exactly in the SQLite schema above.
+- Before returning SQL, verify each selected, filtered, grouped, ordered, and joined identifier against the schema text. If a concept has no exact column, use the closest real column and explain it in the rationale, or return a query that checks the available real columns.
+- Use aliases only for computed outputs or presentation names, never as a substitute for nonexistent source columns.
 - DIM_VENDOR company names are in name_en/name_th, not vendor_name_en unless using an enriched view.
 - DIM_PRODUCT has sku_id. FACT_SALES_LINE_ITEM has sku_id. FACT_SALES does not have sku_id; join through FACT_SALES_LINE_ITEM.
+- DIM_EMPLOYEE has status, employment_type, and position_title. It does not have employment_status_at_period_end.
+- For employee names written in Latin letters, filter DIM_EMPLOYEE.first_name_en and DIM_EMPLOYEE.last_name_en. Do not translate or transliterate names unless the question provides Thai spelling.
 - For percentages, multiply by 100.0.
 - For policy effective date questions, filter effective_date <= target date AND (end_date > target date OR end_date IS NULL OR end_date = '') then ORDER BY effective_date DESC LIMIT 1.
 - In DIM_POLICY_VERSION, policy_class is broad (return, membership, signing_authority, warranty, shipping, refund). The specific named policy is usually policy_variable, e.g. refund_signing_authority_ladder, point_earning_rate_per_thb, refund_threshold_thb, return_window_days.
@@ -850,6 +855,14 @@ def validate_readonly_sql(sql: str) -> None:
         raise ValueError("Query contains a forbidden SQL operation.")
 
 
+def validate_sql_schema(conn: sqlite3.Connection, sql: str) -> None:
+    """Ask SQLite to resolve identifiers without running the data query."""
+    try:
+        conn.execute(f"EXPLAIN QUERY PLAN {sql}")
+    except sqlite3.Error as exc:
+        raise sqlite3.OperationalError(f"Schema validation failed: {exc}") from exc
+
+
 def repair_known_sql_aliases(sql: str) -> str:
     """Fix common friendly-column aliases when the LLM uses base DIM tables."""
     replacements: list[tuple[str, str]] = []
@@ -902,10 +915,24 @@ def repair_known_empty_result_sql(sql: str) -> str | None:
     return repaired if repaired != sql else None
 
 
-def execute_sql(conn: sqlite3.Connection, sql: str) -> list[sqlite3.Row]:
+def execute_sql(conn: sqlite3.Connection, sql: str, query_timeout: int | None = None) -> list[sqlite3.Row]:
     sql = repair_known_sql_aliases(sql)
     validate_readonly_sql(sql)
-    return conn.execute(sql).fetchall()
+    if query_timeout is None:
+        validate_sql_schema(conn, sql)
+        return conn.execute(sql).fetchall()
+
+    deadline = time.monotonic() + query_timeout
+
+    def interrupt_if_expired() -> int:
+        return 1 if time.monotonic() >= deadline else 0
+
+    conn.set_progress_handler(interrupt_if_expired, 10_000)
+    try:
+        validate_sql_schema(conn, sql)
+        return conn.execute(sql).fetchall()
+    finally:
+        conn.set_progress_handler(None, 0)
 
 
 def markdown_table(rows: Iterable[sqlite3.Row]) -> str:
