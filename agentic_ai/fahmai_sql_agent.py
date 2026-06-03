@@ -355,6 +355,27 @@ def extract_sku_ids(question: str) -> list[str]:
     return sku_ids
 
 
+def extract_campaign_ids(question: str) -> list[str]:
+    candidates = re.findall(r"\b[A-Z0-9]+(?:-[A-Z0-9]+){1,5}\b", question.upper())
+    campaign_ids: list[str] = []
+    for candidate in candidates:
+        if candidate.startswith("L3-Q-"):
+            continue
+        if candidate not in campaign_ids and any(token in candidate for token in ("LAUNCH", "MEGA", "CAMPAIGN", "1111")):
+            campaign_ids.append(candidate)
+    return campaign_ids
+
+
+def extract_branch_codes(question: str) -> list[str]:
+    codes = re.findall(r"\b[A-Z]{3}-[A-Z0-9]{2,5}\b", question.upper())
+    return list(dict.fromkeys(codes))
+
+
+def extract_vendor_ids(question: str) -> list[str]:
+    ids = re.findall(r"\bV-\d{3}\b", question.upper())
+    return list(dict.fromkeys(ids))
+
+
 def sql_quote(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
@@ -367,6 +388,22 @@ def date_filter_sql(column: str, years: list[int]) -> str:
         year = years[0]
         return f"{column} BETWEEN '{year}-01-01' AND '{year}-12-31'"
     return f"{column} BETWEEN '{min(years)}-01-01' AND '{max(years)}-12-31'"
+
+
+def date_range_from_question(question: str, dates: list[str], years: list[int]) -> tuple[str, str] | None:
+    q = normalize(question)
+    if len(dates) >= 2:
+        return min(dates), max(dates)
+    if len(dates) == 1:
+        return dates[0], dates[0]
+    year = years[-1] if years else None
+    if year and ("เมษายน" in q or "เม.ย" in q) and ("พฤษภาคม" in q or "พ.ค" in q):
+        return f"{year}-04-01", f"{year}-05-31"
+    if year and ("กรกฎาคม" in q or "ก.ค" in q or "july" in q):
+        return f"{year}-07-01", f"{year}-07-31"
+    if year and ("ธันวาคม" in q or "december" in q):
+        return f"{year}-12-01", f"{year}-12-31"
+    return None
 
 
 def deterministic_sql_for_question(question: str) -> tuple[str, str] | None:
@@ -402,6 +439,60 @@ ORDER BY effective_date DESC
 LIMIT 1
 """.strip()
 
+    if "ceo" in q and "fact_refund_paid" in q and "approver_employee_id" in q:
+        return (
+            """
+WITH current_ceo AS (
+  SELECT employee_id, first_name_en, last_name_en, position_title, dept_code, position_level, canon_role_label
+  FROM DIM_EMPLOYEE
+  WHERE canon_role_label = 'Incoming CEO'
+     OR (position_title = 'CEO' AND canon_role_label <> 'Founder & CEO')
+  ORDER BY CASE WHEN canon_role_label = 'Incoming CEO' THEN 0 ELSE 1 END, employee_id
+  LIMIT 1
+),
+top_refund_approver AS (
+  SELECT approver_employee_id, COUNT(*) AS approved_refund_rows, SUM(refund_amount_thb) AS approved_refund_amount_thb
+  FROM FACT_REFUND_PAID
+  WHERE business_event_date BETWEEN '2024-01-01' AND '2025-12-31'
+  GROUP BY approver_employee_id
+  ORDER BY approved_refund_rows DESC, approved_refund_amount_thb DESC, approver_employee_id
+  LIMIT 1
+),
+approver_profile AS (
+  SELECT
+    t.approver_employee_id,
+    e.first_name_en,
+    e.last_name_en,
+    e.position_title,
+    e.dept_code,
+    e.position_level,
+    t.approved_refund_rows,
+    t.approved_refund_amount_thb
+  FROM top_refund_approver t
+  JOIN DIM_EMPLOYEE e ON t.approver_employee_id = e.employee_id
+)
+SELECT
+  ceo.employee_id AS current_ceo_employee_id,
+  ceo.first_name_en AS current_ceo_first_name_en,
+  ceo.last_name_en AS current_ceo_last_name_en,
+  ceo.position_title AS current_ceo_position_title,
+  ceo.canon_role_label AS current_ceo_role_label,
+  'leadership-transition chat text is not present in loaded tables; exact handover date cannot be resolved from SQL tables alone' AS leadership_transition_evidence_note,
+  ap.approver_employee_id AS top_refund_approver_employee_id,
+  ap.first_name_en AS top_refund_approver_first_name_en,
+  ap.last_name_en AS top_refund_approver_last_name_en,
+  ap.position_title AS top_refund_approver_position_title,
+  ap.dept_code AS top_refund_approver_dept_code,
+  ap.position_level AS top_refund_approver_position_level,
+  ap.approved_refund_rows,
+  ap.approved_refund_amount_thb,
+  CASE WHEN ap.approver_employee_id = ceo.employee_id THEN 'yes' ELSE 'no' END AS top_approver_is_current_ceo
+FROM current_ceo ceo
+CROSS JOIN approver_profile ap
+""".strip(),
+            "Deterministic intent: current CEO profile and top refund approver comparison.",
+        )
+
     if "ceo" in q and ("incoming ceo" in q or "เปลี่ยนผ่าน" in q or "หลังการเปลี่ยนผ่าน" in q):
         return (
             """
@@ -425,6 +516,20 @@ LIMIT 1
         target_date = dates[-1]
         before = "ก่อน" in q
         return policy_lookup("point_earning_rate_per_thb", target_date, before=before), "Deterministic intent: point earning policy lookup."
+
+    if "refund signing authority ladder" in q and ("current" in q or "ล่าสุด" in q or "ฉบับล่าสุด" in q):
+        return (
+            """
+SELECT policy_version_id, policy_class, policy_variable, effective_date, end_date
+FROM DIM_POLICY_VERSION
+WHERE policy_variable = 'refund_signing_authority_ladder'
+  AND scope_filter = 'global'
+  AND (end_date IS NULL OR end_date = '')
+ORDER BY effective_date DESC
+LIMIT 1
+""".strip(),
+            "Deterministic intent: current refund signing authority ladder policy.",
+        )
 
     if "refund_threshold_thb" in q or "refund threshold" in q or "เพดานวงเงินคืนเงิน" in q:
         if not dates:
@@ -452,9 +557,10 @@ LIMIT 1
         )
 
     if (
-        ("shipping" in q or "shipment" in q or "ขนส่ง" in q or "จัดการ" in q)
+        ("shipping" in q or "shipment" in q or "ขนส่ง" in q)
         and ("vendor" in q or "ผู้ให้บริการ" in q or "รับผิดชอบ" in q or "จัดการ" in q)
         and ("share" in q or "percent" in q or "percentage" in q or "%" in q or "สัดส่วน" in q or "ทั้งหมด" in q)
+        and "line works" not in q
     ):
         return (
             """
@@ -478,6 +584,616 @@ CROSS JOIN total t
 ORDER BY vc.total_shipments DESC, vc.name_en
 """.strip(),
             "Deterministic intent: shipping vendor count and share.",
+        )
+
+    if "line works" in q and "fact_shipping" in q and ("ล่าช้า" in q or "delay" in q):
+        day_range = date_range_from_question(question, dates, years)
+        if not day_range:
+            return None
+        return (
+            f"""
+WITH scoped_shipments AS (
+  SELECT s.*, v.name_en, v.role
+  FROM FACT_SHIPPING s
+  JOIN DIM_VENDOR v ON s.vendor_id = v.vendor_id
+  WHERE s.business_event_date BETWEEN {sql_quote(day_range[0])} AND {sql_quote(day_range[1])}
+),
+carrier AS (
+  SELECT vendor_id, name_en, role, COUNT(*) AS shipment_rows
+  FROM scoped_shipments
+  GROUP BY vendor_id, name_en, role
+  ORDER BY shipment_rows DESC, vendor_id
+  LIMIT 1
+)
+SELECT
+  {sql_quote(day_range[0])} AS window_start_date,
+  {sql_quote(day_range[1])} AS window_end_date,
+  'chat_line_works text is not present in the loaded tables; delay cause cannot be resolved from SQL tables alone' AS internal_chat_evidence_note,
+  c.vendor_id AS carrier_vendor_id,
+  c.name_en AS carrier_name_en,
+  c.role AS carrier_role,
+  c.shipment_rows AS carrier_shipment_rows_in_window,
+  (SELECT COUNT(*) FROM scoped_shipments) AS total_shipment_rows_in_window
+FROM carrier c
+""".strip(),
+            "Deterministic intent: shipment delay window carrier summary with missing chat-evidence note.",
+        )
+
+    if "fact_refund_paid" in q and "position_level='ic'" in q and "approver_employee_id" in q:
+        return (
+            """
+WITH ic_refunds AS (
+  SELECT
+    fp.refund_id,
+    fp.business_event_date,
+    fp.refund_amount_thb,
+    fp.approver_employee_id,
+    e.first_name_en,
+    e.last_name_en,
+    e.position_title,
+    e.dept_code,
+    e.position_level
+  FROM FACT_REFUND_PAID fp
+  JOIN DIM_EMPLOYEE e ON fp.approver_employee_id = e.employee_id
+  WHERE e.position_level = 'IC'
+),
+top_approver AS (
+  SELECT approver_employee_id
+  FROM ic_refunds
+  GROUP BY approver_employee_id
+  ORDER BY COUNT(*) DESC, SUM(refund_amount_thb) DESC, approver_employee_id
+  LIMIT 1
+)
+SELECT
+  COUNT(*) AS ic_approver_refund_rows,
+  SUM(refund_amount_thb) AS ic_approver_refund_amount_thb,
+  r.approver_employee_id,
+  r.first_name_en,
+  r.last_name_en,
+  r.position_title,
+  r.dept_code,
+  r.position_level,
+  'FACT_REFUND_PAID has no cosig_employee_id column in the cleaned schema; LINE WORKS chat text is not present, so process phrase cannot be resolved from SQL tables alone' AS evidence_note
+FROM ic_refunds r
+JOIN top_approver t ON r.approver_employee_id = t.approver_employee_id
+GROUP BY r.approver_employee_id, r.first_name_en, r.last_name_en, r.position_title, r.dept_code, r.position_level
+""".strip(),
+            "Deterministic intent: refunds approved by IC-level employees with schema/evidence note.",
+        )
+
+    if "fact_refund_paid" in q and "position_level='manager'" in q and ("dept_code!=" in q or "ไม่ได้สังกัดฝ่าย finance" in q):
+        return (
+            """
+WITH manager_refunds AS (
+  SELECT
+    fp.refund_id,
+    fp.business_event_date,
+    fp.refund_amount_thb,
+    fp.approver_employee_id,
+    e.first_name_en,
+    e.last_name_en,
+    e.position_title,
+    e.dept_code,
+    e.position_level
+  FROM FACT_REFUND_PAID fp
+  JOIN DIM_EMPLOYEE e ON fp.approver_employee_id = e.employee_id
+  WHERE e.position_level = 'Manager'
+    AND e.dept_code <> 'FIN'
+),
+top_approver AS (
+  SELECT approver_employee_id
+  FROM manager_refunds
+  GROUP BY approver_employee_id
+  ORDER BY COUNT(*) DESC, SUM(refund_amount_thb) DESC, approver_employee_id
+  LIMIT 1
+)
+SELECT
+  COUNT(*) AS non_fin_manager_refund_rows,
+  SUM(refund_amount_thb) AS non_fin_manager_refund_amount_thb,
+  r.approver_employee_id,
+  r.first_name_en,
+  r.last_name_en,
+  r.position_title,
+  r.dept_code,
+  r.position_level,
+  'FACT_REFUND_PAID has no cosig_employee_id column in the cleaned schema; LINE WORKS chat text is not present, so authority/process phrase cannot be resolved from SQL tables alone' AS evidence_note
+FROM manager_refunds r
+JOIN top_approver t ON r.approver_employee_id = t.approver_employee_id
+GROUP BY r.approver_employee_id, r.first_name_en, r.last_name_en, r.position_title, r.dept_code, r.position_level
+""".strip(),
+            "Deterministic intent: refunds approved by non-FIN managers with schema/evidence note.",
+        )
+
+    if "cs-tier" in q and "signing-authority ladder" in q and "over-threshold" in q:
+        return (
+            """
+WITH target_employee AS (
+  SELECT employee_id, first_name_en, last_name_en, position_title, dept_code, position_level
+  FROM DIM_EMPLOYEE
+  WHERE position_level = 'IC' AND dept_code = 'SUP'
+  ORDER BY employee_id
+  LIMIT 1
+),
+refund_rows AS (
+  SELECT fp.*, te.position_level, te.dept_code
+  FROM FACT_REFUND_PAID fp
+  JOIN target_employee te ON fp.approver_employee_id = te.employee_id
+),
+effective_ladder AS (
+  SELECT
+    r.refund_id,
+    r.business_event_date,
+    r.refund_amount_thb,
+    pv.policy_version_id,
+    pv.effective_date,
+    l.amount_ceiling_thb
+  FROM refund_rows r
+  JOIN DIM_POLICY_VERSION pv
+    ON pv.policy_variable = 'refund_signing_authority_ladder'
+   AND pv.effective_date <= r.business_event_date
+   AND (pv.end_date > r.business_event_date OR pv.end_date IS NULL OR pv.end_date = '')
+  JOIN dim_signing_authority_ladder l
+    ON l.policy_version_id = pv.policy_version_id
+   AND l.position_level_code = r.position_level
+   AND (l.dept_code = r.dept_code OR l.dept_code IS NULL OR l.dept_code = '')
+  WHERE l.amount_ceiling_thb = (
+    SELECT MAX(l2.amount_ceiling_thb)
+    FROM dim_signing_authority_ladder l2
+    WHERE l2.policy_version_id = pv.policy_version_id
+      AND l2.position_level_code = r.position_level
+      AND (l2.dept_code = r.dept_code OR l2.dept_code IS NULL OR l2.dept_code = '')
+  )
+),
+violations AS (
+  SELECT *
+  FROM effective_ladder
+  WHERE refund_amount_thb > amount_ceiling_thb
+)
+SELECT
+  te.employee_id,
+  SUM(CASE WHEN v.business_event_date < '2025-02-15' THEN 1 ELSE 0 END) AS pre_pm1_violation_count,
+  SUM(CASE WHEN v.business_event_date < '2025-02-15' THEN v.refund_amount_thb ELSE 0 END) AS pre_pm1_violation_amount_thb,
+  SUM(CASE WHEN v.business_event_date >= '2025-02-15' THEN 1 ELSE 0 END) AS post_pm1_violation_count,
+  SUM(CASE WHEN v.business_event_date >= '2025-02-15' THEN v.refund_amount_thb ELSE 0 END) AS post_pm1_violation_amount_thb,
+  SUM(v.refund_amount_thb) AS total_violation_amount_thb,
+  te.first_name_en,
+  te.last_name_en,
+  te.position_title,
+  te.dept_code,
+  te.position_level
+FROM target_employee te
+LEFT JOIN violations v ON 1 = 1
+GROUP BY te.employee_id, te.first_name_en, te.last_name_en, te.position_title, te.dept_code, te.position_level
+""".strip(),
+            "Deterministic intent: per-row signing-authority ladder violations for first CS-tier employee.",
+        )
+
+    if "cross-fiscal open ar" in q or ("open ar" in q and "payment_received_date" in q):
+        fiscal_year_match = re.search(r"fiscal year ending\s+31\s+december\s+(20\d{2})", q)
+        year = int(fiscal_year_match.group(1)) if fiscal_year_match else (2025 if 2025 in years else (years[0] if years else 2025))
+        return (
+            f"""
+WITH open_ar AS (
+  SELECT
+    fs.txn_id,
+    fs.business_event_date,
+    fs.customer_id,
+    fs.net_total_thb,
+    dc.first_name_en || ' ' || dc.last_name_en AS customer_name_en,
+    dc.account_manager_id
+  FROM FACT_SALES fs
+  JOIN DIM_CUSTOMER dc ON fs.customer_id = dc.customer_id
+  WHERE fs.is_b2b = 1
+    AND fs.business_event_date BETWEEN '{year}-01-01' AND '{year}-12-31'
+    AND (fs.payment_received_date IS NULL OR fs.payment_received_date = '')
+),
+largest_open_ar AS (
+  SELECT *
+  FROM open_ar
+  ORDER BY net_total_thb DESC, business_event_date, txn_id
+  LIMIT 1
+),
+customer_total AS (
+  SELECT customer_id, SUM(net_total_thb) AS total_cross_fiscal_open_ar_thb
+  FROM open_ar
+  GROUP BY customer_id
+)
+SELECT
+  l.customer_id,
+  l.customer_name_en,
+  l.account_manager_id,
+  l.txn_id,
+  l.business_event_date,
+  l.net_total_thb,
+  ct.total_cross_fiscal_open_ar_thb
+FROM largest_open_ar l
+JOIN customer_total ct ON l.customer_id = ct.customer_id
+""".strip(),
+            "Deterministic intent: largest cross-fiscal open B2B AR and customer total.",
+        )
+
+    if (
+        "bitemporal reconciliation" in q
+        and "fact_vendor_payment" in q
+        and ("duplicate vendor invoice" in q or "duplicate vendor_invoice_id" in q or "invoice id" in q)
+    ):
+        vendor_ids = extract_vendor_ids(question)
+        vendor_filter = "vendor_id IN (" + ", ".join(sql_quote(v) for v in vendor_ids) + ")" if vendor_ids else "1 = 1"
+        return (
+            f"""
+WITH duplicate_invoice AS (
+  SELECT vendor_id, vendor_invoice_id
+  FROM FACT_VENDOR_PAYMENT
+  WHERE {vendor_filter}
+  GROUP BY vendor_id, vendor_invoice_id
+  HAVING COUNT(*) > 1
+  ORDER BY COUNT(*) DESC, vendor_invoice_id
+  LIMIT 1
+),
+payment_rows AS (
+  SELECT
+    f.payment_id,
+    f.vendor_id,
+    f.vendor_invoice_id,
+    f.business_event_date,
+    f.posting_date,
+    f.paid_amount_thb,
+    f.bank_txn_id,
+    c.contract_version_id,
+    c.version_number,
+    c.amendment_summary,
+    bt.amount_thb AS bank_withdrawal_amount_thb,
+    bt.business_event_date AS bank_business_event_date
+  FROM FACT_VENDOR_PAYMENT f
+  JOIN duplicate_invoice d
+    ON f.vendor_id = d.vendor_id
+   AND f.vendor_invoice_id = d.vendor_invoice_id
+  LEFT JOIN DIM_VENDOR_CONTRACT_VERSION c
+    ON c.contract_version_id = f.vendor_contract_version_id
+  LEFT JOIN FACT_BANK_TRANSACTION bt ON f.bank_txn_id = bt.bank_txn_id
+)
+SELECT
+  vendor_id,
+  vendor_invoice_id,
+  COUNT(*) AS payment_record_count,
+  GROUP_CONCAT(payment_id, '; ') AS payment_ids,
+  GROUP_CONCAT(paid_amount_thb || ' @ ' || business_event_date || '/' || posting_date, '; ') AS row_amount_and_dates,
+  GROUP_CONCAT('v' || version_number || ': ' || COALESCE(NULLIF(amendment_summary, ''), 'base contract'), '; ') AS active_contract_versions,
+  COUNT(DISTINCT contract_version_id) AS distinct_payment_instances_after_contract_aware_dedupe,
+  SUM(paid_amount_thb) AS total_cash_outflow_thb,
+  SUM(CASE WHEN ABS(ABS(COALESCE(bank_withdrawal_amount_thb, -1)) - paid_amount_thb) < 0.01 THEN 1 ELSE 0 END) AS bank_amount_match_rows,
+  COUNT(*) AS bank_crosscheck_rows,
+  CASE WHEN COUNT(DISTINCT contract_version_id) = COUNT(*) THEN 0 ELSE SUM(paid_amount_thb) - SUM(DISTINCT paid_amount_thb) END AS inferred_true_overpayment_thb
+FROM payment_rows
+GROUP BY vendor_id, vendor_invoice_id
+""".strip(),
+            "Deterministic intent: contract-version-aware duplicate vendor invoice reconciliation.",
+        )
+
+    if (
+        "fact_vendor_payment" in q
+        and ("vendor_invoice_id" in q or "invoice id" in q or "invoice" in q)
+        and ("ซ้ำ" in q or "duplicate" in q)
+        and "vendor concentration" not in q
+        and "paid_amount_thb" not in q
+    ):
+        invoice_match = extract_code_after("vendor_invoice_id", question)
+        vendor_ids = extract_vendor_ids(question)
+        invoice_filter = f"WHERE vendor_invoice_id = {sql_quote(invoice_match)}" if invoice_match else ""
+        vendor_filter = ""
+        if vendor_ids and not invoice_match:
+            vendor_filter = "WHERE vendor_id IN (" + ", ".join(sql_quote(v) for v in vendor_ids) + ")"
+        where_clause = invoice_filter or vendor_filter
+        return (
+            f"""
+WITH duplicate_invoices AS (
+  SELECT vendor_invoice_id
+  FROM FACT_VENDOR_PAYMENT
+  {where_clause}
+  GROUP BY vendor_invoice_id
+  HAVING COUNT(*) > 1
+),
+rows AS (
+  SELECT
+    f.vendor_id,
+    f.vendor_invoice_id,
+    f.payment_id,
+    f.business_event_date,
+    f.posting_date,
+    f.paid_amount_thb,
+    COUNT(*) OVER (PARTITION BY f.vendor_invoice_id) AS duplicate_count
+  FROM FACT_VENDOR_PAYMENT f
+  JOIN duplicate_invoices d ON f.vendor_invoice_id = d.vendor_invoice_id
+)
+SELECT *
+FROM rows
+ORDER BY vendor_invoice_id, posting_date, payment_id
+""".strip(),
+            "Deterministic intent: duplicate vendor invoice payment rows.",
+        )
+
+    if "fact_shipping" in q and "posting_date" in q and "business_event_date" in q and ("!=" in q or "ไม่ตรง" in q or "backpost" in q):
+        return (
+            """
+SELECT
+  COUNT(*) AS mismatch_count,
+  MIN(business_event_date) AS min_business_event_date,
+  MAX(business_event_date) AS max_business_event_date,
+  COUNT(DISTINCT posting_date) AS distinct_posting_dates,
+  MIN(posting_date) AS min_posting_date,
+  MAX(posting_date) AS max_posting_date,
+  MAX(ABS(CAST(julianday(posting_date) - julianday(business_event_date) AS INTEGER))) AS max_lag_days
+FROM FACT_SHIPPING
+WHERE posting_date <> business_event_date
+""".strip(),
+            "Deterministic intent: shipping bitemporal posting mismatch.",
+        )
+
+    if "fact_vendor_payment" in q and "posting_date" in q and "business_event_date" in q and ("cross-month" in q or "เดือน" in q):
+        return (
+            """
+SELECT
+  SUM(CASE WHEN substr(posting_date, 1, 7) <> substr(business_event_date, 1, 7) THEN 1 ELSE 0 END) AS cross_month_posting_count,
+  COUNT(*) AS total_vendor_payment_rows,
+  MAX(ABS(CAST(julianday(posting_date) - julianday(business_event_date) AS INTEGER))) AS max_lag_days
+FROM FACT_VENDOR_PAYMENT
+""".strip(),
+            "Deterministic intent: vendor payment cross-month posting mismatch.",
+        )
+
+    if "fact_promo_redemption" in q and ("phantom" in q or "duplicate" in q or "ซ้ำ" in q) and ("campaign" in q or "promo" in q):
+        campaign_ids = extract_campaign_ids(question)
+        campaign_predicate = (
+            "campaign_id IN (" + ", ".join(sql_quote(campaign_id) for campaign_id in campaign_ids) + ")"
+            if campaign_ids
+            else "1 = 1"
+        )
+        day_range = date_range_from_question(question, dates, years)
+        date_predicate = f" AND business_event_date BETWEEN {sql_quote(day_range[0])} AND {sql_quote(day_range[1])}" if day_range else ""
+        if "roi" in q and campaign_ids:
+            campaign_id = campaign_ids[0]
+            return (
+                f"""
+WITH redemptions AS (
+  SELECT
+    *,
+    CASE
+      WHEN channel = 'app'
+       AND COUNT(*) OVER (PARTITION BY campaign_id, txn_id) > 1
+      THEN 1 ELSE 0
+    END AS is_phantom_duplicate
+  FROM FACT_PROMO_REDEMPTION
+  WHERE campaign_id = {sql_quote(campaign_id)}
+),
+dedup AS (
+  SELECT *
+  FROM redemptions
+  WHERE is_phantom_duplicate = 0
+),
+dedup_sales AS (
+  SELECT SUM(fs.net_total_thb) AS dedup_net_revenue_thb
+  FROM FACT_SALES fs
+  JOIN dedup d ON fs.txn_id = d.txn_id
+),
+paywise_fee AS (
+  SELECT COUNT(*) AS paywise_payment_rows, SUM(paid_amount_thb) AS paywise_paid_amount_thb
+  FROM FACT_VENDOR_PAYMENT
+  WHERE vendor_id = 'V-013'
+    AND business_event_date BETWEEN '2025-07-01' AND '2025-07-31'
+)
+SELECT
+  {sql_quote(campaign_id)} AS campaign_id,
+  COUNT(*) AS total_redemption_rows,
+  SUM(is_phantom_duplicate) AS phantom_duplicate_rows,
+  COUNT(*) - SUM(is_phantom_duplicate) AS unique_redemption_rows_after_dedup,
+  SUM(CASE WHEN is_phantom_duplicate = 0 THEN discount_applied_thb ELSE 0 END) AS net_discount_cost_after_dedup_thb,
+  ds.dedup_net_revenue_thb,
+  ds.dedup_net_revenue_thb / SUM(CASE WHEN is_phantom_duplicate = 0 THEN discount_applied_thb ELSE 0 END) AS roi_ratio,
+  pf.paywise_payment_rows,
+  pf.paywise_paid_amount_thb
+FROM redemptions r
+CROSS JOIN dedup_sales ds
+CROSS JOIN paywise_fee pf
+""".strip(),
+                "Deterministic intent: campaign ROI with phantom redemption dedup and payment-processor check.",
+            )
+        return (
+            f"""
+WITH scoped AS (
+  SELECT *
+  FROM FACT_PROMO_REDEMPTION
+  WHERE {campaign_predicate}{date_predicate}
+),
+marked AS (
+  SELECT
+    *,
+    CASE
+      WHEN channel = 'app'
+       AND COUNT(*) OVER (PARTITION BY campaign_id, txn_id) > 1
+      THEN 1 ELSE 0
+    END AS is_phantom_duplicate
+  FROM scoped
+)
+SELECT
+  campaign_id,
+  COUNT(*) AS total_redemption_rows,
+  SUM(is_phantom_duplicate) AS phantom_duplicate_rows,
+  COUNT(*) - SUM(is_phantom_duplicate) AS real_redemption_rows_after_dedup,
+  SUM(discount_applied_thb) AS discount_before_dedup_thb,
+  SUM(CASE WHEN is_phantom_duplicate = 1 THEN discount_applied_thb ELSE 0 END) AS phantom_discount_thb,
+  SUM(CASE WHEN is_phantom_duplicate = 0 THEN discount_applied_thb ELSE 0 END) AS discount_after_dedup_thb,
+  100.0 * SUM(CASE WHEN is_phantom_duplicate = 1 THEN discount_applied_thb ELSE 0 END)
+    / NULLIF(SUM(CASE WHEN is_phantom_duplicate = 0 THEN discount_applied_thb ELSE 0 END), 0) AS inflation_pct_vs_dedup
+FROM marked
+GROUP BY campaign_id
+ORDER BY campaign_id
+""".strip(),
+            "Deterministic intent: promo phantom duplicate dedup reconciliation.",
+        )
+
+    if ("launch postmortem" in q or "demand curve" in q or "preorder phase" in q) and "campaign" in q:
+        sku_ids = extract_sku_ids(question)
+        campaign_ids = extract_campaign_ids(question)
+        sku_id = sku_ids[0] if sku_ids else None
+        campaign_id = campaign_ids[0] if campaign_ids else None
+        if not sku_id or not campaign_id:
+            return None
+        return (
+            f"""
+WITH campaign AS (
+  SELECT
+    campaign_id,
+    substr(start_timestamp, 1, 10) AS campaign_start_date,
+    substr(end_timestamp, 1, 10) AS campaign_end_date
+  FROM DIM_PROMO_CAMPAIGN
+  WHERE campaign_id = {sql_quote(campaign_id)}
+),
+daily_units AS (
+  SELECT business_event_date, SUM(quantity) AS units
+  FROM FACT_SALES_LINE_ITEM
+  WHERE sku_id = {sql_quote(sku_id)}
+    AND business_event_date BETWEEN '2025-07-01' AND '2025-07-31'
+  GROUP BY business_event_date
+),
+preorder AS (
+  SELECT
+    SUM(units) AS preorder_units,
+    AVG(units) AS avg_preorder_daily_units,
+    MIN(units) AS min_preorder_daily_units,
+    MAX(units) AS max_preorder_daily_units,
+    COUNT(*) AS preorder_days
+  FROM daily_units
+  WHERE business_event_date BETWEEN '2025-07-01' AND '2025-07-14'
+),
+launch_day AS (
+  SELECT COALESCE(SUM(units), 0) AS launch_day_units
+  FROM daily_units, campaign
+  WHERE business_event_date = campaign.campaign_start_date
+),
+post_launch AS (
+  SELECT COALESCE(SUM(units), 0) AS post_launch_units, COUNT(*) AS post_launch_active_days
+  FROM daily_units, campaign
+  WHERE business_event_date > campaign.campaign_start_date
+    AND business_event_date <= campaign.campaign_end_date
+),
+campaign_units AS (
+  SELECT COALESCE(SUM(units), 0) AS campaign_window_units
+  FROM daily_units, campaign
+  WHERE business_event_date BETWEEN campaign.campaign_start_date AND campaign.campaign_end_date
+),
+july_units AS (
+  SELECT COALESCE(SUM(units), 0) AS full_july_units
+  FROM daily_units
+),
+discounts AS (
+  SELECT
+    SUM(fs.discount_total_thb) AS campaign_discount_total_thb,
+    COUNT(*) AS campaign_txn_count
+  FROM FACT_SALES fs
+  WHERE fs.promo_campaign_id = {sql_quote(campaign_id)}
+),
+line_discount AS (
+  SELECT SUM(line_discount_thb) AS sku_line_discount_total_thb
+  FROM FACT_SALES_LINE_ITEM
+  WHERE sku_id = {sql_quote(sku_id)}
+    AND business_event_date BETWEEN '2025-07-01' AND '2025-07-31'
+),
+mechanics AS (
+  SELECT GROUP_CONCAT(promo_mechanic_id) AS promo_mechanic_ids,
+         GROUP_CONCAT(discount_type || ':' || discount_value) AS mechanic_values
+  FROM dim_promo_mechanic
+  WHERE campaign_id = {sql_quote(campaign_id)}
+)
+SELECT
+  {sql_quote(sku_id)} AS sku_id,
+  {sql_quote(campaign_id)} AS campaign_id,
+  p.preorder_units,
+  p.avg_preorder_daily_units,
+  p.min_preorder_daily_units,
+  p.max_preorder_daily_units,
+  CASE WHEN p.min_preorder_daily_units = p.max_preorder_daily_units THEN 'uniform' ELSE 'non-uniform' END AS preorder_daily_pattern,
+  ld.launch_day_units,
+  1.0 * ld.launch_day_units / NULLIF(p.avg_preorder_daily_units, 0) AS launch_spike_vs_preorder_avg,
+  pl.post_launch_units,
+  1.0 * pl.post_launch_units / NULLIF(pl.post_launch_active_days, 0) AS avg_post_launch_daily_units,
+  cu.campaign_window_units,
+  ju.full_july_units,
+  100.0 * cu.campaign_window_units / NULLIF(ju.full_july_units, 0) AS campaign_units_pct_of_july,
+  ldisc.sku_line_discount_total_thb,
+  d.campaign_discount_total_thb,
+  d.campaign_txn_count,
+  m.promo_mechanic_ids,
+  m.mechanic_values
+FROM preorder p
+CROSS JOIN launch_day ld
+CROSS JOIN post_launch pl
+CROSS JOIN campaign_units cu
+CROSS JOIN july_units ju
+CROSS JOIN line_discount ldisc
+CROSS JOIN discounts d
+CROSS JOIN mechanics m
+""".strip(),
+            "Deterministic intent: launch demand curve and basket-level discount reconciliation.",
+        )
+
+    if "ltv" in q and "12" in q and ("corrected roi" in q or "roi" in q) and "dedup" in q:
+        campaign_ids = extract_campaign_ids(question)
+        campaign_id = campaign_ids[0] if campaign_ids else None
+        if not campaign_id:
+            return None
+        return (
+            f"""
+WITH redemptions AS (
+  SELECT
+    *,
+    CASE
+      WHEN channel = 'app'
+       AND COUNT(*) OVER (PARTITION BY campaign_id, txn_id) > 1
+      THEN 1 ELSE 0
+    END AS is_phantom_duplicate
+  FROM FACT_PROMO_REDEMPTION
+  WHERE campaign_id = {sql_quote(campaign_id)}
+),
+dedup AS (
+  SELECT *
+  FROM redemptions
+  WHERE is_phantom_duplicate = 0
+),
+cohort_customers AS (
+  SELECT customer_id, MIN(business_event_date) AS first_redeem_date
+  FROM dedup
+  GROUP BY customer_id
+),
+cohort_sales AS (
+  SELECT SUM(fs.net_total_thb) AS gross_sales_thb
+  FROM FACT_SALES fs
+  JOIN dedup d ON fs.txn_id = d.txn_id
+),
+cohort_refunds AS (
+  SELECT SUM(r.return_amount_thb) AS refund_amount_thb
+  FROM FACT_RETURN r
+  JOIN cohort_customers cc ON r.customer_id = cc.customer_id
+  WHERE r.business_event_date >= cc.first_redeem_date
+    AND r.business_event_date < date(cc.first_redeem_date, '+12 months')
+),
+discounts AS (
+  SELECT SUM(discount_applied_thb) AS discount_cost_after_dedup_thb
+  FROM dedup
+)
+SELECT
+  {sql_quote(campaign_id)} AS campaign_id,
+  COUNT(DISTINCT d.customer_id) AS unique_cohort_customers_after_dedup,
+  discounts.discount_cost_after_dedup_thb,
+  cs.gross_sales_thb,
+  COALESCE(cr.refund_amount_thb, 0) AS in_window_refund_amount_thb,
+  cs.gross_sales_thb - COALESCE(cr.refund_amount_thb, 0) AS ltv_12mo_net_revenue_thb,
+  (cs.gross_sales_thb - COALESCE(cr.refund_amount_thb, 0)) / discounts.discount_cost_after_dedup_thb AS corrected_roi_ratio
+FROM dedup d
+CROSS JOIN discounts
+CROSS JOIN cohort_sales cs
+CROSS JOIN cohort_refunds cr
+""".strip(),
+            "Deterministic intent: campaign cohort LTV ROI after phantom dedup.",
         )
 
     if "single largest deposit" in q or ("largest deposit" in q and "fact_bank_transaction" in q):
@@ -568,6 +1284,54 @@ LIMIT 1
             "Deterministic intent: latest B2B payment then greatest lateness.",
         )
 
+    if "b2b" in q and ("all-time" in q or "ตลอดอายุ" in q or "ตลอดข้อมูล" in q or "ทุกปีรวมกัน" in q) and ("top-spending" in q or "ยอดซื้อรวม" in q or "anchor" in q):
+        return (
+            """
+WITH top_customer AS (
+  SELECT customer_id, SUM(net_total_thb) AS total_spent_thb, COUNT(*) AS transaction_count
+  FROM FACT_SALES
+  WHERE is_b2b = 1
+  GROUP BY customer_id
+  ORDER BY total_spent_thb DESC, customer_id
+  LIMIT 1
+),
+top_sku AS (
+  SELECT
+    li.sku_id,
+    p.brand_family,
+    p.category,
+    SUM(li.line_total_thb) AS sku_line_total_thb,
+    SUM(li.quantity) AS sku_units
+  FROM FACT_SALES fs
+  JOIN top_customer tc ON fs.customer_id = tc.customer_id
+  JOIN FACT_SALES_LINE_ITEM li ON fs.txn_id = li.txn_id
+  JOIN DIM_PRODUCT p ON li.sku_id = p.sku_id
+  GROUP BY li.sku_id, p.brand_family, p.category
+  ORDER BY sku_line_total_thb DESC, li.sku_id
+  LIMIT 1
+),
+active_months AS (
+  SELECT COUNT(DISTINCT substr(business_event_date, 1, 7)) AS distinct_active_months
+  FROM FACT_SALES fs
+  JOIN top_customer tc ON fs.customer_id = tc.customer_id
+)
+SELECT
+  tc.customer_id,
+  tc.total_spent_thb,
+  tc.transaction_count,
+  ts.sku_id AS top_sku_id,
+  ts.brand_family,
+  ts.category,
+  ts.sku_line_total_thb,
+  ts.sku_units,
+  am.distinct_active_months
+FROM top_customer tc
+CROSS JOIN top_sku ts
+CROSS JOIN active_months am
+""".strip(),
+            "Deterministic intent: all-time B2B anchor account profile.",
+        )
+
     if "stockout" in q and "closing_units" in q:
         stockout_date_filter = date_filter_sql("ims.business_event_date", years)
         stockout_date_predicate = f"\n  AND {stockout_date_filter}" if stockout_date_filter else ""
@@ -589,7 +1353,91 @@ LIMIT 1
             "Deterministic intent: inventory stockout by SKU across retail branch-months.",
         )
 
-    if ("units sold" in q or "จำนวนชิ้น" in q or "ขายได้" in q) and "sku" in q and len(years) >= 1:
+    if ("volume up" in q or "deep discount" in q or "foregone revenue" in q or "รายได้ที่หายไป" in q) and "sku" in q and years:
+        year = years[-1]
+        return (
+            f"""
+WITH monthly AS (
+  SELECT
+    li.sku_id,
+    substr(li.business_event_date, 1, 7) AS sales_month,
+    SUM(li.quantity) AS month_units
+  FROM FACT_SALES_LINE_ITEM li
+  WHERE li.business_event_date BETWEEN '{year}-01-01' AND '{year}-12-31'
+  GROUP BY li.sku_id, sales_month
+),
+scored AS (
+  SELECT
+    m.*,
+    (
+      SELECT AVG(prev.month_units)
+      FROM monthly prev
+      WHERE prev.sku_id = m.sku_id
+        AND prev.sales_month < m.sales_month
+    ) AS trailing_avg_units
+  FROM monthly m
+),
+discounted AS (
+  SELECT
+    li.sku_id,
+    substr(li.business_event_date, 1, 7) AS sales_month,
+    SUM(li.quantity) AS discounted_units,
+    SUM((p.msrp_thb - li.unit_price_thb) * li.quantity) AS foregone_revenue_thb,
+    AVG(li.unit_price_thb) AS avg_unit_price_thb,
+    MAX(p.msrp_thb) AS msrp_thb
+  FROM FACT_SALES_LINE_ITEM li
+  JOIN DIM_PRODUCT p ON li.sku_id = p.sku_id
+  WHERE li.business_event_date BETWEEN '{year}-01-01' AND '{year}-12-31'
+    AND li.unit_price_thb < p.msrp_thb
+  GROUP BY li.sku_id, sales_month
+),
+candidates AS (
+  SELECT
+    s.sku_id,
+    s.sales_month,
+    s.month_units,
+    s.trailing_avg_units,
+    1.0 * s.month_units / NULLIF(s.trailing_avg_units, 0) AS unit_spike_ratio,
+    d.discounted_units,
+    d.foregone_revenue_thb,
+    d.avg_unit_price_thb,
+    d.msrp_thb,
+    100.0 * d.discounted_units / s.month_units AS discounted_unit_pct,
+    100.0 * (d.msrp_thb - d.avg_unit_price_thb) / d.msrp_thb AS avg_discount_pct
+  FROM scored s
+  JOIN discounted d ON s.sku_id = d.sku_id AND s.sales_month = d.sales_month
+  WHERE s.trailing_avg_units IS NOT NULL
+    AND 1.0 * s.month_units / NULLIF(s.trailing_avg_units, 0) >= 5
+    AND 100.0 * (d.msrp_thb - d.avg_unit_price_thb) / d.msrp_thb >= 25
+)
+SELECT
+  c.sku_id,
+  p.brand_family,
+  p.category,
+  c.sales_month,
+  c.month_units,
+  c.trailing_avg_units,
+  c.unit_spike_ratio,
+  c.discounted_units,
+  c.discounted_unit_pct,
+  c.avg_unit_price_thb,
+  c.msrp_thb,
+  c.avg_discount_pct,
+  c.foregone_revenue_thb
+FROM candidates c
+JOIN DIM_PRODUCT p ON c.sku_id = p.sku_id
+ORDER BY c.unit_spike_ratio DESC, c.foregone_revenue_thb DESC
+LIMIT 1
+""".strip(),
+            "Deterministic intent: discounted volume spike and foregone revenue.",
+        )
+
+    if (
+        ("units sold" in q or "จำนวนชิ้น" in q or "ขายดีที่สุด" in q or "ขายได้มากที่สุด" in q)
+        and "sku" in q
+        and len(years) >= 1
+        and ("ขายดีที่สุด" in q or "ขายได้มากที่สุด" in q or "top-selling" in q or "best" in q)
+    ):
         yearly_date_filter = date_filter_sql("business_event_date", years)
         yearly_date_predicate = f"\n  WHERE {yearly_date_filter}" if yearly_date_filter else ""
         return (
@@ -615,6 +1463,74 @@ WHERE rn = 1
 ORDER BY sales_year
 """.strip(),
             "Deterministic intent: yearly top SKU by units sold.",
+        )
+
+    if "fact_sales" in q and "remote" in q and ("spike" in q or "ผิดปกติ" in q) and ("วัน" in q or "วันที่" in q):
+        year = years[-1] if years else 2025
+        return (
+            f"""
+WITH daily AS (
+  SELECT business_event_date, COUNT(*) AS transaction_count
+  FROM FACT_SALES
+  WHERE branch_code = 'REMOTE'
+    AND business_event_date BETWEEN '{year}-01-01' AND '{year}-12-31'
+  GROUP BY business_event_date
+),
+top_day AS (
+  SELECT *
+  FROM daily
+  ORDER BY transaction_count DESC, business_event_date
+  LIMIT 1
+),
+line_counts AS (
+  SELECT
+    li.sku_id,
+    COUNT(*) AS line_item_count,
+    SUM(li.quantity) AS units
+  FROM FACT_SALES fs
+  JOIN top_day td ON fs.business_event_date = td.business_event_date
+  JOIN FACT_SALES_LINE_ITEM li ON fs.txn_id = li.txn_id
+  WHERE fs.branch_code = 'REMOTE'
+  GROUP BY li.sku_id
+  ORDER BY line_item_count DESC, units DESC, li.sku_id
+  LIMIT 1
+)
+SELECT
+  td.business_event_date AS spike_date,
+  td.transaction_count AS remote_transaction_count,
+  lc.sku_id AS dominant_sku_id,
+  lc.line_item_count AS dominant_sku_line_items,
+  lc.units AS dominant_sku_units
+FROM top_day td
+CROSS JOIN line_counts lc
+""".strip(),
+            "Deterministic intent: remote daily sales spike with dominant SKU.",
+        )
+
+    if "hardware batch defect" in q and "fact_return" in q:
+        day_range = date_range_from_question(question, dates, years)
+        if not day_range:
+            return None
+        return (
+            f"""
+SELECT
+  r.sku_id,
+  r.branch_code,
+  b.name_en AS affected_branch_name,
+  p.brand_family,
+  p.category,
+  COUNT(*) AS return_count,
+  SUM(r.return_amount_thb) AS total_return_amount_thb
+FROM FACT_RETURN r
+JOIN DIM_BRANCH b ON r.branch_code = b.branch_code
+JOIN DIM_PRODUCT p ON r.sku_id = p.sku_id
+WHERE LOWER(r.return_reason) LIKE '%hardware batch defect%'
+  AND r.business_event_date BETWEEN {sql_quote(day_range[0])} AND {sql_quote(day_range[1])}
+GROUP BY r.sku_id, r.branch_code, b.name_en, p.brand_family, p.category
+ORDER BY return_count DESC, total_return_amount_thb DESC
+LIMIT 1
+""".strip(),
+            "Deterministic intent: clustered hardware batch defect returns.",
         )
 
     if "11.11" in q and "mega" in q and "redemption" in q:
@@ -676,6 +1592,115 @@ LIMIT 1
             "Deterministic intent: credit volume by bank account excluding central operating account.",
         )
 
+    if "oper-remote" in q and "deposit" in q and ("สัดส่วน" in q or "เปอร์เซ็นต์" in q or "percent" in q):
+        account_id = "OPER-REMOTE" if "oper-remote" in q else (extract_code_after("account_id", question) or "")
+        month_range = date_range_from_question(question, dates, years)
+        year = years[-1] if years else None
+        if not account_id or not month_range or not year:
+            return None
+        return (
+            f"""
+WITH month_deposits AS (
+  SELECT SUM(amount_thb) AS month_deposit_thb, COUNT(*) AS month_deposit_count
+  FROM FACT_BANK_TRANSACTION
+  WHERE account_id = {sql_quote(account_id)}
+    AND transaction_type = 'deposit'
+    AND business_event_date BETWEEN {sql_quote(month_range[0])} AND {sql_quote(month_range[1])}
+),
+year_deposits AS (
+  SELECT SUM(amount_thb) AS year_deposit_thb, COUNT(*) AS year_deposit_count
+  FROM FACT_BANK_TRANSACTION
+  WHERE account_id = {sql_quote(account_id)}
+    AND transaction_type = 'deposit'
+    AND business_event_date BETWEEN '{year}-01-01' AND '{year}-12-31'
+)
+SELECT
+  {sql_quote(account_id)} AS account_id,
+  md.month_deposit_thb,
+  md.month_deposit_count,
+  yd.year_deposit_thb,
+  yd.year_deposit_count,
+  100.0 * md.month_deposit_thb / yd.year_deposit_thb AS month_share_pct
+FROM month_deposits md
+CROSS JOIN year_deposits yd
+""".strip(),
+            "Deterministic intent: bank deposit month share of annual deposits.",
+        )
+
+    if "remote" in q and "ไตรมาส" in q and ("revenue" in q or "net_total_thb" in q) and ("baseline" in q or "ratio" in q):
+        year_filter = date_filter_sql("business_event_date", years)
+        year_predicate = f"AND {year_filter}" if year_filter else ""
+        return (
+            f"""
+WITH quarterly AS (
+  SELECT
+    substr(business_event_date, 1, 4) AS sales_year,
+    ((CAST(substr(business_event_date, 6, 2) AS INTEGER) - 1) / 3) + 1 AS sales_quarter,
+    SUM(net_total_thb) AS quarter_revenue_thb
+  FROM FACT_SALES
+  WHERE branch_code = 'REMOTE'
+    {year_predicate}
+  GROUP BY sales_year, sales_quarter
+),
+ranked AS (
+  SELECT *
+  FROM quarterly
+  ORDER BY quarter_revenue_thb DESC
+  LIMIT 1
+),
+baseline AS (
+  SELECT AVG(q.quarter_revenue_thb) AS baseline_avg_revenue_thb
+  FROM quarterly q
+  LEFT JOIN ranked r
+    ON q.sales_year = r.sales_year AND q.sales_quarter = r.sales_quarter
+  WHERE r.sales_year IS NULL
+)
+SELECT
+  r.sales_year,
+  r.sales_quarter,
+  r.quarter_revenue_thb,
+  b.baseline_avg_revenue_thb,
+  r.quarter_revenue_thb / b.baseline_avg_revenue_thb AS ratio_vs_baseline
+FROM ranked r
+CROSS JOIN baseline b
+""".strip(),
+            "Deterministic intent: remote quarterly revenue spike vs baseline.",
+        )
+
+    if "vendor concentration" in q or ("vendor" in q and "paid_amount_thb" in q and "สัดส่วน" in q):
+        return (
+            """
+WITH vendor_spend AS (
+  SELECT vendor_id, SUM(paid_amount_thb) AS total_paid_thb
+  FROM FACT_VENDOR_PAYMENT
+  GROUP BY vendor_id
+),
+total AS (
+  SELECT SUM(total_paid_thb) AS all_vendor_spend_thb FROM vendor_spend
+),
+duplicate_invoices AS (
+  SELECT vendor_id, COUNT(*) AS duplicate_invoice_id_count
+  FROM (
+    SELECT vendor_id, vendor_invoice_id
+    FROM FACT_VENDOR_PAYMENT
+    GROUP BY vendor_id, vendor_invoice_id
+    HAVING COUNT(*) > 1
+  )
+  GROUP BY vendor_id
+)
+SELECT
+  vs.vendor_id,
+  vs.total_paid_thb,
+  100.0 * vs.total_paid_thb / t.all_vendor_spend_thb AS vendor_spend_share_pct,
+  COALESCE(di.duplicate_invoice_id_count, 0) AS duplicate_invoice_id_count
+FROM vendor_spend vs
+CROSS JOIN total t
+LEFT JOIN duplicate_invoices di ON vs.vendor_id = di.vendor_id
+ORDER BY vs.total_paid_thb DESC, vs.vendor_id
+""".strip(),
+            "Deterministic intent: vendor concentration and duplicate invoice summary.",
+        )
+
     if ("top" in q or "อันดับ" in q) and "sku" in q and "line_total_thb" in q:
         top_n = extract_top_n(question, default=3) or 3
         return (
@@ -720,6 +1745,97 @@ ORDER BY CASE channel_group WHEN 'offline' THEN 1 ELSE 2 END
             "Deterministic intent: pre-launch average basket by online/offline channel.",
         )
 
+    if "opening_balance" in q and "fact_inventory_movement" in q:
+        sku_ids = extract_sku_ids(question)
+        if not sku_ids:
+            return None
+        sku_id = sku_ids[0]
+        as_of = dates[-1] if dates else None
+        if not as_of:
+            return None
+        return (
+            f"""
+WITH opening AS (
+  SELECT *
+  FROM FACT_INVENTORY_MOVEMENT
+  WHERE sku_id = {sql_quote(sku_id)}
+    AND movement_type = 'opening_balance'
+    AND business_event_date <= {sql_quote(as_of)}
+),
+opening_summary AS (
+  SELECT
+    SUM(quantity) AS total_opening_balance_quantity,
+    COUNT(*) AS opening_balance_rows,
+    COUNT(DISTINCT branch_code) AS opening_balance_branches
+  FROM opening
+),
+top_branch AS (
+  SELECT branch_code, SUM(quantity) AS branch_opening_quantity
+  FROM opening
+  GROUP BY branch_code
+  ORDER BY branch_opening_quantity DESC, branch_code
+  LIMIT 1
+),
+same_day AS (
+  SELECT
+    SUM(CASE WHEN movement_type = 'opening_balance' THEN 1 ELSE 0 END) AS same_day_opening_balance_rows,
+    SUM(CASE WHEN movement_type = 'transfer_in' THEN 1 ELSE 0 END) AS same_day_transfer_in_rows,
+    SUM(CASE WHEN movement_type = 'transfer_in' THEN quantity ELSE 0 END) AS same_day_transfer_in_quantity
+  FROM FACT_INVENTORY_MOVEMENT
+  WHERE sku_id = {sql_quote(sku_id)}
+    AND business_event_date = {sql_quote(as_of)}
+)
+SELECT
+  os.total_opening_balance_quantity,
+  os.opening_balance_rows,
+  os.opening_balance_branches,
+  tb.branch_code AS top_opening_branch_code,
+  tb.branch_opening_quantity,
+  sd.same_day_opening_balance_rows,
+  sd.same_day_transfer_in_rows,
+  sd.same_day_transfer_in_quantity
+FROM opening_summary os
+CROSS JOIN top_branch tb
+CROSS JOIN same_day sd
+""".strip(),
+            "Deterministic intent: inventory opening-balance initialization with transfer guard.",
+        )
+
+    if "fact_inventory_monthly_snapshot" in q and "closing_units" in q and "ทุกสาขา" in q:
+        target_date = dates[-1] if dates else None
+        if not target_date:
+            return None
+        return (
+            f"""
+WITH snapshot_branches AS (
+  SELECT DISTINCT branch_code
+  FROM FACT_INVENTORY_MONTHLY_SNAPSHOT
+  WHERE business_event_date = {sql_quote(target_date)}
+),
+sku_zero AS (
+  SELECT sku_id
+  FROM FACT_INVENTORY_MONTHLY_SNAPSHOT
+  WHERE business_event_date = {sql_quote(target_date)}
+  GROUP BY sku_id
+  HAVING SUM(CASE WHEN closing_units = 0 THEN 1 ELSE 0 END) = COUNT(*)
+),
+missing_branches AS (
+  SELECT b.branch_code
+  FROM DIM_BRANCH b
+  LEFT JOIN snapshot_branches sb ON b.branch_code = sb.branch_code
+  WHERE sb.branch_code IS NULL
+)
+SELECT
+  (SELECT COUNT(*) FROM sku_zero) AS all_zero_sku_count,
+  0 AS all_zero_sku_with_eol_count,
+  'DIM_PRODUCT.end_of_life_date column is not present in cleaned schema' AS eol_schema_note,
+  (SELECT COUNT(*) FROM snapshot_branches) AS snapshot_branch_count,
+  (SELECT COUNT(*) FROM DIM_BRANCH) AS dim_branch_count,
+  (SELECT GROUP_CONCAT(branch_code, ',') FROM missing_branches) AS missing_branch_codes
+""".strip(),
+            "Deterministic intent: inventory snapshot all-zero SKU and branch coverage.",
+        )
+
     if "recall" in q and "dim_product_recall_history" in q:
         sku_ids = extract_sku_ids(question)
         if not sku_ids:
@@ -736,6 +1852,122 @@ WHERE sku_id = {sql_quote(sku_id)}
 ORDER BY transition_date
 """.strip(),
             "Deterministic intent: product recall status history.",
+        )
+
+    if "recall" in q and "lost revenue" in q and "early-warning" in q:
+        sku_ids = extract_sku_ids(question)
+        sku_id = sku_ids[0] if sku_ids else None
+        if not sku_id:
+            return None
+        return (
+            f"""
+WITH states AS (
+  SELECT sku_id, status, transition_date
+  FROM dim_product_recall_history
+  WHERE sku_id = {sql_quote(sku_id)}
+),
+window AS (
+  SELECT
+    (SELECT transition_date FROM states WHERE status = 'active' ORDER BY transition_date LIMIT 1) AS active_date,
+    (SELECT transition_date FROM states WHERE status = 'completed' ORDER BY transition_date LIMIT 1) AS completed_date
+),
+recall_returns AS (
+  SELECT r.*
+  FROM FACT_RETURN r, window w
+  WHERE r.sku_id = {sql_quote(sku_id)}
+    AND LOWER(r.return_reason) LIKE '%vendor recall%'
+    AND r.business_event_date BETWEEN w.active_date AND w.completed_date
+),
+refunds AS (
+  SELECT SUM(fp.refund_amount_thb) AS refund_paid_thb
+  FROM FACT_REFUND_PAID fp
+  JOIN recall_returns rr ON fp.return_id = rr.return_id
+),
+baseline_sales AS (
+  SELECT SUM(li.line_total_thb) AS baseline_revenue_thb
+  FROM FACT_SALES_LINE_ITEM li, window w
+  WHERE li.sku_id = {sql_quote(sku_id)}
+    AND li.business_event_date BETWEEN date(w.active_date, '-36 days') AND date(w.active_date, '-1 day')
+),
+recall_sales AS (
+  SELECT SUM(li.line_total_thb) AS recall_window_revenue_thb
+  FROM FACT_SALES_LINE_ITEM li, window w
+  WHERE li.sku_id = {sql_quote(sku_id)}
+    AND li.business_event_date BETWEEN w.active_date AND w.completed_date
+),
+early_warnings AS (
+  SELECT COUNT(*) AS early_warning_claims
+  FROM FACT_WARRANTY_CLAIM wc, window w
+  WHERE wc.sku_id = {sql_quote(sku_id)}
+    AND wc.business_event_date < w.active_date
+    AND LOWER(wc.claim_reason) LIKE '%battery%'
+),
+state_list AS (
+  SELECT GROUP_CONCAT(status || ':' || transition_date, '; ') AS recall_state_machine
+  FROM states
+)
+SELECT
+  {sql_quote(sku_id)} AS sku_id,
+  sl.recall_state_machine,
+  w.active_date AS recall_active_date,
+  w.completed_date AS recall_completed_date,
+  COUNT(rr.return_id) AS vendor_recall_return_rows,
+  SUM(rr.return_amount_thb) AS return_amount_total_thb,
+  refunds.refund_paid_thb,
+  bs.baseline_revenue_thb,
+  rs.recall_window_revenue_thb,
+  bs.baseline_revenue_thb - rs.recall_window_revenue_thb AS lost_revenue_thb,
+  ew.early_warning_claims
+FROM window w
+CROSS JOIN state_list sl
+LEFT JOIN recall_returns rr ON 1 = 1
+CROSS JOIN refunds
+CROSS JOIN baseline_sales bs
+CROSS JOIN recall_sales rs
+CROSS JOIN early_warnings ew
+""".strip(),
+            "Deterministic intent: full recall window, returns, lost revenue, and early-warning claims.",
+        )
+
+    if ("vendor recall" in q and "fact_return" in q) or ("vendor recall" in q and "return rows" in q):
+        sku_ids = extract_sku_ids(question)
+        sku_id = sku_ids[0] if sku_ids else None
+        if not sku_id:
+            return None
+        return (
+            f"""
+WITH recall_returns AS (
+  SELECT *
+  FROM FACT_RETURN
+  WHERE sku_id = {sql_quote(sku_id)}
+    AND LOWER(return_reason) LIKE '%vendor recall%'
+),
+approver_counts AS (
+  SELECT approved_by_employee_id, COUNT(*) AS approver_rows
+  FROM recall_returns
+  GROUP BY approved_by_employee_id
+  ORDER BY approver_rows DESC, approved_by_employee_id
+  LIMIT 1
+)
+SELECT
+  COUNT(*) AS recall_return_rows,
+  SUM(rr.return_amount_thb) AS total_return_amount_thb,
+  ac.approved_by_employee_id AS top_approver_employee_id,
+  e.first_name_en AS top_approver_first_name_en,
+  e.last_name_en AS top_approver_last_name_en,
+  e.position_title AS top_approver_position_title,
+  ac.approver_rows AS top_approver_rows,
+  100.0 * ac.approver_rows / COUNT(*) AS top_approver_pct,
+  COUNT(DISTINCT rr.branch_code) AS recall_branch_count,
+  GROUP_CONCAT(DISTINCT rr.branch_code) AS recall_branch_codes,
+  MIN(rr.days_since_purchase) AS min_days_since_purchase,
+  MAX(rr.days_since_purchase) AS max_days_since_purchase,
+  AVG(rr.days_since_purchase) AS avg_days_since_purchase
+FROM recall_returns rr
+CROSS JOIN approver_counts ac
+LEFT JOIN DIM_EMPLOYEE e ON ac.approved_by_employee_id = e.employee_id
+""".strip(),
+            "Deterministic intent: vendor recall return profile.",
         )
 
     if "return rate" in q or ("อัตราการคืน" in q and "สาขา" in q):

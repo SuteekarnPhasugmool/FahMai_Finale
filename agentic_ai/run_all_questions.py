@@ -81,12 +81,17 @@ def generate_rows(
     api_key: str,
     model: str,
     fallback_to_rules: bool,
+    rules_only: bool,
     limit: int,
     query_timeout: int,
 ) -> tuple[str, list[sqlite3.Row]]:
     deterministic = deterministic_sql_for_question(question)
     if deterministic:
         sql, _ = deterministic
+        return sql, execute_sql(conn, sql, query_timeout=query_timeout)
+
+    if rules_only:
+        _, sql = plan_query(question, conn, limit)
         return sql, execute_sql(conn, sql, query_timeout=query_timeout)
 
     try:
@@ -140,11 +145,12 @@ def main() -> int:
     parser.add_argument("--query-timeout", type=int, default=30)
     parser.add_argument("--max-questions", type=int, help="Optional cap for smoke testing.")
     parser.add_argument("--fallback-to-rules", action="store_true")
+    parser.add_argument("--rules-only", action="store_true", help="Skip LLM calls and use deterministic templates plus local rule planner.")
     parser.add_argument("--rebuild-db", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
 
-    if not args.llm_api_key:
+    if not args.llm_api_key and not args.rules_only:
         parser.error("Please set THAILLM_API_KEY or pass --llm-api-key.")
 
     if args.overwrite and args.output.exists():
@@ -177,6 +183,7 @@ def main() -> int:
                         api_key=args.llm_api_key,
                         model=args.llm_model,
                         fallback_to_rules=args.fallback_to_rules,
+                        rules_only=args.rules_only,
                         limit=args.limit,
                         query_timeout=args.query_timeout,
                     )
