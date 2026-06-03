@@ -1,0 +1,264 @@
+﻿id,question,answer
+L3-Q-EASY-001,MSRP ของสินค้ารหัส NT-LT-001 (NovaTech laptop) เป็นเท่าไหร่ครับ,"| id_column | sku_id | brand_family | category | subcategory | msrp_thb |
+| --- | --- | --- | --- | --- | --- |
+| sku_id | NT-LT-001 | NovaTech | laptop | flagship | 42,900.00 |"
+L3-Q-EASY-002,ใน FACT_VENDOR_PAYMENT มีรายการ vendor payment กี่รายการที่เดือนของ posting_date ไม่ตรงกับเดือนของ business_event_date ครับ (นับเป็นจำนวนแถว โดยถือว่าต่างกันก็ต่อเมื่อ ปี-เดือน ของสองคอลัมน์นี้ไม่ตรงกัน),"| source_table | row_type | cross_month_posting_count | total_vendor_payment_rows | max_lag_days |
+| --- | --- | --- | --- | --- |
+| FACT_VENDOR_PAYMENT | vendor_payment | 767 | 809 | 28 |"
+L3-Q-EASY-003,ในตาราง FACT_SHIPPING รายการขนส่งทั้งหมดของ FahMai ถูกจัดการโดย vendor รายใดบ้าง ขอชื่อ vendor (ชื่อบริษัทขนส่ง) และส่วนแบ่งของ vendor นั้นเทียบกับจำนวนรายการขนส่งทั้งหมด (เป็นเปอร์เซ็นต์) ครับ,"| source_table | entity_type | vendor_id | name_en | total_shipments | vendor_share_pct |
+| --- | --- | --- | --- | --- | --- |
+| FACT_SHIPPING | vendor | V-006 | VeloShip | 23182 | 100.00 |"
+L3-Q-EASY-004,ในตาราง FACT_CS_INTERACTION พนักงาน CS คนไหน (employee_id) ที่มีจำนวน interaction บันทึกไว้มากที่สุดครับ และมีทั้งหมดกี่ครั้ง,"| employee_id | row_count |
+| --- | --- |
+| EMP-L3-00010 | 730 |
+| EMP-L3-00019 | 726 |
+| EMP-L3-00025 | 725 |
+| EMP-L3-00031 | 722 |
+| EMP-L3-00055 | 721 |
+| EMP-L3-00049 | 721 |
+| EMP-L3-00043 | 721 |
+| EMP-L3-00037 | 721 |
+| EMP-L3-00061 | 720 |
+| EMP-L3-00067 | 713 |
+| EMP-L3-00073 | 707 |
+| EMP-L3-00079 | 696 |
+| EMP-L3-00085 | 683 |
+| EMP-L3-00091 | 660 |
+| EMP-L3-00097 | 636 |
+| EMP-L3-00103 | 603 |
+| EMP-L3-00109 | 555 |
+| EMP-L3-00115 | 491 |
+| EMP-L3-00121 | 432 |
+| EMP-L3-00127 | 374 |
+| EMP-L3-00133 | 302 |
+| EMP-L3-00139 | 256 |
+| EMP-L3-00145 | 203 |
+| EMP-L3-00151 | 157 |
+| EMP-L3-00157 | 124 |
+| EMP-L3-00163 | 90 |
+| EMP-L3-00169 | 63 |
+| EMP-L3-00175 | 48 |
+| EMP-L3-00181 | 29 |
+| EMP-L3-00187 | 17 |
+| EMP-L3-00193 | 6 |
+| EMP-L3-00199 | 4 |
+| EMP-L3-00205 | 3 |
+| EMP-L3-00211 | 2 |
+| EMP-L3-00253 | 1 |
+| EMP-L3-00247 | 1 |
+| EMP-L3-00241 | 1 |
+| EMP-L3-00235 | 1 |
+| EMP-L3-00229 | 1 |
+| EMP-L3-00223 | 1 |
+| EMP-L3-00217 | 1 |"
+L3-Q-EASY-005,FahMai มี vendor ที่เป็น partner brand (พาร์ทเนอร์แบรนด์สินค้า) ทั้งหมดกี่ราย และ vendor_id ของแต่ละรายคืออะไรบ้างครับ,"| source_table | entity_type | partner_brand_vendor_count | vendor_id | name_en |
+| --- | --- | --- | --- | --- |
+| DIM_VENDOR | vendor | 2 | V-001 | NovaTech |
+| DIM_VENDOR | vendor | 2 | V-002 | NovaTech Service |"
+L3-Q-EASY-006,ในปี 2024-2025 สาขาไหนของฟ้าใหม่ที่มีจำนวน transaction การขายมากที่สุด และยอดรายได้รวม (net_total_thb) ของสาขานั้นเป็นเท่าไหร่ครับ,"| year_start_date | year_end_date | branch_code | sales_branch_name | total_transactions | total_net_revenue_thb |
+| --- | --- | --- | --- | --- | --- |
+| 2024-01-01 | 2025-12-31 | BKK-SIAM | FahMai Siam | 18084 | 1,039,386,349.00 |"
+L3-Q-EASY-007,ในฐานข้อมูลลูกค้าของฟ้าใหม่ มีลูกค้าทั้งหมดกี่รายในแต่ละ loyalty_tier ครับ ขอจำนวนแยกตามแต่ละ tier ที่ปรากฏใน DIM_CUSTOMER,"| loyalty_tier | customer_count | total_customer_count |
+| --- | --- | --- |
+| none | 7800 | 30000 |
+| silver | 7200 | 30000 |
+| gold | 7500 | 30000 |
+| platinum | 7500 | 30000 |"
+L3-Q-EASY-008,FahMai มีสาขา/สถานที่ทั้งหมดกี่แห่งในไดเรกทอรี DIM_BRANCH ครับ (นับทุกประเภท ทั้งสำนักงานใหญ่ สาขาหน้าร้าน และช่องทาง remote),"| source_table | entity_type | branch_location_count |
+| --- | --- | --- |
+| DIM_BRANCH | branch | 11 |"
+L3-Q-EASY-009,ใครเป็น CEO ของ FahMai ณ วันที่ 1 มิถุนายน 2568 (หลังการเปลี่ยนผ่านผู้บริหารเมื่อ 15 มกราคม 2568) ครับ ขอชื่อ-นามสกุลตามที่ระบุไว้ใน DIM_EMPLOYEE,"| as_of_date | handover_date | employee_id | first_name_en | last_name_en | position_title | canon_role_label |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2025-06-01 | 2025-01-15 | EMP-L3-00013 | Naret | Vision | CEO | Incoming CEO |"
+L3-Q-EASY-010,ระยะเวลารับประกันของสินค้ารหัส AW-MN-001 (ArcWave monitor flagship) ตามที่ระบุในไดเรกทอรี DIM_PRODUCT คือกี่เดือนครับ,"| id_column | sku_id | brand_family | category | subcategory | warranty_months |
+| --- | --- | --- | --- | --- | --- |
+| sku_id | AW-MN-001 | ArcWave | monitor | flagship | 24 |"
+L3-Q-EASY-011,นโยบาย refund signing authority ladder ฉบับล่าสุด (current version) ของฟ้าใหม่ มีผลบังคับใช้ตั้งแต่วันที่เท่าไหร่ครับ,"| policy_version_id | policy_class | policy_variable | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 6 | signing_authority | refund_signing_authority_ladder | 2025-02-15 |  |"
+L3-Q-EASY-012,MSRP ของสินค้ารหัส SF-Galaxy-Pro-2568 (SaiFah smartphone flagship) เป็นเท่าไหร่ครับ,"| id_column | sku_id | brand_family | category | subcategory | msrp_thb |
+| --- | --- | --- | --- | --- | --- |
+| sku_id | SF-Galaxy-Pro-2568 | SaiFah | smartphone | flagship | 38,900.00 |"
+L3-Q-EASY-013,FahMai มี vendor (คู่ค้า/ซัพพลายเออร์) ทั้งหมดกี่รายในไดเรกทอรี DIM_VENDOR ครับ (นับทุกรายในตาราง รวมทั้งที่ยังใช้งานอยู่และที่ยุติสัญญาไปแล้ว),"| source_table | entity_type | vendor_count |
+| --- | --- | --- |
+| DIM_VENDOR | vendor | 6 |"
+L3-Q-EASY-014,สาขาไหนของฟ้าใหม่ที่มีจำนวนรายการขาย (transactions) ตลอดประวัติศาสตร์มากที่สุดครับ และมีกี่รายการ,"| branch_code | sales_branch_name | total_transactions |
+| --- | --- | --- |
+| BKK-SIAM | FahMai Siam | 18084 |"
+L3-Q-EASY-015,FahMai มีพนักงานทั้งหมดกี่คนในไดเรกทอรี DIM_EMPLOYEE ครับ (นับทุกแถวในตาราง รวมทุกสายงาน ทุกระดับ และทุกสาขา),"| employee_id | row_count |
+| --- | --- |
+| EMP-L3-00600 | 24 |
+| EMP-L3-00599 | 24 |
+| EMP-L3-00598 | 24 |
+| EMP-L3-00597 | 24 |
+| EMP-L3-00596 | 24 |
+| EMP-L3-00595 | 24 |
+| EMP-L3-00594 | 24 |
+| EMP-L3-00593 | 24 |
+| EMP-L3-00592 | 24 |
+| EMP-L3-00591 | 24 |
+| EMP-L3-00590 | 24 |
+| EMP-L3-00589 | 24 |
+| EMP-L3-00588 | 24 |
+| EMP-L3-00587 | 24 |
+| EMP-L3-00586 | 24 |
+| EMP-L3-00585 | 24 |
+| EMP-L3-00584 | 24 |
+| EMP-L3-00583 | 24 |
+| EMP-L3-00582 | 24 |
+| EMP-L3-00581 | 24 |
+| EMP-L3-00580 | 24 |
+| EMP-L3-00579 | 24 |
+| EMP-L3-00578 | 24 |
+| EMP-L3-00577 | 24 |
+| EMP-L3-00576 | 24 |
+| EMP-L3-00575 | 24 |
+| EMP-L3-00574 | 24 |
+| EMP-L3-00573 | 24 |
+| EMP-L3-00572 | 24 |
+| EMP-L3-00571 | 24 |
+| EMP-L3-00570 | 24 |
+| EMP-L3-00569 | 24 |
+| EMP-L3-00568 | 24 |
+| EMP-L3-00567 | 24 |
+| EMP-L3-00566 | 24 |
+| EMP-L3-00565 | 24 |
+| EMP-L3-00564 | 24 |
+| EMP-L3-00563 | 24 |
+| EMP-L3-00562 | 24 |
+| EMP-L3-00561 | 24 |
+| EMP-L3-00560 | 24 |
+| EMP-L3-00559 | 24 |
+| EMP-L3-00558 | 24 |
+| EMP-L3-00557 | 24 |
+| EMP-L3-00556 | 24 |
+| EMP-L3-00555 | 24 |
+| EMP-L3-00554 | 24 |
+| EMP-L3-00553 | 24 |
+| EMP-L3-00552 | 24 |
+| EMP-L3-00551 | 24 |"
+L3-Q-EASY-016,ในวันที่ 15 ธันวาคม 2024 ลูกค้าสามารถคืนสินค้าได้ภายในกี่วันตามนโยบายของฟ้าใหม่ที่มีผลบังคับใช้ ณ วันนั้นครับ,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 1 | return_window_days | 14.00 | 2024-01-01 | 2025-03-01 |"
+L3-Q-EASY-017,ฟ้าใหม่มีลูกค้าประเภท B2B ทั้งหมดกี่รายใน DIM_CUSTOMER ครับ,"| source_table | filter_column | customer_type | b2b_customer_count |
+| --- | --- | --- | --- |
+| DIM_CUSTOMER | customer_type | B2B | 300 |"
+L3-Q-EASY-018,อัตราการสะสม FahMai Points ต่อบาท (point_earning_rate_per_thb) ของฟ้าใหม่ที่มีผลบังคับใช้ก่อนวันที่ 1 เมษายน 2025 มีค่าเท่าไหร่ครับ,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 3 | point_earning_rate_per_thb | 0.0100 | 2024-01-01 | 2025-04-01 |"
+L3-Q-EASY-019,ตาม DIM_POLICY_VERSION อัตราการสะสม FahMai Points ต่อบาท (policy_variable=point_earning_rate_per_thb) ของฟ้าใหม่ที่มีผลบังคับใช้ตั้งแต่วันที่ 1 เมษายน 2025 เป็นต้นไป มีค่าเท่าไหร่ครับ,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 4 | point_earning_rate_per_thb | 0.0125 | 2025-04-01 |  |"
+L3-Q-EASY-020,ใน FACT_SHIPPING ของ FahMai ทั้งหมด ขอทราบว่า vendor ขนส่งรายใดเป็นผู้รับผิดชอบรายการขนส่งให้ FahMai บ้าง และมีจำนวนรายการขนส่ง (ตามจำนวนแถวใน FACT_SHIPPING) ของ vendor รายนั้นทั้งหมดกี่รายการครับ,"| source_table | entity_type | vendor_id | name_en | total_shipments | vendor_share_pct |
+| --- | --- | --- | --- | --- | --- |
+| FACT_SHIPPING | vendor | V-006 | VeloShip | 23182 | 100.00 |"
+L3-Q-EASY-021,ตามฐานข้อมูลลูกค้าของฟ้าใหม่ใน DIM_CUSTOMER ขณะนี้มีลูกค้าที่อยู่ใน loyalty_tier ระดับ gold ทั้งหมดกี่รายครับ,"| loyalty_tier | customer_count | total_customer_count |
+| --- | --- | --- |
+| none | 7800 | 30000 |
+| silver | 7200 | 30000 |
+| gold | 7500 | 30000 |
+| platinum | 7500 | 30000 |"
+L3-Q-EASY-022,ในโปรแกรมสะสมแต้มของ FahMai (อ้างอิงคอลัมน์ loyalty_tier ใน DIM_CUSTOMER) ระดับสมาชิก (tier) ที่สูงที่สุดที่มีการกำหนดให้กับลูกค้าจริงในฐานข้อมูล คือระดับใดครับ,"| loyalty_tier | customer_count |
+| --- | --- |
+| platinum | 7500 |"
+L3-Q-EASY-023,ฟ้าใหม่มีบัญชีธนาคาร (bank account) ที่ใช้ดำเนินงานทั้งหมดกี่บัญชีตาม DIM_BANK_ACCOUNT ครับ,"| source_table | entity_type | bank_account_count |
+| --- | --- | --- |
+| DIM_BANK_ACCOUNT | bank_account | 14 |"
+L3-Q-EASY-024,ตาม DIM_POLICY_VERSION ของฟ้าใหม่ refund threshold (policy_variable=refund_threshold_thb) ที่มีผลบังคับใช้ ณ วันที่ 1 เมษายน 2025 (หลังการปรับนโยบายล่าสุด) มีค่าเท่าไหร่บาทครับ,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 12 | refund_threshold_thb | 5,000.00 | 2025-03-15 |  |"
+L3-Q-EASY-025,ฟ้าใหม่มีแคมเปญโปรโมชัน (promotional campaigns) ที่แตกต่างกันทั้งหมดกี่แคมเปญในไดเรกทอรี DIM_PROMO_CAMPAIGN ครับ (นับทุกแถวในตาราง ทุกปี ทุกประเภท),"| event_year | campaign_description_en | row_count |
+| --- | --- | --- |
+| 2025 | 11.11 Mega Sale 2568 | 442 |
+| 2025 | 12.12 Mega Sale 2568 | 402 |
+| 2024 | 11.11 Mega Sale 2567 | 267 |
+| 2024 | 12.12 Mega Sale 2567 | 262 |
+| 2024 | Year-end Clearance 2567 | 87 |
+| 2025 | SF Galaxy Pro 2568 launch promo | 86 |
+| 2025 | Year-end Clearance 2568 | 80 |"
+L3-Q-MED-001,ขอข้อมูล SKU ที่ขายดีที่สุดของฟ้าใหม่ตามจำนวนชิ้นที่ขายได้ (units sold) แยกเป็น 2 ปี ครับ ปี 2024 (พ.ศ. 2567) คือ SKU ไหน และปี 2025 (พ.ศ. 2568) คือ SKU ไหน? ตอบเป็น sku_id ของแต่ละปีให้ครบทั้งสองค่า,"| sales_year | sku_id | total_units_sold |
+| --- | --- | --- |
+| 2024 | SKU-MASS-063 | 1508 |
+| 2025 | SF-Galaxy-Pro-2568 | 4370 |"
+L3-Q-MED-002,"ใน FACT_BANK_TRANSACTION ของฟ้าใหม่ ขอ single largest deposit แบบรายแถวเดียว (single transaction, ฝั่ง credit) ตลอดช่วงข้อมูลที่มี ขอครบ 4 อย่างคือ (1) จำนวนเงิน amount_thb (บาท), (2) วันที่ business_event_date, (3) account_id ของบัญชีที่รับเงิน, และ (4) source event ของรายการนี้ (เกี่ยวกับสินค้าตัวไหน / promo campaign อะไร / event ของบริษัทคืออะไร) ครับ","| amount_thb | business_event_date | account_id | bank_txn_id | transaction_type | related_entity_table | related_entity_id | description | batch_txn_count | batch_net_total_thb | primary_promo_campaign_id | primary_campaign_description_en | primary_sku_id | primary_sku_units | primary_sku_gross_revenue_thb |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 18,906,765.00 | 2025-07-15 | OPER-REMOTE | BT-202507-1041521243094 | deposit | FACT_SALES_DEPOSIT_BATCH | REMOTE\|2025-07-15\|credit_card | B2C credit_card batch deposit REMOTE 2025-07-15 | 509 | 18,906,765.00 | SF-LAUNCH-2568 | SF Galaxy Pro 2568 launch promo | SF-Galaxy-Pro-2568 | 501 | 19,488,900.00 |"
+L3-Q-MED-003,"อยากทราบครับว่าในกลุ่มลูกค้า B2C ของฟ้าใหม่ ทั้งหมดที่บันทึกใน FACT_LOYALTY_LEDGER ใครเป็นคนที่ ""earn"" คะแนนสะสมรวมตลอดเวลาได้มากที่สุด (รวมเฉพาะ event_type = earned ไม่นับ expired/redeemed/tier_change) ขอ customer_id, จำนวนคะแนนที่ earn รวมทั้งสิ้นเป็นตัวเลข และ loyalty_tier ปัจจุบันของลูกค้ารายนั้นตาม DIM_CUSTOMER ครับ","| id_column | customer_id | total_earned_points | current_loyalty_tier | customer_type |
+| --- | --- | --- | --- | --- |
+| customer_id | CUST-L3-023922 | 15738 | platinum | B2C |"
+L3-Q-MED-004,"ในปี 2025 (พ.ศ. 2568) ลูกค้า B2B รายไหนเป็นรายที่จ่ายเงินช้าที่สุด (วันที่ payment_received_date ล่าสุดของปี) รบกวนระบุ customer_id, จำนวนวันที่ชำระล่าช้ากว่า payment_due_date (ถ้าตรงเวลาให้ระบุ 0) และ payment_terms ที่ลูกค้ารายนั้นใช้อยู่ครับ","| customer_id | txn_id | payment_due_date | payment_received_date | days_late | payment_terms |
+| --- | --- | --- | --- | --- | --- |
+| CUST-L3-B2B-020600 | TXN-202510-18020600 | 2025-12-17 | 2025-12-31 | 14 | NET-60 |"
+L3-Q-MED-005,จากข้อมูล FACT_INVENTORY_MONTHLY_SNAPSHOT ของปี 2568 (ค.ศ. 2025) SKU ไหนของฟ้าใหม่มีจำนวนเหตุการณ์ stockout (closing_units = 0) ต่อสาขาต่อเดือน รวมแล้วมากที่สุดในรอบปี และกระทบสาขา (retail branch) กี่สาขาครับ,"| stockout_year | stockout_buddhist_year | id_column | sku_id | stockout_events | affected_retail_branches |
+| --- | --- | --- | --- | --- | --- |
+| 2025 | 2568 | sku_id | SKU-MASS-048 | 10 | 9 |"
+L3-Q-MED-006,"ขอเปรียบเทียบผลแคมเปญ 11.11 Mega Sale ปีต่อปีหน่อยครับ โดยใช้ข้อมูลจาก FACT_PROMO_REDEMPTION เทียบ MEGA-1111-2567 (11.11 ปี 2567) กับ MEGA-1111-2568 (11.11 ปี 2568) ขอตัวเลข 4 ค่า: (1) จำนวน redemption ทั้งหมดของแคมเปญปี 2567, (2) ยอดส่วนลดรวมเป็นบาทของแคมเปญปี 2567, (3) จำนวน redemption ทั้งหมดของแคมเปญปี 2568, และ (4) ยอดส่วนลดรวมเป็นบาทของแคมเปญปี 2568 ครับ","| campaign_id | redemption_count | discount_total_thb |
+| --- | --- | --- |
+| MEGA-1111-2567 | 267 | 1,308,360.00 |
+| MEGA-1111-2568 | 442 | 2,868,084.00 |"
+L3-Q-MED-007,ใน FACT_SALES ของ FahMai ตะกร้าซื้อขายฝั่ง B2C (is_b2b=False) ใบเดียวที่มียอด basket_total_thb สูงที่สุดตลอดทั้ง corpus เกิดขึ้นที่สาขาไหน รหัสรายการ (txn_id) คืออะไร และยอดรวมในตะกร้าเป็นกี่บาทครับ,"| txn_id | branch_code | sales_branch_name | business_event_date | basket_total_thb | is_b2b |
+| --- | --- | --- | --- | --- | --- |
+| TXN-202411-03026757 | BKK-EMSP | FahMai EM Sphere | 2024-11-03 | 320,300.00 | 0 |"
+L3-Q-MED-008,ในปี 2024 (พ.ศ. 2567) ลูกค้าประเภท B2B ของ FahMai 5 อันดับแรกที่มียอดซื้อสูงสุด (วัดจาก net_total_thb ใน FACT_SALES รวมทั้งปี โดยกรองเฉพาะ business_event_date ที่อยู่ในปี 2024) คือลูกค้า customer_id อะไรบ้างครับ ขอเรียงจากอันดับ 1 ลงไปอันดับ 5 พร้อมยอด net รวมของแต่ละราย (หน่วยเป็นบาท) ด้วยครับ,"| customer_id | net_total_thb |
+| --- | --- |
+| CUST-L3-B2B-002600 | 7,548,210.00 |
+| CUST-L3-B2B-021100 | 7,405,700.00 |
+| CUST-L3-B2B-019600 | 6,817,740.00 |
+| CUST-L3-B2B-026300 | 6,774,900.00 |
+| CUST-L3-B2B-003500 | 6,758,870.00 |"
+L3-Q-MED-009,"ลูกค้าซื้อสินค้าและรับของในวันที่ 15 กุมภาพันธ์ 2025 (2025-02-15) ตามนโยบายของ FahMai ที่ ""มีผลบังคับใช้"" ในวันนั้น ลูกค้ามีสิทธิ์ขอคืนสินค้าได้ภายในกี่วันนับจากวันที่รับสินค้าครับ (return_window_days ใน DIM_POLICY_VERSION ขอบเขต global)","| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 1 | return_window_days | 14.00 | 2024-01-01 | 2025-03-01 |"
+L3-Q-MED-010,ในวันที่ 20 มีนาคม 2568 (2025-03-20) เพดานวงเงินคืนเงิน (refund threshold) ที่บริษัทฟ้าใหม่ใช้บังคับอยู่ในขณะนั้นเป็นเท่าไหร่ในหน่วยบาท และเป็น policy_version_id หมายเลขใดครับ,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 12 | refund_threshold_thb | 5,000.00 | 2025-03-15 |  |"
+L3-Q-MED-011,จากตาราง FACT_RETURN ในช่วงสัปดาห์สุดท้ายของปี 2025 (ตั้งแต่ 2025-12-25 ถึง 2025-12-31 รวมทั้งสองวัน อิงตามคอลัมน์ business_event_date) มีรายการคืนสินค้าทั้งหมดกี่รายการ และเมื่อจัดกลุ่มตาม return_reason แล้วแต่ละหมวดเหตุผลมีจำนวนเท่าไหร่ครับ กรุณาระบุทั้งจำนวนรวมและจำนวนแยกตามเหตุผล,"| window_start_date | window_end_date | total_returns | return_reason | count_per_reason |
+| --- | --- | --- | --- | --- |
+| 2025-12-25 | 2025-12-31 | 74 | customer_change_of_mind | 74 |"
+L3-Q-MED-012,ขอข้อมูลจาก FACT_BANK_TRANSACTION หน่อยครับ ถ้านับเฉพาะธุรกรรมขาเข้า (credit / amount_thb เป็นบวก) และไม่นับบัญชี central operating ของ KBank (account_id=KBANK-OPER) แล้ว บัญชีไหนมี credit volume รวมสูงที่สุดในช่วงปี 2024-2025 และยอดรวมเป็นเท่าไหร่ (THB)? ขอ account_id + ยอด THB ครับ,"| year_start_date | year_end_date | excluded_account_id | account_id | credit_volume_thb |
+| --- | --- | --- | --- | --- |
+| 2024-01-01 | 2025-12-31 | KBANK-OPER | OPER-BKK-SIAM | 579,680,857.00 |"
+L3-Q-MED-013,ขอ Top 3 SKU ของฟ้าใหม่ที่ทำยอดขายรวม (gross revenue เป็น THB) ตลอดระยะเวลาที่มีข้อมูลในระบบสูงที่สุด โดยคิดจาก line_total_thb ใน FACT_SALES_LINE_ITEM ครับ ตอบ sku_id ทั้งสามตัวเรียงจากมากไปน้อย พร้อมระบุ brand_family ของแต่ละ SKU จาก DIM_PRODUCT ด้วย,"| sku_id | brand_family | gross_revenue_thb |
+| --- | --- | --- |
+| DN-LT-010 | Dawn | 228,465,900.00 |
+| SF-Galaxy-Pro-2568 | SaiFah | 169,993,000.00 |
+| SKU-MASS-019 | FahMai | 159,538,600.00 |"
+L3-Q-MED-014,ในช่วง pre-launch baseline ก่อนเปิดตัวสินค้า SF-Galaxy-Pro (เปิดตัววันที่ 2025-07-15) basket size เฉลี่ยต่อ transaction (basket_total_thb) ของยอดขายที่หน้าร้านสาขา (สาขาทั้งหมดที่ไม่ใช่ REMOTE) เทียบกับยอดขายช่องทางออนไลน์ (สาขา REMOTE) เป็นเท่าไหร่ครับ กรุณาให้ค่าทั้งสองอย่าง (offline และ online) เป็นบาท,"| launch_date | branch_scope | channel_group | avg_basket_total_thb | transaction_count |
+| --- | --- | --- | --- | --- |
+| 2025-07-15 | NON_REMOTE_BRANCHES | offline | 58,040.03 | 79321 |
+| 2025-07-15 | REMOTE | online | 37,993.83 | 10049 |"
+L3-Q-MED-015,NovaTech Laptop รุ่น NT-LT-001 (Powercell X3) เคยถูก recall ใช่ไหมครับ อยากทราบว่าใน dim_product_recall_history ของ SKU นี้มีการเปลี่ยน status (transition) ทั้งหมดกี่ครั้ง สถานะอะไรบ้าง และเปลี่ยนเมื่อวันที่เท่าไหร่ในแต่ละครั้ง? ขอตอบให้ครบทั้งจำนวน transition + รายชื่อ status ตามลำดับเวลา + วันที่ของแต่ละ transition ด้วยครับ,"| status_record_count | status | transition_date |
+| --- | --- | --- |
+| 3 | normal | 2024-01-01 |
+| 3 | active | 2025-09-10 |
+| 3 | completed | 2025-10-15 |"
+L3-Q-MED-016,ในปี 2025 (2568) อัตราการคืนสินค้าต่อสาขา คำนวณจาก (จำนวน return / จำนวน sales transaction) สำหรับแต่ละสาขา ในช่วง business_event_date ปี 2025 สาขาใดมีอัตราการคืนสูงสุด และสาขาใดมีอัตราการคืนต่ำสุด ขอ branch_code ของทั้งสองสาขา พร้อมเปอร์เซ็นต์อัตราการคืนของแต่ละสาขาด้วยครับ,"| rate_position | branch_code | sales_transactions | return_events | return_rate_percent |
+| --- | --- | --- | --- | --- |
+| highest | HKT-FEST | 3970 | 271 | 6.83 |
+| lowest | REMOTE | 8150 | 316 | 3.88 |"
+L3-Q-MED-017,DN-LT-010 (Dawn flagship laptop) เป็น SKU ที่ทำรายได้สูงสุดของฟ้าใหม่ตลอดทั้งคลัง ขอตรวจรายการขายที่ใหญ่ที่สุดของรุ่นนี้ในระบบหน่อยครับ: ใน FACT_SALES_LINE_ITEM เมื่อ group by txn_id แล้ว transaction เดียวที่มียอดรวมเฉพาะ DN-LT-010 สูงที่สุดเป็นกี่บาท และในรายการนั้นขายไปกี่เครื่อง ขอเลขทั้งสองค่า (มูลค่า DN-LT-010 + จำนวนเครื่อง),"| sku_id | txn_id | sku_line_total_thb | sku_quantity |
+| --- | --- | --- | --- |
+| DN-LT-010 | TXN-202411-09020300 | 254,700.00 | 3 |
+| DN-LT-010 | TXN-202506-02002742 | 254,700.00 | 3 |
+| DN-LT-010 | TXN-202508-12023200 | 254,700.00 | 3 |
+| DN-LT-010 | TXN-202509-14028900 | 254,700.00 | 3 |"
+L3-Q-MED-018,ในปี 2025 (พ.ศ. 2568) ค่าธรรมเนียมธนาคารทั้งหมดของฟ้าใหม่ที่บันทึกใน FACT_BANK_TRANSACTION (transaction_type='fee') มีกี่รายการ และยอดรวม (ผลรวมของ amount_thb ของรายการเหล่านั้น) เป็นเท่าไหร่ THB ครับ ขอตัวเลข 2 ค่า: จำนวนรายการ + ยอดรวม THB,"| fee_year | transaction_type | total_count | total_amount_thb | absolute_fee_amount_thb |
+| --- | --- | --- | --- | --- |
+| 2025 | fee | 24 | -15,600.00 | 15,600.00 |"
+L3-Q-MED-019,ในปี 2025 (พ.ศ. 2568) FahMai ขายสินค้า (sku_id) ที่แตกต่างกันกี่ตัวในแต่ละเดือนครับ ขอจำนวน SKU ที่ปรากฏใน FACT_SALES_LINE_ITEM (นับ DISTINCT sku_id) แยกตามเดือนของ business_event_date เป็น tuple 12 ค่าตามลำดับเดือนมกราคมถึงธันวาคม,"| sales_year | counted_column | counted_entity | sales_month | distinct_sku_count | sku_id_added_in_year |
+| --- | --- | --- | --- | --- | --- |
+| 2025 | sku_id | SKU | 2025-01 | 109 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-02 | 109 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-03 | 109 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-04 | 109 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-05 | 109 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-06 | 109 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-07 | 110 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-08 | 110 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-09 | 110 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-10 | 110 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-11 | 110 | SF-Galaxy-Pro-2568 |
+| 2025 | sku_id | SKU | 2025-12 | 110 | SF-Galaxy-Pro-2568 |"
+L3-Q-MED-020,ในปี 2025 (พ.ศ. 2568) วันใดของสัปดาห์ที่มีจำนวนรายการคืนสินค้า (return events) จากลูกค้าประเภท B2C มากที่สุดของฟ้าใหม่ครับ ขอตอบ 2 ค่า: (ก) ชื่อวันของสัปดาห์ และ (ข) จำนวนรายการคืนของวันนั้น (นับ return_id จาก FACT_RETURN หลัง join กับ DIM_CUSTOMER เพื่อกรอง customer_type='B2C' และ filter business_event_date อยู่ในปี 2025; group by day-of-week ของ business_event_date),"| return_year | day_of_week | return_events |
+| --- | --- | --- |
+| 2025 | Thursday | 536 |"

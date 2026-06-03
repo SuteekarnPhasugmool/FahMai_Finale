@@ -1,0 +1,291 @@
+﻿id,level,status,note,ground_truth,predicted_table
+L3-Q-EASY-001,EASY,correct,"MSRP value matches 42,900.00","MSRP ของสินค้า NT-LT-001 คือ 42,900.00 บาท ตาม DIM_PRODUCT.","| msrp_thb |
+| --- |
+| 42,900.00 |"
+L3-Q-EASY-002,EASY,correct,Count matches 767,มีรายการ vendor payment ที่ปี-เดือนของ posting_date ไม่ตรงกับ business_event_date ทั้งหมด 767 แถว.,"| COUNT(*) |
+| --- |
+| 767 |"
+L3-Q-EASY-003,EASY,correct,"Vendor/share matches VeloShip 23,182 and 100.00%","รายการขนส่งทั้งหมดใน FACT_SHIPPING ถูกจัดการโดย VeloShip (V-006) จำนวน 23,182 รายการ คิดเป็น 100.00% ของทั้งหมด.","| name_en | total_shipments | percentage_of_total_shipments |
+| --- | --- | --- |
+| VeloShip | 23182 | 100.00 |"
+L3-Q-EASY-004,EASY,correct,Employee and count match,พนักงาน CS ที่มี interaction มากที่สุดคือ EMP-L3-00010 รวม 730 ครั้ง.,"| employee_id | interaction_count |
+| --- | --- |
+| EMP-L3-00010 | 730 |"
+L3-Q-EASY-005,EASY,correct,Partner vendor IDs match; count inferable from two rows,FahMai มี partner brand vendor 2 ราย คือ V-001 (NovaTech) และ V-002 (NovaTech Service).,"| vendor_id | name_th | name_en |
+| --- | --- | --- |
+| V-001 | NovaTech | NovaTech |
+| V-002 | NovaTech Service | NovaTech Service |"
+L3-Q-EASY-006,EASY,correct,Branch and net revenue match; transaction count not included in table,"ในช่วงปี 2024-2025 สาขาที่มี transaction การขายมากที่สุดคือ BKK-SIAM (FahMai Siam) จำนวน 18,084 transactions และ net_total_thb รวม 1,039,386,349.00 บาท.","| branch_code | total_net_revenue_thb |
+| --- | --- |
+| BKK-SIAM | 1,039,386,349.00 |"
+L3-Q-EASY-007,EASY,correct,Tier counts match,"จำนวนลูกค้าแยกตาม loyalty_tier คือ none 7,800 ราย, silver 7,200 ราย, gold 7,500 ราย, และ platinum 7,500 ราย.","| loyalty_tier | customer_count |
+| --- | --- |
+| gold | 7500 |
+| none | 7800 |
+| platinum | 7500 |
+| silver | 7200 |"
+L3-Q-EASY-008,EASY,correct,Count matches 11,DIM_BRANCH มีสาขา/สถานที่ทั้งหมด 11 แห่ง.,"| COUNT(*) |
+| --- |
+| 11 |"
+L3-Q-EASY-009,EASY,wrong,Predicted Vichai Leelawong; GT is Naret Vision,ณ วันที่ 1 มิถุนายน 2568 หลังการเปลี่ยนผ่านผู้บริหาร CEO คือ Naret Vision (EMP-L3-00013) ตาม DIM_EMPLOYEE.,"| first_name_en | last_name_en |
+| --- | --- |
+| Vichai | Leelawong |"
+L3-Q-EASY-010,EASY,correct,Warranty months match 24,สินค้า AW-MN-001 มีระยะเวลารับประกัน 24 เดือน.,"| warranty_months |
+| --- |
+| 24 |"
+L3-Q-EASY-011,EASY,correct,Effective date matches 2025-02-15,นโยบาย refund signing authority ladder ฉบับ current version มีผลตั้งแต่วันที่ 2025-02-15 (policy_version_id 6).,"| effective_date |
+| --- |
+| 2025-02-15 |"
+L3-Q-EASY-012,EASY,correct,"MSRP matches 38,900.00","MSRP ของสินค้า SF-Galaxy-Pro-2568 คือ 38,900.00 บาท ตาม DIM_PRODUCT.","| msrp_thb |
+| --- |
+| 38,900.00 |"
+L3-Q-EASY-013,EASY,correct,Vendor count matches 6,DIM_VENDOR มี vendor ทั้งหมด 6 ราย.,"| COUNT(*) |
+| --- |
+| 6 |"
+L3-Q-EASY-014,EASY,correct,Branch and transaction count match,"สาขาที่มีรายการขายมากที่สุดตลอดข้อมูลคือ BKK-SIAM (FahMai Siam) จำนวน 18,084 รายการ.","| branch_code | transaction_count |
+| --- | --- |
+| BKK-SIAM | 18084 |"
+L3-Q-EASY-015,EASY,correct,Employee count matches 600,DIM_EMPLOYEE มีพนักงานทั้งหมด 600 คน.,"| COUNT(*) |
+| --- |
+| 600 |"
+L3-Q-EASY-016,EASY,wrong,"Predicted return amount by SKU, not return_window_days policy",วันที่ 15 ธันวาคม 2024 นโยบายที่มีผลบังคับใช้ให้ลูกค้าคืนสินค้าได้ภายใน 14 วัน (policy_version_id 1).,"| sku_id | total_return_amount_thb |
+| --- | --- |
+| SKU-MASS-091 | 2,739,100.00 |
+| DN-LT-010 | 2,631,900.00 |
+| SKU-MASS-019 | 2,291,900.00 |
+| SKU-MASS-107 | 2,180,100.00 |
+| SKU-MASS-067 | 2,124,200.00 |
+| SKU-MASS-011 | 2,124,200.00 |
+| SKU-MASS-083 | 1,956,500.00 |
+| SKU-MASS-035 | 1,956,500.00 |
+| SKU-MASS-051 | 1,788,800.00 |
+| SKU-MASS-075 | 1,565,200.00 |
+| SKU-MASS-043 | 1,565,200.00 |
+| NT-LT-001 | 1,544,400.00 |
+| SKU-MASS-105 | 1,465,100.00 |
+| SKU-MASS-099 | 1,453,400.00 |
+| SKU-MASS-059 | 1,453,400.00 |
+| SKU-MASS-027 | 1,397,500.00 |
+| SKU-MASS-025 | 1,196,000.00 |
+| SKU-MASS-017 | 1,166,100.00 |
+| SKU-MASS-033 | 1,136,200.00 |
+| SKU-MASS-073 | 1,106,300.00 |
+| SKU-MASS-089 | 1,076,400.00 |
+| SKU-MASS-081 | 1,076,400.00 |
+| SKU-MASS-049 | 1,076,400.00 |
+| SKU-MASS-065 | 1,046,500.00 |
+| SKU-MASS-057 | 1,046,500.00 |
+| SKU-MASS-010 | 1,045,800.00 |
+| SKU-MASS-009 | 1,016,600.00 |
+| SKU-MASS-082 | 996,000.00 |
+| SKU-MASS-034 | 996,000.00 |
+| SKU-MASS-066 | 946,200.00 |
+| SKU-MASS-097 | 926,900.00 |
+| SKU-MASS-041 | 867,100.00 |
+| SKU-MASS-106 | 821,700.00 |
+| SKU-MASS-090 | 771,900.00 |
+| SKU-MASS-042 | 697,200.00 |
+| SKU-MASS-045 | 680,400.00 |
+| SKU-MASS-069 | 623,700.00 |
+| SKU-MASS-053 | 604,800.00 |
+| SKU-MASS-074 | 597,600.00 |
+| SKU-MASS-018 | 597,600.00 |
+| SKU-MASS-098 | 572,700.00 |
+| SKU-MASS-058 | 572,700.00 |
+| SKU-MASS-093 | 567,000.00 |
+| SKU-MASS-061 | 567,000.00 |
+| SKU-MASS-085 | 529,200.00 |
+| SKU-MASS-050 | 522,900.00 |
+| SKU-MASS-103 | 516,000.00 |
+| SKU-MASS-087 | 516,000.00 |
+| SKU-MASS-039 | 516,000.00 |
+| SKU-MASS-101 | 510,300.00 |"
+L3-Q-EASY-017,EASY,correct,B2B customer count matches 300,DIM_CUSTOMER มีลูกค้าประเภท B2B ทั้งหมด 300 ราย.,"| COUNT(DISTINCT customer_id) |
+| --- |
+| 300 |"
+L3-Q-EASY-018,EASY,correct,"Value matches 0.0100, although selected row metadata is suspicious",ก่อนวันที่ 1 เมษายน 2025 อัตราสะสม FahMai Points คือ 0.0100 points ต่อบาท (policy_version_id 3).,"| policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- |
+| point_earning_rate_per_thb | 0.01 | 2025-04-01 |  |"
+L3-Q-EASY-019,EASY,wrong,Predicted 0.01; GT is 0.0125,ตั้งแต่วันที่ 1 เมษายน 2025 เป็นต้นไป อัตราสะสม FahMai Points คือ 0.0125 points ต่อบาท (policy_version_id 4).,"| policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- |
+| point_earning_rate_per_thb | 0.01 | 2025-04-01 |  |"
+L3-Q-EASY-020,EASY,correct,Vendor and count match,"รายการขนส่งทั้งหมดรับผิดชอบโดย VeloShip (V-006) รวม 23,182 รายการ.","| vendor_name_en | total_shipments |
+| --- | --- |
+| VeloShip | 23182 |"
+L3-Q-EASY-021,EASY,correct,"Gold count matches 7,500","DIM_CUSTOMER มีลูกค้า loyalty_tier gold ทั้งหมด 7,500 ราย.","| COUNT(*) |
+| --- |
+| 7500 |"
+L3-Q-EASY-022,EASY,wrong,Predicted silver; GT highest tier is platinum,"tier สูงสุดที่มีการกำหนดให้ลูกค้าจริงคือ platinum มีลูกค้า 7,500 ราย.","| max_loyalty_tier |
+| --- |
+| silver |"
+L3-Q-EASY-023,EASY,correct,Bank account count matches 14,DIM_BANK_ACCOUNT มีบัญชีธนาคารทั้งหมด 14 บัญชี.,"| COUNT(*) |
+| --- |
+| 14 |"
+L3-Q-EASY-024,EASY,correct,"Refund threshold matches 5,000.00","refund threshold ที่มีผล ณ วันที่ 1 เมษายน 2025 คือ 5,000.00 บาท (policy_version_id 12).","| policy_variable | value_numeric |
+| --- | --- |
+| refund_threshold_thb | 5,000.00 |"
+L3-Q-EASY-025,EASY,correct,Campaign count matches 7,DIM_PROMO_CAMPAIGN มีแคมเปญโปรโมชันทั้งหมด 7 แคมเปญ.,"| COUNT(*) |
+| --- |
+| 7 |"
+L3-Q-MED-001,MED,correct,Both yearly top SKU IDs match,"คำตอบ: - ปี 2024: `SKU-MASS-063` ขายได้มากที่สุด รวม `1,508` ชิ้น - ปี 2025: `SF-Galaxy-Pro-2568` ขายได้มากที่สุด รวม `4,370` ชิ้น ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` - กรอง `business_event_date` แยกปี 2024 และ 2025 - group by `sku_id` แล้ว sum `quantity` - เรียงจาก `quantity` มากไปน้อย","| sku_id_2024 | sku_id_2025 |
+| --- | --- |
+| SKU-MASS-063 | SF-Galaxy-Pro-2568 |"
+L3-Q-MED-002,MED,wrong,"Predicted no rows; GT has largest deposit 18,906,765","คำตอบ: Single largest deposit ใน `FACT_BANK_TRANSACTION` คือ: - `amount_thb`: `18,906,765` บาท - `business_event_date`: `2025-07-15` - `account_id`: `OPER-REMOTE` - `bank_txn_id`: `BT-202507-1041521243094` - `transaction_type`: `deposit` - `related_entity_table`: `FACT_SALES_DEPOSIT_BATCH` - `related_entity_id`: `REMOTE|2025-07-15|credit_card` - `description`: `B2C credit_card batch deposit REMOTE 2025-07-15` Source event ของรายการนี้คือยอดรับเงินแบบ batch จากยอดขาย B2C ช่องทาง online/REMOTE ที่จ่ายด้วย `credit_card` วันที่ `2025-07-15` ไม่ใช่ transaction สินค้ารายตัวเดียว แต่เมื่อตรวจยอดขายใน batch นี้พบว่าเกี่ยวข้องกับแคมเปญ `SF-LAUNCH-2568` เป็นหลัก: - จำนวน transaction ใน batch: `509` - sum `net_total_thb`: `18,906,765` บาท ตรงกับยอด deposit - promo campaign หลัก: `SF-LAUNCH-2568` จำนวน `501` transaction - SKU หลักใน batch: `SF-Galaxy-Pro-2568` - จำนวน `SF-Galaxy-Pro-2568` ใน batch: `501` เครื่อง - gross จาก `SF-Galaxy-Pro-2568` ใน batch: `19,488,900` บาท - campaign description: `SF Galaxy Pro 2568 launch promo` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_BANK_TRANSACTION.csv` หาแถว `transaction_type = deposit` และ `amount_thb > 0` ที่มี `amount_thb` สูงสุด - ใช้ `tables/FACT_SALES.csv` ตรวจ batch จาก `related_entity_id = REMOTE|2025-07-15|credit_card` - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` รวมยอด SKU ใน transaction ของ batch - ใช้ `tables/DIM_PRODUCT.csv` ดู product/brand ของ SKU - ใช้ `tables/DIM_PROMO_CAMPAIGN.csv` ดูคำอธิบาย campaign `SF-LAUNCH-2568` - มี render ที่เกี่ยวข้องกับ bank statement เดือนนี้ใน `renders/bank_statement/2025-07/BS-OPER-REMOTE-2568-07_header.png` และ transaction pages ของ account `OPER-REMOTE`; ค่าที่ใช้ตอบยึดจาก structured table เป็นหลัก",(no rows)
+L3-Q-MED-003,MED,correct,"Customer, points, and tier match","คำตอบ: ลูกค้า B2C ที่ earn คะแนนสะสมรวมมากที่สุดคือ: - `customer_id`: `CUST-L3-023922` - คะแนน earned รวม: `15,738` - loyalty tier ปัจจุบันจาก `DIM_CUSTOMER`: `platinum` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_LOYALTY_LEDGER.csv` - กรอง `event_type = earned` - join กับ `tables/DIM_CUSTOMER.csv` - กรอง `customer_type = B2C` - group by `customer_id` แล้ว sum `points_delta` - join/read `loyalty_tier` จาก `DIM_CUSTOMER`","| customer_id | total_earned_points | current_loyalty_tier |
+| --- | --- | --- |
+| CUST-L3-023922 | 15738 | platinum |"
+L3-Q-MED-004,MED,wrong,"Predicted yearly amount aggregate, not latest paid B2B customer",คำตอบ: ในปี 2025 วันที่รับเงิน B2B ที่ล่าสุดที่สุดคือ `2025-12-31` และมีหลาย transaction ที่รับเงินวันนี้ (`23` transactions) ดังนั้นเลือก customer ที่ช้าสุดในกลุ่มวันที่ล่าสุดนี้จากจำนวนวันที่เกิน due date มากที่สุด: - `customer_id`: `CUST-L3-B2B-020600` - `txn_id`: `TXN-202510-18020600` - `payment_due_date`: `2025-12-17` - `payment_received_date`: `2025-12-31` - จ่ายช้ากว่า due date: `14` วัน - `payment_terms`: `NET-60` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` - กรอง `is_b2b = true` - กรอง `payment_received_date` อยู่ในปี 2025 - หา `payment_received_date` ล่าสุด คือ `2025-12-31` - ในกลุ่มวันล่าสุด คำนวณ `payment_received_date - payment_due_date` ถ้าติดลบให้นับเป็น `0` - ใช้ `tables/DIM_CUSTOMER.csv` เพื่อดึง `payment_terms`,"| event_year | total_amount_thb |
+| --- | --- |
+| 2025 | 2,953,453,591.00 |"
+L3-Q-MED-005,MED,wrong,Predicted only one branch event; GT SKU-MASS-048 has 10 events across 9 branches,คำตอบ: SKU ที่มี stockout มากที่สุดในปี 2025 คือ: - `sku_id`: `SKU-MASS-048` - จำนวนเหตุการณ์ stockout: `10` branch-month events - กระทบ retail branch: `9` สาขา ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_INVENTORY_MONTHLY_SNAPSHOT.csv` - กรองปี 2025 จาก `business_event_date` - กรอง `closing_units = 0` - ใช้ `tables/DIM_BRANCH.csv` เพื่อกรอง retail/physical branch โดยใช้ `branch_type = branch` - group by `sku_id` - นับจำนวน row เป็น stockout events และนับ distinct `branch_code` เป็นจำนวนสาขาที่กระทบ,"| sku_id | branch_code | stockout_count | total_stockout_events | affected_branches |
+| --- | --- | --- | --- | --- |
+| SKU-MASS-048 | UDN-CTRL | 2 | 2 | 1 |"
+L3-Q-MED-006,MED,correct,All four campaign comparison values match,"คำตอบ: เปรียบเทียบ 11.11 Mega Sale: | campaign_id | redemption count | discount รวม | |---|---:|---:| | `MEGA-1111-2567` | `267` | `1,308,360` บาท | | `MEGA-1111-2568` | `442` | `2,868,084` บาท | ปี 2568 มี redemption มากกว่าปี 2567 อยู่ `175` ครั้ง และ discount รวมมากกว่า `1,559,724` บาท ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_PROMO_REDEMPTION.csv` - กรอง `campaign_id` เป็น `MEGA-1111-2567` และ `MEGA-1111-2568` - count rows เป็นจำนวน redemption - sum `discount_applied_thb` เป็นยอดส่วนลดรวม - ใช้ `tables/DIM_PROMO_CAMPAIGN.csv` เพื่อยืนยันว่า campaign เหล่านี้คือ `11.11 Mega Sale` - มี banner render ประกอบใน `renders/e7_banner/2024-11/BN-MEGA1111-2567.png` และ `renders/e7_banner/2025-11/BN-MEGA1111-2568.png`","| redemption_count_2024 | discount_total_2024 | redemption_count_2025 | discount_total_2025 |
+| --- | --- | --- | --- |
+| 267 | 1,308,360.00 | 442 | 2,868,084.00 |"
+L3-Q-MED-007,MED,correct,"txn_id, branch, basket total match","คำตอบ: B2C basket ที่มี `basket_total_thb` สูงที่สุดทั้ง corpus คือ: - `txn_id`: `TXN-202411-03026757` - `branch_code`: `BKK-EMSP` - `basket_total_thb`: `320,300` บาท - `business_event_date`: `2024-11-03` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` - กรอง `is_b2b = false` - เรียง `basket_total_thb` จากมากไปน้อย - ดึงแถวแรก","| txn_id | branch_code | basket_total_thb |
+| --- | --- | --- |
+| TXN-202411-03026757 | BKK-EMSP | 320,300.00 |"
+L3-Q-MED-008,MED,wrong,Predicted no rows; GT has top 5 B2B customers,"คำตอบ: Top 5 ลูกค้า B2B ปี 2024 ตามยอดซื้อรวม `net_total_thb`: | rank | customer_id | net_total_thb | |---:|---|---:| | 1 | `CUST-L3-B2B-002600` | `7,548,210` | | 2 | `CUST-L3-B2B-021100` | `7,405,700` | | 3 | `CUST-L3-B2B-019600` | `6,817,740` | | 4 | `CUST-L3-B2B-026300` | `6,774,900` | | 5 | `CUST-L3-B2B-003500` | `6,758,870` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` - กรอง `is_b2b = true` - กรอง `business_event_date` อยู่ในปี 2024 - group by `customer_id` - sum `net_total_thb` - เรียงจากมากไปน้อย",(no rows)
+L3-Q-MED-009,MED,wrong,"Predicted SKU return counts, not return_window_days policy",คำตอบ: สำหรับวันที่ `2025-02-15` policy return window ที่มีผลบังคับใช้คือ: - `return_window_days`: `14` วัน - `policy_version_id`: `1` - effective period: `2024-01-01` ถึง `2025-03-01` - scope: `global` ดังนั้นลูกค้าซื้อและรับของวันที่ `2025-02-15` มีสิทธิ์คืนสินค้าได้ภายใน `14` วันนับจากวันที่รับสินค้า ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/DIM_POLICY_VERSION.csv` - กรอง `policy_variable = return_window_days` - กรอง `scope_filter = global` - เลือก policy ที่ `effective_date <= 2025-02-15` และ `end_date >= 2025-02-15`,"| sku_id | row_count |
+| --- | --- |
+| WK-SW-004 | 63 |
+| NT-LT-001 | 62 |
+| SKU-MASS-016 | 52 |
+| SKU-MASS-081 | 46 |
+| SKU-MASS-049 | 46 |
+| SKU-MASS-050 | 42 |
+| SKU-MASS-041 | 42 |
+| SKU-MASS-074 | 41 |
+| SKU-MASS-064 | 41 |
+| SKU-MASS-054 | 41 |
+| SKU-MASS-084 | 40 |
+| SKU-MASS-019 | 40 |
+| SKU-MASS-101 | 39 |
+| SKU-MASS-072 | 39 |
+| SKU-MASS-032 | 39 |
+| SKU-MASS-026 | 39 |
+| SKU-MASS-025 | 39 |
+| SKU-STD-001 | 38 |
+| SKU-MASS-096 | 38 |
+| SKU-MASS-009 | 38 |
+| SKU-MASS-088 | 37 |
+| SKU-MASS-075 | 36 |
+| SKU-MASS-051 | 36 |
+| SKU-MASS-048 | 36 |
+| SKU-MASS-035 | 36 |
+| SKU-MASS-024 | 36 |
+| SKU-MASS-011 | 36 |
+| SKU-MASS-071 | 35 |
+| SKU-MASS-067 | 35 |
+| SKU-MASS-063 | 35 |
+| SKU-MASS-042 | 35 |
+| SKU-MASS-036 | 35 |
+| SKU-MASS-017 | 35 |
+| SKU-MASS-106 | 34 |
+| SKU-MASS-093 | 34 |
+| SKU-MASS-087 | 34 |
+| SKU-MASS-066 | 34 |
+| SKU-MASS-056 | 34 |
+| SKU-MASS-027 | 34 |
+| SKU-MASS-090 | 33 |
+| SKU-MASS-079 | 33 |
+| SKU-MASS-077 | 33 |
+| SKU-MASS-014 | 33 |
+| SKU-MASS-013 | 33 |
+| SKU-MASS-007 | 33 |
+| SKU-MASS-110 | 32 |
+| SKU-MASS-103 | 32 |
+| SKU-MASS-099 | 32 |
+| SKU-MASS-098 | 32 |
+| SKU-MASS-097 | 32 |"
+L3-Q-MED-010,MED,correct,Threshold and policy_version_id match,"คำตอบ: วันที่ `2025-03-20` refund threshold ที่มีผลบังคับใช้คือ: - refund threshold: `5,000` บาท - `policy_version_id`: `12` - effective date: `2025-03-15` - end date: ยังไม่มี end date - scope: `global` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/DIM_POLICY_VERSION.csv` - กรอง `policy_variable = refund_threshold_thb` - กรอง `scope_filter = global` - เลือก policy ที่ครอบคลุมวันที่ `2025-03-20`","| policy_variable | value_numeric | policy_version_id |
+| --- | --- | --- |
+| refund_threshold_thb | 5,000.00 | 12 |"
+L3-Q-MED-011,MED,correct,Total and reason count match,คำตอบ: ช่วง `2025-12-25` ถึง `2025-12-31` มีรายการคืนสินค้าทั้งหมด: - total returns: `74` รายการ แยกตาม `return_reason`: | return_reason | count | |---|---:| | `customer_change_of_mind` | `74` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_RETURN.csv` - กรอง `business_event_date` ตั้งแต่ `2025-12-25` ถึง `2025-12-31` แบบรวมสองวัน - count `return_id` - group by `return_reason`,"| total_returns | return_reason | count_per_reason |
+| --- | --- | --- |
+| 74 | customer_change_of_mind | 74 |"
+L3-Q-MED-012,MED,wrong,"Predicted no rows; GT account OPER-BKK-SIAM volume 579,680,857","คำตอบ: ถ้านับเฉพาะ credit หรือ `amount_thb > 0` และไม่รวม `account_id = KBANK-OPER` บัญชีที่มี credit volume รวมสูงที่สุดคือ: - `account_id`: `OPER-BKK-SIAM` - credit volume รวม: `579,680,857` บาท ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_BANK_TRANSACTION.csv` - กรอง `amount_thb > 0` - กรองออก `account_id = KBANK-OPER` - group by `account_id` - sum `amount_thb` - เรียงจากมากไปน้อย",(no rows)
+L3-Q-MED-013,MED,wrong,"Predicted total sales aggregate, not top 3 SKU gross revenue","คำตอบ: Top 3 SKU ตาม gross revenue จาก `line_total_thb` ตลอด corpus: | rank | sku_id | brand_family | gross revenue | |---:|---|---|---:| | 1 | `DN-LT-010` | `Dawn` | `228,465,900` | | 2 | `SF-Galaxy-Pro-2568` | `SaiFah` | `169,993,000` | | 3 | `SKU-MASS-019` | `FahMai` | `159,538,600` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` - group by `sku_id` - sum `line_total_thb` - ใช้ `tables/DIM_PRODUCT.csv` join เพื่อดึง `brand_family`","| total_net_total_thb |
+| --- |
+| 6,514,622,034.20 |"
+L3-Q-MED-014,MED,wrong,Predicted no rows; GT offline/online basket averages,"คำตอบ: ใช้ช่วง pre-launch ก่อนเปิดตัว `SF-Galaxy-Pro-2568` คือข้อมูลตั้งแต่ `2024-01-01` ถึง `2025-07-14` - Offline หรือหน้าร้านทุกสาขาที่ไม่ใช่ `REMOTE`: average basket size = `58,040.03` บาทต่อ transaction - Online หรือ `branch_code = REMOTE`: average basket size = `37,993.83` บาทต่อ transaction จำนวน transaction ที่ใช้คำนวณ: - Offline/non-REMOTE: `79,321` transactions - Online/REMOTE: `10,049` transactions ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` - กรอง `business_event_date < 2025-07-15` - แยก offline ด้วย `branch_code != REMOTE` - แยก online ด้วย `branch_code = REMOTE` - average `basket_total_thb` - วัน launch ของ SKU อ้างอิงจากคำถามและตรวจได้จาก `tables/DIM_PRODUCT.csv` โดย `SF-Galaxy-Pro-2568` มี `launch_date = 2025-07-15`",(no rows)
+L3-Q-MED-015,MED,wrong,Only first recall row returned; missing active/completed transitions,คำตอบ: `NT-LT-001` เคยถูก recall ใช่ มี status history ทั้งหมด `3` records ตามลำดับเวลา: | order | status | transition_date | |---:|---|---| | 1 | `normal` | `2024-01-01` | | 2 | `active` | `2025-09-10` | | 3 | `completed` | `2025-10-15` | ถ้านับเฉพาะการเปลี่ยนสถานะจากสถานะก่อนหน้า จะมี `2` transitions: - `normal -> active` วันที่ `2025-09-10` - `active -> completed` วันที่ `2025-10-15` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/dim_product_recall_history.csv` - กรอง `sku_id = NT-LT-001` - เรียงตาม `transition_date`,"| total_transitions | status | transition_date |
+| --- | --- | --- |
+| 3 | normal | 2024-01-01 |"
+L3-Q-MED-016,MED,wrong,"Predicted 100% rates for wrong branches; GT HKT-FEST 6.83%, REMOTE 3.88%","คำตอบ: คำนวณปี 2025 ด้วยสูตร: `return rate = จำนวน distinct return_id / จำนวน distinct sales txn_id` รวม `REMOTE` เพราะเป็น `branch_code` ใน `FACT_SALES` และ `FACT_RETURN` - สาขาที่ return rate สูงสุด: `HKT-FEST` - sales transactions: `3,970` - return events: `271` - return rate: `6.83%` - สาขาที่ return rate ต่ำสุด: `REMOTE` - sales transactions: `8,150` - return events: `316` - return rate: `3.88%` หมายเหตุ: ถ้าต้องการเฉพาะ physical branch และตัด `REMOTE` ออก สาขาที่ต่ำสุดคือ `KKC-CTRL` ที่ `4.97%` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` นับ distinct `txn_id` ปี 2025 ต่อ `branch_code` - ใช้ `tables/FACT_RETURN.csv` นับ distinct `return_id` ปี 2025 ต่อ `branch_code` - join ด้วย `branch_code` - คำนวณ `return_id count / txn_id count`","| branch_code | return_rate_percent |
+| --- | --- |
+| UDN-CTRL | 100.00 |
+| REMOTE | 100.00 |"
+L3-Q-MED-017,MED,correct,Top DN-LT-010 transaction amount and quantity match,"คำตอบ: สำหรับ `DN-LT-010` transaction ที่มียอดรวมเฉพาะ SKU นี้สูงสุดมีมูลค่า: - มูลค่า `DN-LT-010` สูงสุดต่อ transaction: `254,700` บาท - จำนวนเครื่องใน transaction นั้น: `3` เครื่อง มี transaction ที่ tie กันที่ยอดสูงสุดนี้ `4` รายการ: - `TXN-202411-09020300` - `TXN-202506-02002742` - `TXN-202508-12023200` - `TXN-202509-14028900` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` - กรอง `sku_id = DN-LT-010` - group by `txn_id` - sum `line_total_thb` และ sum `quantity` - เรียงยอดรวมจากมากไปน้อย","| total_dn_lt_010_thb | quantity_dn_lt_010_units |
+| --- | --- |
+| 254,700.00 | 3 |"
+L3-Q-MED-018,MED,correct,Fee count and sum match,"คำตอบ: ในปี 2025 รายการค่าธรรมเนียมธนาคารใน `FACT_BANK_TRANSACTION` ที่ `transaction_type = fee` มี: - จำนวนรายการ: `24` - ผลรวม `amount_thb`: `-15,600` บาท หมายเหตุ: ค่าเป็นลบเพราะเป็นเงินออก/ค่าธรรมเนียม ถ้าดูเป็น cost แบบค่าสัมบูรณ์คือ `15,600` บาท ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_BANK_TRANSACTION.csv` - กรอง `business_event_date` อยู่ในปี 2025 - กรอง `transaction_type = fee` - count rows และ sum `amount_thb`","| total_count | total_amount_thb |
+| --- | --- |
+| 24 | -15,600.00 |"
+L3-Q-MED-019,MED,correct,Monthly distinct SKU counts match GT tuple values,"คำตอบ: จำนวน distinct `sku_id` ที่ขายในปี 2025 แยกตามเดือน มกราคมถึงธันวาคม คือ: `(109, 109, 109, 109, 109, 109, 110, 110, 110, 110, 110, 110)` แปลตามเดือน: | month | distinct sku_id | |---:|---:| | Jan | `109` | | Feb | `109` | | Mar | `109` | | Apr | `109` | | May | `109` | | Jun | `109` | | Jul | `110` | | Aug | `110` | | Sep | `110` | | Oct | `110` | | Nov | `110` | | Dec | `110` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` - กรอง `business_event_date` อยู่ในปี 2025 - แปลงเดือนจาก `business_event_date` - group by month - count distinct `sku_id`","| month | distinct_sku_count |
+| --- | --- |
+| 2025-01 | 109 |
+| 2025-02 | 109 |
+| 2025-03 | 109 |
+| 2025-04 | 109 |
+| 2025-05 | 109 |
+| 2025-06 | 109 |
+| 2025-07 | 110 |
+| 2025-08 | 110 |
+| 2025-09 | 110 |
+| 2025-10 | 110 |
+| 2025-11 | 110 |
+| 2025-12 | 110 |"
+L3-Q-MED-020,MED,wrong,"Predicted SKU return counts, not B2C return day-of-week",คำตอบ: ในปี 2025 วันของสัปดาห์ที่มี return events จากลูกค้า B2C มากที่สุดคือ: - วัน: `Thursday` - จำนวน return events: `536` จำนวนตามวันของสัปดาห์: | day_of_week | return events | |---|---:| | Thursday | `536` | | Friday | `519` | | Monday | `499` | | Saturday | `496` | | Wednesday | `496` | | Tuesday | `492` | | Sunday | `486` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_RETURN.csv` - ใช้ `tables/DIM_CUSTOMER.csv` - join ด้วย `customer_id` - กรอง `customer_type = B2C` - กรอง `business_event_date` อยู่ในปี 2025 - group by day-of-week จาก `business_event_date` - นับ distinct `return_id`,"| event_year | sku_id | row_count |
+| --- | --- | --- |
+| 2025 | WK-SW-004 | 63 |
+| 2025 | NT-LT-001 | 62 |
+| 2025 | SKU-MASS-016 | 52 |
+| 2025 | SKU-MASS-049 | 46 |
+| 2025 | SKU-MASS-081 | 46 |
+| 2025 | SKU-MASS-041 | 42 |
+| 2025 | SKU-MASS-050 | 42 |
+| 2025 | SKU-MASS-054 | 41 |
+| 2025 | SKU-MASS-064 | 41 |
+| 2025 | SKU-MASS-074 | 41 |
+| 2025 | SKU-MASS-019 | 40 |
+| 2025 | SKU-MASS-084 | 40 |
+| 2025 | SKU-MASS-025 | 39 |
+| 2025 | SKU-MASS-026 | 39 |
+| 2025 | SKU-MASS-032 | 39 |
+| 2025 | SKU-MASS-072 | 39 |
+| 2025 | SKU-MASS-101 | 39 |
+| 2025 | SKU-MASS-009 | 38 |
+| 2025 | SKU-MASS-096 | 38 |
+| 2025 | SKU-STD-001 | 38 |
+| 2025 | SKU-MASS-088 | 37 |
+| 2025 | SKU-MASS-011 | 36 |
+| 2025 | SKU-MASS-024 | 36 |
+| 2025 | SKU-MASS-035 | 36 |
+| 2025 | SKU-MASS-048 | 36 |
+| 2025 | SKU-MASS-051 | 36 |
+| 2025 | SKU-MASS-075 | 36 |
+| 2025 | SKU-MASS-017 | 35 |
+| 2025 | SKU-MASS-036 | 35 |
+| 2025 | SKU-MASS-042 | 35 |
+| 2025 | SKU-MASS-063 | 35 |
+| 2025 | SKU-MASS-067 | 35 |
+| 2025 | SKU-MASS-071 | 35 |
+| 2025 | SKU-MASS-027 | 34 |
+| 2025 | SKU-MASS-056 | 34 |
+| 2025 | SKU-MASS-066 | 34 |
+| 2025 | SKU-MASS-087 | 34 |
+| 2025 | SKU-MASS-093 | 34 |
+| 2025 | SKU-MASS-106 | 34 |
+| 2025 | SKU-MASS-007 | 33 |
+| 2025 | SKU-MASS-013 | 33 |
+| 2025 | SKU-MASS-014 | 33 |
+| 2025 | SKU-MASS-077 | 33 |
+| 2025 | SKU-MASS-079 | 33 |
+| 2025 | SKU-MASS-090 | 33 |
+| 2025 | SKU-MASS-044 | 32 |
+| 2025 | SKU-MASS-045 | 32 |
+| 2025 | SKU-MASS-062 | 32 |
+| 2025 | SKU-MASS-091 | 32 |
+| 2025 | SKU-MASS-097 | 32 |"

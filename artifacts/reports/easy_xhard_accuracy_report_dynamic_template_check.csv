@@ -1,0 +1,632 @@
+id,level,status,note,ground_truth,predicted_table
+L3-Q-EASY-001,EASY,correct,Value-level match against ground truth; output is markdown table.,"MSRP ของสินค้า NT-LT-001 คือ 42,900.00 บาท ตาม DIM_PRODUCT.","| msrp_thb |
+| --- |
+| 42,900.00 |"
+L3-Q-EASY-002,EASY,correct,Value-level match against ground truth; output is markdown table.,มีรายการ vendor payment ที่ปี-เดือนของ posting_date ไม่ตรงกับ business_event_date ทั้งหมด 767 แถว.,"| COUNT(*) |
+| --- |
+| 767 |"
+L3-Q-EASY-003,EASY,wrong,"Partial only after dynamic-template rerun: vendor and shipment count match, but the required 100.00% vendor share is missing from the answer table.","รายการขนส่งทั้งหมดใน FACT_SHIPPING ถูกจัดการโดย VeloShip (V-006) จำนวน 23,182 รายการ คิดเป็น 100.00% ของทั้งหมด.","| vendor_name_en | row_count |
+| --- | --- |
+| VeloShip | 23182 |"
+L3-Q-EASY-004,EASY,correct,Value-level match against ground truth; output is markdown table.,พนักงาน CS ที่มี interaction มากที่สุดคือ EMP-L3-00010 รวม 730 ครั้ง.,"| employee_id | interaction_count |
+| --- | --- |
+| EMP-L3-00010 | 730 |"
+L3-Q-EASY-005,EASY,correct,Value-level match against ground truth; output is markdown table.,FahMai มี partner brand vendor 2 ราย คือ V-001 (NovaTech) และ V-002 (NovaTech Service).,"| vendor_id | name_th | name_en |
+| --- | --- | --- |
+| V-001 | NovaTech | NovaTech |
+| V-002 | NovaTech Service | NovaTech Service |"
+L3-Q-EASY-006,EASY,correct,Value-level match against ground truth; output is markdown table.,"ในช่วงปี 2024-2025 สาขาที่มี transaction การขายมากที่สุดคือ BKK-SIAM (FahMai Siam) จำนวน 18,084 transactions และ net_total_thb รวม 1,039,386,349.00 บาท.","| branch_code | total_net_revenue_thb | transaction_count |
+| --- | --- | --- |
+| BKK-SIAM | 1,039,386,349.00 | 18084 |"
+L3-Q-EASY-007,EASY,correct,Value-level match against ground truth; output is markdown table.,"จำนวนลูกค้าแยกตาม loyalty_tier คือ none 7,800 ราย, silver 7,200 ราย, gold 7,500 ราย, และ platinum 7,500 ราย.","| loyalty_tier | customer_count |
+| --- | --- |
+| gold | 7500 |
+| none | 7800 |
+| platinum | 7500 |
+| silver | 7200 |"
+L3-Q-EASY-008,EASY,correct,Value-level match against ground truth; output is markdown table.,DIM_BRANCH มีสาขา/สถานที่ทั้งหมด 11 แห่ง.,"| COUNT(*) |
+| --- |
+| 11 |"
+L3-Q-EASY-009,EASY,correct,Value-level match against ground truth; output is markdown table.,ณ วันที่ 1 มิถุนายน 2568 หลังการเปลี่ยนผ่านผู้บริหาร CEO คือ Naret Vision (EMP-L3-00013) ตาม DIM_EMPLOYEE.,"| employee_id | first_name_en | last_name_en | position_title | canon_role_label |
+| --- | --- | --- | --- | --- |
+| EMP-L3-00013 | Naret | Vision | CEO | Incoming CEO |"
+L3-Q-EASY-010,EASY,correct,Value-level match against ground truth; output is markdown table.,สินค้า AW-MN-001 มีระยะเวลารับประกัน 24 เดือน.,"| warranty_months |
+| --- |
+| 24 |"
+L3-Q-EASY-011,EASY,correct,Value-level match against ground truth; output is markdown table.,นโยบาย refund signing authority ladder ฉบับ current version มีผลตั้งแต่วันที่ 2025-02-15 (policy_version_id 6).,"| effective_date |
+| --- |
+| 2025-02-15 |"
+L3-Q-EASY-012,EASY,correct,Value-level match against ground truth; output is markdown table.,"MSRP ของสินค้า SF-Galaxy-Pro-2568 คือ 38,900.00 บาท ตาม DIM_PRODUCT.","| msrp_thb |
+| --- |
+| 38,900.00 |"
+L3-Q-EASY-013,EASY,correct,Value-level match against ground truth; output is markdown table.,DIM_VENDOR มี vendor ทั้งหมด 6 ราย.,"| COUNT(*) |
+| --- |
+| 6 |"
+L3-Q-EASY-014,EASY,correct,Value-level match against ground truth; output is markdown table.,"สาขาที่มีรายการขายมากที่สุดตลอดข้อมูลคือ BKK-SIAM (FahMai Siam) จำนวน 18,084 รายการ.","| branch_code | transaction_count |
+| --- | --- |
+| BKK-SIAM | 18084 |"
+L3-Q-EASY-015,EASY,correct,Value-level match against ground truth; output is markdown table.,DIM_EMPLOYEE มีพนักงานทั้งหมด 600 คน.,"| COUNT(*) |
+| --- |
+| 600 |"
+L3-Q-EASY-016,EASY,correct,Value-level match against ground truth; output is markdown table.,วันที่ 15 ธันวาคม 2024 นโยบายที่มีผลบังคับใช้ให้ลูกค้าคืนสินค้าได้ภายใน 14 วัน (policy_version_id 1).,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 1 | return_window_days | 14.00 | 2024-01-01 | 2025-03-01 |"
+L3-Q-EASY-017,EASY,correct,Value-level match against ground truth; output is markdown table.,DIM_CUSTOMER มีลูกค้าประเภท B2B ทั้งหมด 300 ราย.,"| COUNT(DISTINCT customer_id) |
+| --- |
+| 300 |"
+L3-Q-EASY-018,EASY,correct,Value-level match against ground truth; output is markdown table.,ก่อนวันที่ 1 เมษายน 2025 อัตราสะสม FahMai Points คือ 0.0100 points ต่อบาท (policy_version_id 3).,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 3 | point_earning_rate_per_thb | 0.0100 | 2024-01-01 | 2025-04-01 |"
+L3-Q-EASY-019,EASY,correct,Value-level match against ground truth; output is markdown table.,ตั้งแต่วันที่ 1 เมษายน 2025 เป็นต้นไป อัตราสะสม FahMai Points คือ 0.0125 points ต่อบาท (policy_version_id 4).,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 4 | point_earning_rate_per_thb | 0.0125 | 2025-04-01 |  |"
+L3-Q-EASY-020,EASY,correct,Value-level match against ground truth; output is markdown table.,"รายการขนส่งทั้งหมดรับผิดชอบโดย VeloShip (V-006) รวม 23,182 รายการ.","| vendor_name_en | total_shipments |
+| --- | --- |
+| VeloShip | 23182 |"
+L3-Q-EASY-021,EASY,correct,Value-level match against ground truth; output is markdown table.,"DIM_CUSTOMER มีลูกค้า loyalty_tier gold ทั้งหมด 7,500 ราย.","| COUNT(*) |
+| --- |
+| 7500 |"
+L3-Q-EASY-022,EASY,correct,Value-level match against ground truth; output is markdown table.,"tier สูงสุดที่มีการกำหนดให้ลูกค้าจริงคือ platinum มีลูกค้า 7,500 ราย.","| loyalty_tier | customer_count |
+| --- | --- |
+| platinum | 7500 |"
+L3-Q-EASY-023,EASY,correct,Value-level match against ground truth; output is markdown table.,DIM_BANK_ACCOUNT มีบัญชีธนาคารทั้งหมด 14 บัญชี.,"| COUNT(*) |
+| --- |
+| 14 |"
+L3-Q-EASY-024,EASY,correct,Value-level match against ground truth; output is markdown table.,"refund threshold ที่มีผล ณ วันที่ 1 เมษายน 2025 คือ 5,000.00 บาท (policy_version_id 12).","| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 12 | refund_threshold_thb | 5,000.00 | 2025-03-15 |  |"
+L3-Q-EASY-025,EASY,correct,Value-level match against ground truth; output is markdown table.,DIM_PROMO_CAMPAIGN มีแคมเปญโปรโมชันทั้งหมด 7 แคมเปญ.,"| COUNT(*) |
+| --- |
+| 7 |"
+L3-Q-HARD-001,HARD,wrong,Incorrect invoice reconciliation; predicted total amount instead of duplicate invoice identity/details.,"(1) Invoice ID ที่ซ้ำ: PW-INV-2568-04823 (2) มี 2 แถวที่ใช้ invoice ID เดียวกัน (3) แถวที่ 1: payment_id=VP-202504-9096124, 89,000 THB, posting_date=2025-04-05; แถวที่ 2: payment_id=VP-202509-15179906, 104,500 THB, posting_date=2025-09-10","| total_amount_thb |
+| --- |
+| 2,953,453,591.00 |"
+L3-Q-HARD-002,HARD,wrong,"Partial only: phantom count and duplicate discount appear, but inflation percentage/raw vs dedup metrics are incorrect or incomplete.","มี phantom/log ซ้ำจาก app channel 1 รายการ; มี LINE WORKS thread วันที่ 2025-07-15 ยืนยันว่าเกิด app bug; ยอด discount ที่ถูกนับซ้ำ 4,135.00 THB; ยอด raw 15,840.00 เทียบ dedup 11,705.00 ทำให้ inflate 35.3%","| phantom_count | total_discount_inflated | inflation_percentage |
+| --- | --- | --- |
+| 1 | 4,135.00 | 100.00 |"
+L3-Q-HARD-003,HARD,wrong,No matching answer rows; misses requested anomaly.,(1) วันที่ spike: 2025-07-15 (2) SKU ที่ครอง: SF-Galaxy-Pro-2568 (501 จาก 530 line items = 94.53%) (3) จำนวนธุรกรรมทั้งหมด: 512 รายการ (median ปกติ ~12/วัน),(no rows)
+L3-Q-HARD-004,HARD,wrong,No matching answer rows; misses requested anomaly.,SKU คือ WK-SW-004; สาขาคือ HKT-FEST; มี hardware batch defect return 28 ครั้งในช่วงเม.ย.-พ.ค. 2025,(no rows)
+L3-Q-HARD-005,HARD,wrong,"Partial only: shipment/date counts present, but max lag/cause details do not match ground truth.",มี shipment mismatch 8 รายการ; business_event_date ครอบคลุม 2024-08-22 ถึง 2024-08-24; posting_date batch คือ 2024-09-30; lag สูงสุด 39 วัน,"| total_shipments | min_business_event_date | max_business_event_date | min_posting_date | max_posting_date | max_lag_days |
+| --- | --- | --- | --- | --- | --- |
+| 8 | 2024-08-22 | 2024-08-24 | 2024-09-30 | 2024-09-30 | 0 |"
+L3-Q-HARD-006,HARD,wrong,"Max lag matches, but cross-month count differs from ground truth.",(1) 767 แถว (จาก 809 ทั้งหมด) เป็น cross-month posting (2) Lag สูงสุด: 28 วัน (เช่น business_event_date 2024-01-31 → posting_date 2024-02-28),"| cross_month_count | max_lag_days |
+| --- | --- |
+| 809 | 28.00 |"
+L3-Q-HARD-007,HARD,wrong,No matching answer rows; misses requested anomaly.,"2025 Q3; revenue 178,707,675.00 THB; baseline เฉลี่ยอีก 7 ไตรมาส 41,816,611.14 THB; ratio 4.27 เท่า",(no rows)
+L3-Q-HARD-008,HARD,wrong,"Partial only: largest deposit core fields match, but source driver/campaign/SKU explanation required by ground truth is missing.","largest deposit คือวันที่ 2025-07-15, account_id OPER-REMOTE, amount 18,906,765.00 THB. ตัวขับเคลื่อนคือยอดขาย REMOTE credit_card วันที่ 2025-07-15 ซึ่งถูกดันโดยการเปิดตัว SF-Galaxy-Pro-2568 ภายใต้ promo SF-LAUNCH-2568","| business_event_date | account_id | amount_thb |
+| --- | --- | --- |
+| 2025-07-15 | OPER-REMOTE | 18,906,765.00 |"
+L3-Q-HARD-009,HARD,wrong,Incorrect inventory anomaly framing; answers closing units rather than all-zero snapshot pattern.,มี SKU ที่ closing_units=0 ทุกสาขาใน snapshot 100 SKU; ในนั้นมี end_of_life_date ใน DIM_PRODUCT 0 SKU; snapshot ครอบคลุม 10 สาขา ไม่ตรงกับ DIM_BRANCH 11 สาขา โดยสาขาที่หายไปคือ REMOTE,"| event_year | event_month | branch_name_en | sku_id | total_closing_units |
+| --- | --- | --- | --- | --- |
+| 2025 | 2025-12 | FahMai Khon Kaen Central | SF-Galaxy-Pro-2568 | 1,217.00 |
+| 2025 | 2025-12 | FahMai Phuket Festival | SF-Galaxy-Pro-2568 | 1,204.00 |
+| 2025 | 2025-12 | Bangkok Ratchada 9 HQ | SF-Galaxy-Pro-2568 | 1,199.00 |
+| 2025 | 2025-12 | FahMai Udon Central | SF-Galaxy-Pro-2568 | 1,197.00 |
+| 2025 | 2025-12 | FahMai Chiang Mai Maya | SF-Galaxy-Pro-2568 | 1,194.00 |
+| 2025 | 2025-12 | FahMai Pattaya Central | SF-Galaxy-Pro-2568 | 1,192.00 |
+| 2025 | 2025-12 | FahMai Central World | SF-Galaxy-Pro-2568 | 1,181.00 |
+| 2025 | 2025-12 | FahMai EM Sphere | SF-Galaxy-Pro-2568 | 1,177.00 |
+| 2025 | 2025-11 | FahMai Khon Kaen Central | SF-Galaxy-Pro-2568 | 1,176.00 |
+| 2025 | 2025-12 | FahMai Phuket Road | SF-Galaxy-Pro-2568 | 1,167.00 |
+| 2025 | 2025-11 | FahMai Phuket Festival | SF-Galaxy-Pro-2568 | 1,164.00 |
+| 2025 | 2025-11 | Bangkok Ratchada 9 HQ | SF-Galaxy-Pro-2568 | 1,158.00 |
+| 2025 | 2025-11 | FahMai Chiang Mai Maya | SF-Galaxy-Pro-2568 | 1,154.00 |
+| 2025 | 2025-11 | FahMai Pattaya Central | SF-Galaxy-Pro-2568 | 1,154.00 |
+| 2025 | 2025-11 | FahMai Udon Central | SF-Galaxy-Pro-2568 | 1,154.00 |
+| 2025 | 2025-11 | FahMai Central World | SF-Galaxy-Pro-2568 | 1,142.00 |
+| 2025 | 2025-11 | FahMai EM Sphere | SF-Galaxy-Pro-2568 | 1,140.00 |
+| 2025 | 2025-11 | FahMai Phuket Road | SF-Galaxy-Pro-2568 | 1,135.00 |
+| 2025 | 2025-12 | FahMai Siam | SF-Galaxy-Pro-2568 | 1,132.00 |
+| 2025 | 2025-12 | FahMai Udon Central | SKU-MASS-008 | 1,130.00 |
+| 2025 | 2025-10 | FahMai Khon Kaen Central | SF-Galaxy-Pro-2568 | 1,129.00 |
+| 2025 | 2025-10 | FahMai Phuket Festival | SF-Galaxy-Pro-2568 | 1,121.00 |
+| 2025 | 2025-10 | FahMai Udon Central | SF-Galaxy-Pro-2568 | 1,120.00 |
+| 2025 | 2025-10 | FahMai Pattaya Central | SF-Galaxy-Pro-2568 | 1,119.00 |
+| 2025 | 2025-12 | FahMai Udon Central | SKU-MASS-010 | 1,118.00 |
+| 2025 | 2025-10 | FahMai Chiang Mai Maya | SF-Galaxy-Pro-2568 | 1,116.00 |
+| 2025 | 2025-12 | FahMai Udon Central | NT-LT-001 | 1,115.00 |
+| 2025 | 2025-10 | Bangkok Ratchada 9 HQ | SF-Galaxy-Pro-2568 | 1,110.00 |
+| 2025 | 2025-10 | FahMai Central World | SF-Galaxy-Pro-2568 | 1,109.00 |
+| 2025 | 2025-12 | FahMai Udon Central | SKU-MASS-009 | 1,105.00 |
+| 2025 | 2025-12 | FahMai Udon Central | SKU-MASS-012 | 1,105.00 |
+| 2025 | 2025-12 | FahMai Udon Central | SKU-MASS-007 | 1,103.00 |
+| 2025 | 2025-10 | FahMai EM Sphere | SF-Galaxy-Pro-2568 | 1,099.00 |
+| 2025 | 2025-10 | FahMai Phuket Road | SF-Galaxy-Pro-2568 | 1,098.00 |
+| 2025 | 2025-11 | FahMai Siam | SF-Galaxy-Pro-2568 | 1,096.00 |
+| 2025 | 2025-12 | FahMai Udon Central | SKU-MASS-011 | 1,095.00 |
+| 2025 | 2025-12 | FahMai Udon Central | DN-LT-010 | 1,094.00 |
+| 2025 | 2025-12 | FahMai Khon Kaen Central | NT-LT-001 | 1,093.00 |
+| 2025 | 2025-12 | FahMai Khon Kaen Central | SKU-MASS-008 | 1,089.00 |
+| 2025 | 2025-12 | FahMai Khon Kaen Central | AW-MN-001 | 1,086.00 |
+| 2025 | 2025-09 | FahMai Khon Kaen Central | SF-Galaxy-Pro-2568 | 1,085.00 |
+| 2025 | 2025-11 | FahMai Udon Central | SKU-MASS-008 | 1,085.00 |
+| 2025 | 2025-12 | FahMai Khon Kaen Central | DN-LT-010 | 1,083.00 |
+| 2025 | 2025-12 | FahMai Phuket Festival | DN-LT-010 | 1,082.00 |
+| 2025 | 2025-12 | FahMai Udon Central | AW-MN-001 | 1,082.00 |
+| 2025 | 2025-09 | FahMai Udon Central | SF-Galaxy-Pro-2568 | 1,080.00 |
+| 2025 | 2025-09 | FahMai Phuket Festival | SF-Galaxy-Pro-2568 | 1,079.00 |
+| 2025 | 2025-12 | FahMai Khon Kaen Central | SKU-MASS-011 | 1,078.00 |
+| 2025 | 2025-12 | FahMai Phuket Festival | SKU-MASS-007 | 1,078.00 |
+| 2025 | 2025-12 | FahMai Phuket Festival | SKU-MASS-012 | 1,078.00 |"
+L3-Q-HARD-010,HARD,correct,Strict match for campaign ROI headline values.,"(1) Campaign ID: SF-LAUNCH-2568 (2) ROI ratio: 19.0x (net_total 143,301,515 THB / discount_total 7,542,185 THB)","| campaign_id | roi_ratio |
+| --- | --- |
+| SF-LAUNCH-2568 | 19.00 |"
+L3-Q-HARD-011,HARD,wrong,"Deposit total matches, but share/percentage context is wrong.","(1) ยอด deposit กรกฎาคม 2025: 150,986,075.00 THB (89 รายการ) (2) 49.5% ของยอด deposit ทั้งปี 2025 (305,078,991 THB) → 2-tuple: (150,986,075.0, 49.5%)","| total_deposit_july_2025 | deposit_percentage_of_year_2025 |
+| --- | --- |
+| 150,986,075.00 | 100.00 |"
+L3-Q-HARD-012,HARD,wrong,"Partial vendor spend list, but misses top share and duplicate invoice linkage required by ground truth.","vendor spend เรียงมากไปน้อย: V-001=16,320,000.00 THB; V-002=8,064,000.00 THB; V-006=3,552,000.00 THB; V-013=2,032,350.00 THB; V-014=2,016,000.00 THB; V-018=1,382,400.00 THB. อันดับ 1 คือ V-001 คิดเป็น 48.9% ของ spend ทั้งหมด. duplicate vendor_invoice_id มี 1 id: V-013/PW-INV-2568-04823 (2 rows)","| vendor_id | total_paid_thb |
+| --- | --- |
+| V-001 | 16,320,000.00 |
+| V-002 | 8,064,000.00 |
+| V-006 | 3,552,000.00 |
+| V-013 | 2,032,350.00 |
+| V-014 | 2,016,000.00 |
+| V-018 | 1,382,400.00 |"
+L3-Q-HARD-013,HARD,wrong,"Incorrect after dynamic-template rerun: generic inventory aggregate, not opening-balance initialization/REMOTE/transfer-in answer.","opening_balance รวม 12,652 units จาก 11 แถว / 11 branch. branch สูงสุดคือ REMOTE 12,152 units. วันที่ 2024-01-15 มี opening_balance 0 แถว; วันเดียวกันมี transfer_in 10 แถว quantity รวม 500 units ซึ่งไม่รวมใน opening_balance","| branch_name_en | sku_id | event_fiscal_quarter | row_count |
+| --- | --- | --- | --- |
+| FahMai Siam | AW-MN-001 | 3 | 84 |
+| FahMai Siam | SKU-MASS-076 | 3 | 83 |
+| FahMai Siam | SKU-MASS-072 | 4 | 82 |
+| FahMai Siam | SKU-MASS-009 | 1 | 80 |
+| FahMai Siam | SKU-MASS-007 | 4 | 79 |
+| FahMai Siam | SKU-MASS-043 | 1 | 78 |
+| FahMai Siam | SKU-MASS-010 | 4 | 77 |
+| FahMai Siam | SKU-MASS-039 | 1 | 76 |
+| FahMai Siam | SKU-MASS-062 | 1 | 76 |
+| FahMai Siam | SKU-MASS-033 | 4 | 75 |
+| FahMai Siam | SKU-MASS-048 | 1 | 75 |
+| FahMai Siam | NT-LT-001 | 3 | 74 |
+| FahMai Siam | SKU-MASS-021 | 1 | 74 |
+| FahMai Siam | SKU-MASS-023 | 3 | 74 |
+| FahMai Siam | SKU-MASS-061 | 1 | 74 |
+| FahMai Siam | SKU-MASS-063 | 2 | 74 |
+| FahMai Siam | SKU-MASS-096 | 4 | 74 |
+| FahMai Siam | SKU-MASS-012 | 3 | 73 |
+| FahMai Siam | SKU-MASS-044 | 1 | 73 |
+| FahMai Siam | SKU-MASS-050 | 3 | 73 |
+| FahMai Siam | SKU-MASS-060 | 3 | 73 |
+| FahMai Siam | SKU-MASS-061 | 3 | 73 |
+| FahMai Siam | SKU-MASS-085 | 3 | 73 |
+| FahMai Siam | SKU-MASS-012 | 4 | 72 |
+| FahMai Siam | SKU-MASS-037 | 4 | 72 |
+| FahMai Siam | SKU-MASS-040 | 3 | 72 |
+| FahMai Siam | SKU-MASS-089 | 3 | 72 |
+| FahMai Siam | SKU-MASS-090 | 2 | 72 |
+| FahMai Siam | SKU-MASS-013 | 3 | 71 |
+| FahMai Siam | SKU-MASS-014 | 3 | 71 |
+| FahMai Siam | SKU-MASS-022 | 3 | 71 |
+| FahMai Siam | SKU-MASS-042 | 4 | 71 |
+| FahMai Siam | SKU-MASS-087 | 3 | 71 |
+| FahMai Siam | SKU-MASS-088 | 3 | 71 |
+| FahMai Siam | SKU-MASS-068 | 3 | 70 |
+| FahMai Siam | SKU-MASS-083 | 3 | 70 |
+| FahMai Siam | SKU-MASS-098 | 3 | 70 |
+| FahMai Siam | SKU-MASS-016 | 3 | 69 |
+| FahMai Siam | SKU-MASS-027 | 3 | 69 |
+| FahMai Siam | SKU-MASS-027 | 4 | 69 |
+| FahMai Siam | SKU-MASS-041 | 1 | 69 |
+| FahMai Siam | SKU-MASS-041 | 2 | 69 |
+| FahMai Siam | SKU-MASS-042 | 1 | 69 |
+| FahMai Siam | SKU-MASS-051 | 3 | 69 |
+| FahMai Siam | SKU-MASS-071 | 3 | 69 |
+| FahMai Central World | SKU-MASS-028 | 4 | 68 |
+| FahMai Siam | NT-LT-001 | 1 | 68 |
+| FahMai Siam | SKU-MASS-008 | 3 | 68 |
+| FahMai Siam | SKU-MASS-013 | 4 | 68 |
+| FahMai Siam | SKU-MASS-034 | 3 | 68 |"
+L3-Q-HARD-014,HARD,wrong,No matching answer rows; misses requested anomaly.,"CEO ปัจจุบันคือ EMP-L3-00013 Naret Vision (CEO); leadership handover มีผลวันที่ 2025-01-15. ผู้อนุมัติ refund มากที่สุดคือ EMP-L3-00005 Fin Approver (Finance Manager) จำนวน 7,116 แถว. เป็นคนเดียวกับ CEO หรือไม่: ไม่; role จริงคือ dept_code=FIN, position_level=Manager",(no rows)
+L3-Q-HARD-015,HARD,wrong,"Partial duplicate invoice metrics, but misses row-level/AP responsibility/status evidence.","(1) 2 แถว: VP-202504-9096124 (posting 2025-04-05, 89,000 THB) และ VP-202509-15179906 (posting 2025-09-10, 104,500 THB) (2) payment_id = VP-202504-9096124, จ่าย 89,000 THB (3) ทีม AP (Accounts Payable) รับผิดชอบยืนยัน canonical record; สถานะยังอยู่ระหว่างดำเนินการ (not yet resolved ในวันนั้น)","| duplicate_count | vendor_invoice_id | unique_payment_count | total_paid_thb |
+| --- | --- | --- | --- |
+| 2 | PW-INV-2568-04823 | 2 | 193,500.00 |"
+L3-Q-HARD-016,HARD,wrong,"Phantom duplicate count matches, but real redemptions and discount totals are incorrect.","phantom duplicate ของ campaign SF-LAUNCH-2568 มี 4 rows. หลังหัก phantom rows เหลือ redemption จริง 39 rows. discount_applied_thb รวมจริงหลัง dedup = 143,505.00 THB","| phantom_duplicates | real_redemptions | total_discount_thb |
+| --- | --- | --- |
+| 4 | 4 | 15,485.00 |"
+L3-Q-HARD-017,HARD,wrong,Incorrect shipment count/cause; returns zero rows instead of delayed shipment pattern.,สาเหตุคือ temporary service disruption / carrier disruption จัดเป็น external จากฝั่ง carrier. carrier คือ V-006 VeloShip. ช่วง 2024-08-22 ถึง 2024-08-24 มี shipment ของ carrier นี้ 88 แถว,"| shipment_count |
+| --- |
+| 0 |"
+L3-Q-HARD-018,HARD,wrong,Incorrect generic row count; misses supply-driven shortage attribution.,"เป็น supply-driven: สินค้า out of stock จาก upstream component supply shortage. ยอดขายลดจาก 234,214,000.00 เป็น 212,414,700.00 THB (-21,799,300.00 THB, -9.3%). LINE WORKS ภายในที่ Ops/CS คุยเรื่องนี้มี 4 threads; LINE OA ที่ CS แจ้งลูกค้าด้วยสถานะเดียวกันมี 150 threads","| row_count |
+| --- |
+| 7133 |"
+L3-Q-HARD-019,HARD,wrong,No matching answer rows; misses requested anomaly.,"(1) 14 รายการ (2) 77,250.00 THB (3) EMP-L3-00010, May Support, CS Agent, dept_code=SUP (4) ชื่อขั้นตอน: 'standard goodwill-return process'",(no rows)
+L3-Q-HARD-020,HARD,wrong,No matching answer rows; misses requested anomaly.,"(1) 4 รายการ (3,500 + 4,500 + 5,500 + 6,200 THB) (2) 19,700.00 THB (3) EMP-L3-00008, Ollie Logistics, Operations Manager, dept_code=OPS (4) 'manager delegated approval authority' (EN) / 'อำนาจอนุมัติของผู้จัดการ' / 'อำนาจที่ได้รับมอบหมาย' (TH)",(no rows)
+L3-Q-MED-001,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: - ปี 2024: `SKU-MASS-063` ขายได้มากที่สุด รวม `1,508` ชิ้น - ปี 2025: `SF-Galaxy-Pro-2568` ขายได้มากที่สุด รวม `4,370` ชิ้น ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` - กรอง `business_event_date` แยกปี 2024 และ 2025 - group by `sku_id` แล้ว sum `quantity` - เรียงจาก `quantity` มากไปน้อย","| sales_year | sku_id | total_units_sold |
+| --- | --- | --- |
+| 2024 | SKU-MASS-063 | 1508 |
+| 2025 | SF-Galaxy-Pro-2568 | 4370 |"
+L3-Q-MED-002,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: Single largest deposit ใน `FACT_BANK_TRANSACTION` คือ: - `amount_thb`: `18,906,765` บาท - `business_event_date`: `2025-07-15` - `account_id`: `OPER-REMOTE` - `bank_txn_id`: `BT-202507-1041521243094` - `transaction_type`: `deposit` - `related_entity_table`: `FACT_SALES_DEPOSIT_BATCH` - `related_entity_id`: `REMOTE|2025-07-15|credit_card` - `description`: `B2C credit_card batch deposit REMOTE 2025-07-15` Source event ของรายการนี้คือยอดรับเงินแบบ batch จากยอดขาย B2C ช่องทาง online/REMOTE ที่จ่ายด้วย `credit_card` วันที่ `2025-07-15` ไม่ใช่ transaction สินค้ารายตัวเดียว แต่เมื่อตรวจยอดขายใน batch นี้พบว่าเกี่ยวข้องกับแคมเปญ `SF-LAUNCH-2568` เป็นหลัก: - จำนวน transaction ใน batch: `509` - sum `net_total_thb`: `18,906,765` บาท ตรงกับยอด deposit - promo campaign หลัก: `SF-LAUNCH-2568` จำนวน `501` transaction - SKU หลักใน batch: `SF-Galaxy-Pro-2568` - จำนวน `SF-Galaxy-Pro-2568` ใน batch: `501` เครื่อง - gross จาก `SF-Galaxy-Pro-2568` ใน batch: `19,488,900` บาท - campaign description: `SF Galaxy Pro 2568 launch promo` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_BANK_TRANSACTION.csv` หาแถว `transaction_type = deposit` และ `amount_thb > 0` ที่มี `amount_thb` สูงสุด - ใช้ `tables/FACT_SALES.csv` ตรวจ batch จาก `related_entity_id = REMOTE|2025-07-15|credit_card` - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` รวมยอด SKU ใน transaction ของ batch - ใช้ `tables/DIM_PRODUCT.csv` ดู product/brand ของ SKU - ใช้ `tables/DIM_PROMO_CAMPAIGN.csv` ดูคำอธิบาย campaign `SF-LAUNCH-2568` - มี render ที่เกี่ยวข้องกับ bank statement เดือนนี้ใน `renders/bank_statement/2025-07/BS-OPER-REMOTE-2568-07_header.png` และ transaction pages ของ account `OPER-REMOTE`; ค่าที่ใช้ตอบยึดจาก structured table เป็นหลัก","| amount_thb | business_event_date | account_id | bank_txn_id | transaction_type | related_entity_table | related_entity_id | description | batch_txn_count | batch_net_total_thb | primary_promo_campaign_id | primary_campaign_description_en | primary_sku_id | primary_sku_units | primary_sku_gross_revenue_thb |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 18,906,765.00 | 2025-07-15 | OPER-REMOTE | BT-202507-1041521243094 | deposit | FACT_SALES_DEPOSIT_BATCH | REMOTE|2025-07-15|credit_card | B2C credit_card batch deposit REMOTE 2025-07-15 | 509 | 18,906,765.00 | SF-LAUNCH-2568 | SF Galaxy Pro 2568 launch promo | SF-Galaxy-Pro-2568 | 501 | 19,488,900.00 |"
+L3-Q-MED-003,MED,correct,"Value-level match against ground truth; column alias changed but customer_id, earned points, and loyalty tier match.","คำตอบ: ลูกค้า B2C ที่ earn คะแนนสะสมรวมมากที่สุดคือ: - `customer_id`: `CUST-L3-023922` - คะแนน earned รวม: `15,738` - loyalty tier ปัจจุบันจาก `DIM_CUSTOMER`: `platinum` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_LOYALTY_LEDGER.csv` - กรอง `event_type = earned` - join กับ `tables/DIM_CUSTOMER.csv` - กรอง `customer_type = B2C` - group by `customer_id` แล้ว sum `points_delta` - join/read `loyalty_tier` จาก `DIM_CUSTOMER`","| customer_id | total_earned_points | loyalty_tier |
+| --- | --- | --- |
+| CUST-L3-023922 | 15738 | platinum |"
+L3-Q-MED-004,MED,correct,Value-level match against ground truth; output is markdown table.,คำตอบ: ในปี 2025 วันที่รับเงิน B2B ที่ล่าสุดที่สุดคือ `2025-12-31` และมีหลาย transaction ที่รับเงินวันนี้ (`23` transactions) ดังนั้นเลือก customer ที่ช้าสุดในกลุ่มวันที่ล่าสุดนี้จากจำนวนวันที่เกิน due date มากที่สุด: - `customer_id`: `CUST-L3-B2B-020600` - `txn_id`: `TXN-202510-18020600` - `payment_due_date`: `2025-12-17` - `payment_received_date`: `2025-12-31` - จ่ายช้ากว่า due date: `14` วัน - `payment_terms`: `NET-60` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` - กรอง `is_b2b = true` - กรอง `payment_received_date` อยู่ในปี 2025 - หา `payment_received_date` ล่าสุด คือ `2025-12-31` - ในกลุ่มวันล่าสุด คำนวณ `payment_received_date - payment_due_date` ถ้าติดลบให้นับเป็น `0` - ใช้ `tables/DIM_CUSTOMER.csv` เพื่อดึง `payment_terms`,"| customer_id | txn_id | payment_due_date | payment_received_date | days_late | payment_terms |
+| --- | --- | --- | --- | --- | --- |
+| CUST-L3-B2B-020600 | TXN-202510-18020600 | 2025-12-17 | 2025-12-31 | 14 | NET-60 |"
+L3-Q-MED-005,MED,correct,Value-level match against ground truth; output is markdown table.,คำตอบ: SKU ที่มี stockout มากที่สุดในปี 2025 คือ: - `sku_id`: `SKU-MASS-048` - จำนวนเหตุการณ์ stockout: `10` branch-month events - กระทบ retail branch: `9` สาขา ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_INVENTORY_MONTHLY_SNAPSHOT.csv` - กรองปี 2025 จาก `business_event_date` - กรอง `closing_units = 0` - ใช้ `tables/DIM_BRANCH.csv` เพื่อกรอง retail/physical branch โดยใช้ `branch_type = branch` - group by `sku_id` - นับจำนวน row เป็น stockout events และนับ distinct `branch_code` เป็นจำนวนสาขาที่กระทบ,"| sku_id | stockout_events | affected_retail_branches |
+| --- | --- | --- |
+| SKU-MASS-048 | 10 | 9 |"
+L3-Q-MED-006,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: เปรียบเทียบ 11.11 Mega Sale: | campaign_id | redemption count | discount รวม | |---|---:|---:| | `MEGA-1111-2567` | `267` | `1,308,360` บาท | | `MEGA-1111-2568` | `442` | `2,868,084` บาท | ปี 2568 มี redemption มากกว่าปี 2567 อยู่ `175` ครั้ง และ discount รวมมากกว่า `1,559,724` บาท ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_PROMO_REDEMPTION.csv` - กรอง `campaign_id` เป็น `MEGA-1111-2567` และ `MEGA-1111-2568` - count rows เป็นจำนวน redemption - sum `discount_applied_thb` เป็นยอดส่วนลดรวม - ใช้ `tables/DIM_PROMO_CAMPAIGN.csv` เพื่อยืนยันว่า campaign เหล่านี้คือ `11.11 Mega Sale` - มี banner render ประกอบใน `renders/e7_banner/2024-11/BN-MEGA1111-2567.png` และ `renders/e7_banner/2025-11/BN-MEGA1111-2568.png`","| campaign_id | redemption_count | discount_total_thb |
+| --- | --- | --- |
+| MEGA-1111-2567 | 267 | 1,308,360.00 |
+| MEGA-1111-2568 | 442 | 2,868,084.00 |"
+L3-Q-MED-007,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: B2C basket ที่มี `basket_total_thb` สูงที่สุดทั้ง corpus คือ: - `txn_id`: `TXN-202411-03026757` - `branch_code`: `BKK-EMSP` - `basket_total_thb`: `320,300` บาท - `business_event_date`: `2024-11-03` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` - กรอง `is_b2b = false` - เรียง `basket_total_thb` จากมากไปน้อย - ดึงแถวแรก","| txn_id | branch_code | basket_total_thb |
+| --- | --- | --- |
+| TXN-202411-03026757 | BKK-EMSP | 320,300.00 |"
+L3-Q-MED-008,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: Top 5 ลูกค้า B2B ปี 2024 ตามยอดซื้อรวม `net_total_thb`: | rank | customer_id | net_total_thb | |---:|---|---:| | 1 | `CUST-L3-B2B-002600` | `7,548,210` | | 2 | `CUST-L3-B2B-021100` | `7,405,700` | | 3 | `CUST-L3-B2B-019600` | `6,817,740` | | 4 | `CUST-L3-B2B-026300` | `6,774,900` | | 5 | `CUST-L3-B2B-003500` | `6,758,870` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` - กรอง `is_b2b = true` - กรอง `business_event_date` อยู่ในปี 2024 - group by `customer_id` - sum `net_total_thb` - เรียงจากมากไปน้อย","| customer_id | net_total_thb |
+| --- | --- |
+| CUST-L3-B2B-002600 | 7,548,210.00 |
+| CUST-L3-B2B-021100 | 7,405,700.00 |
+| CUST-L3-B2B-019600 | 6,817,740.00 |
+| CUST-L3-B2B-026300 | 6,774,900.00 |
+| CUST-L3-B2B-003500 | 6,758,870.00 |"
+L3-Q-MED-009,MED,correct,Value-level match against ground truth; output is markdown table.,คำตอบ: สำหรับวันที่ `2025-02-15` policy return window ที่มีผลบังคับใช้คือ: - `return_window_days`: `14` วัน - `policy_version_id`: `1` - effective period: `2024-01-01` ถึง `2025-03-01` - scope: `global` ดังนั้นลูกค้าซื้อและรับของวันที่ `2025-02-15` มีสิทธิ์คืนสินค้าได้ภายใน `14` วันนับจากวันที่รับสินค้า ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/DIM_POLICY_VERSION.csv` - กรอง `policy_variable = return_window_days` - กรอง `scope_filter = global` - เลือก policy ที่ `effective_date <= 2025-02-15` และ `end_date >= 2025-02-15`,"| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 1 | return_window_days | 14.00 | 2024-01-01 | 2025-03-01 |"
+L3-Q-MED-010,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: วันที่ `2025-03-20` refund threshold ที่มีผลบังคับใช้คือ: - refund threshold: `5,000` บาท - `policy_version_id`: `12` - effective date: `2025-03-15` - end date: ยังไม่มี end date - scope: `global` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/DIM_POLICY_VERSION.csv` - กรอง `policy_variable = refund_threshold_thb` - กรอง `scope_filter = global` - เลือก policy ที่ครอบคลุมวันที่ `2025-03-20`","| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 12 | refund_threshold_thb | 5,000.00 | 2025-03-15 |  |"
+L3-Q-MED-011,MED,correct,Value-level match against ground truth; output is markdown table.,คำตอบ: ช่วง `2025-12-25` ถึง `2025-12-31` มีรายการคืนสินค้าทั้งหมด: - total returns: `74` รายการ แยกตาม `return_reason`: | return_reason | count | |---|---:| | `customer_change_of_mind` | `74` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_RETURN.csv` - กรอง `business_event_date` ตั้งแต่ `2025-12-25` ถึง `2025-12-31` แบบรวมสองวัน - count `return_id` - group by `return_reason`,"| total_returns | return_reason | count_per_reason |
+| --- | --- | --- |
+| 74 | customer_change_of_mind | 74 |"
+L3-Q-MED-012,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: ถ้านับเฉพาะ credit หรือ `amount_thb > 0` และไม่รวม `account_id = KBANK-OPER` บัญชีที่มี credit volume รวมสูงที่สุดคือ: - `account_id`: `OPER-BKK-SIAM` - credit volume รวม: `579,680,857` บาท ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_BANK_TRANSACTION.csv` - กรอง `amount_thb > 0` - กรองออก `account_id = KBANK-OPER` - group by `account_id` - sum `amount_thb` - เรียงจากมากไปน้อย","| account_id | credit_volume_thb |
+| --- | --- |
+| OPER-BKK-SIAM | 579,680,857.00 |"
+L3-Q-MED-013,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: Top 3 SKU ตาม gross revenue จาก `line_total_thb` ตลอด corpus: | rank | sku_id | brand_family | gross revenue | |---:|---|---|---:| | 1 | `DN-LT-010` | `Dawn` | `228,465,900` | | 2 | `SF-Galaxy-Pro-2568` | `SaiFah` | `169,993,000` | | 3 | `SKU-MASS-019` | `FahMai` | `159,538,600` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` - group by `sku_id` - sum `line_total_thb` - ใช้ `tables/DIM_PRODUCT.csv` join เพื่อดึง `brand_family`","| sku_id | brand_family | gross_revenue_thb |
+| --- | --- | --- |
+| DN-LT-010 | Dawn | 228,465,900.00 |
+| SF-Galaxy-Pro-2568 | SaiFah | 169,993,000.00 |
+| SKU-MASS-019 | FahMai | 159,538,600.00 |"
+L3-Q-MED-014,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: ใช้ช่วง pre-launch ก่อนเปิดตัว `SF-Galaxy-Pro-2568` คือข้อมูลตั้งแต่ `2024-01-01` ถึง `2025-07-14` - Offline หรือหน้าร้านทุกสาขาที่ไม่ใช่ `REMOTE`: average basket size = `58,040.03` บาทต่อ transaction - Online หรือ `branch_code = REMOTE`: average basket size = `37,993.83` บาทต่อ transaction จำนวน transaction ที่ใช้คำนวณ: - Offline/non-REMOTE: `79,321` transactions - Online/REMOTE: `10,049` transactions ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` - กรอง `business_event_date < 2025-07-15` - แยก offline ด้วย `branch_code != REMOTE` - แยก online ด้วย `branch_code = REMOTE` - average `basket_total_thb` - วัน launch ของ SKU อ้างอิงจากคำถามและตรวจได้จาก `tables/DIM_PRODUCT.csv` โดย `SF-Galaxy-Pro-2568` มี `launch_date = 2025-07-15`","| channel_group | avg_basket_total_thb | transaction_count |
+| --- | --- | --- |
+| offline | 58,040.03 | 79321 |
+| online | 37,993.83 | 10049 |"
+L3-Q-MED-015,MED,correct,Value-level match against ground truth; output is markdown table.,คำตอบ: `NT-LT-001` เคยถูก recall ใช่ มี status history ทั้งหมด `3` records ตามลำดับเวลา: | order | status | transition_date | |---:|---|---| | 1 | `normal` | `2024-01-01` | | 2 | `active` | `2025-09-10` | | 3 | `completed` | `2025-10-15` | ถ้านับเฉพาะการเปลี่ยนสถานะจากสถานะก่อนหน้า จะมี `2` transitions: - `normal -> active` วันที่ `2025-09-10` - `active -> completed` วันที่ `2025-10-15` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/dim_product_recall_history.csv` - กรอง `sku_id = NT-LT-001` - เรียงตาม `transition_date`,"| status_record_count | status | transition_date |
+| --- | --- | --- |
+| 3 | normal | 2024-01-01 |
+| 3 | active | 2025-09-10 |
+| 3 | completed | 2025-10-15 |"
+L3-Q-MED-016,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: คำนวณปี 2025 ด้วยสูตร: `return rate = จำนวน distinct return_id / จำนวน distinct sales txn_id` รวม `REMOTE` เพราะเป็น `branch_code` ใน `FACT_SALES` และ `FACT_RETURN` - สาขาที่ return rate สูงสุด: `HKT-FEST` - sales transactions: `3,970` - return events: `271` - return rate: `6.83%` - สาขาที่ return rate ต่ำสุด: `REMOTE` - sales transactions: `8,150` - return events: `316` - return rate: `3.88%` หมายเหตุ: ถ้าต้องการเฉพาะ physical branch และตัด `REMOTE` ออก สาขาที่ต่ำสุดคือ `KKC-CTRL` ที่ `4.97%` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES.csv` นับ distinct `txn_id` ปี 2025 ต่อ `branch_code` - ใช้ `tables/FACT_RETURN.csv` นับ distinct `return_id` ปี 2025 ต่อ `branch_code` - join ด้วย `branch_code` - คำนวณ `return_id count / txn_id count`","| rate_position | branch_code | sales_transactions | return_events | return_rate_percent |
+| --- | --- | --- | --- | --- |
+| highest | HKT-FEST | 3970 | 271 | 6.83 |
+| lowest | REMOTE | 8150 | 316 | 3.88 |"
+L3-Q-MED-017,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: สำหรับ `DN-LT-010` transaction ที่มียอดรวมเฉพาะ SKU นี้สูงสุดมีมูลค่า: - มูลค่า `DN-LT-010` สูงสุดต่อ transaction: `254,700` บาท - จำนวนเครื่องใน transaction นั้น: `3` เครื่อง มี transaction ที่ tie กันที่ยอดสูงสุดนี้ `4` รายการ: - `TXN-202411-09020300` - `TXN-202506-02002742` - `TXN-202508-12023200` - `TXN-202509-14028900` ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` - กรอง `sku_id = DN-LT-010` - group by `txn_id` - sum `line_total_thb` และ sum `quantity` - เรียงยอดรวมจากมากไปน้อย","| total_dn_lt_010_thb | quantity_dn_lt_010_units |
+| --- | --- |
+| 254,700.00 | 3 |"
+L3-Q-MED-018,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: ในปี 2025 รายการค่าธรรมเนียมธนาคารใน `FACT_BANK_TRANSACTION` ที่ `transaction_type = fee` มี: - จำนวนรายการ: `24` - ผลรวม `amount_thb`: `-15,600` บาท หมายเหตุ: ค่าเป็นลบเพราะเป็นเงินออก/ค่าธรรมเนียม ถ้าดูเป็น cost แบบค่าสัมบูรณ์คือ `15,600` บาท ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_BANK_TRANSACTION.csv` - กรอง `business_event_date` อยู่ในปี 2025 - กรอง `transaction_type = fee` - count rows และ sum `amount_thb`","| total_count | total_amount_thb |
+| --- | --- |
+| 24 | -15,600.00 |"
+L3-Q-MED-019,MED,correct,Value-level match against ground truth; output is markdown table.,"คำตอบ: จำนวน distinct `sku_id` ที่ขายในปี 2025 แยกตามเดือน มกราคมถึงธันวาคม คือ: `(109, 109, 109, 109, 109, 109, 110, 110, 110, 110, 110, 110)` แปลตามเดือน: | month | distinct sku_id | |---:|---:| | Jan | `109` | | Feb | `109` | | Mar | `109` | | Apr | `109` | | May | `109` | | Jun | `109` | | Jul | `110` | | Aug | `110` | | Sep | `110` | | Oct | `110` | | Nov | `110` | | Dec | `110` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_SALES_LINE_ITEM.csv` - กรอง `business_event_date` อยู่ในปี 2025 - แปลงเดือนจาก `business_event_date` - group by month - count distinct `sku_id`","| month | distinct_sku_count |
+| --- | --- |
+| 2025-01 | 109 |
+| 2025-02 | 109 |
+| 2025-03 | 109 |
+| 2025-04 | 109 |
+| 2025-05 | 109 |
+| 2025-06 | 109 |
+| 2025-07 | 110 |
+| 2025-08 | 110 |
+| 2025-09 | 110 |
+| 2025-10 | 110 |
+| 2025-11 | 110 |
+| 2025-12 | 110 |"
+L3-Q-MED-020,MED,correct,Value-level match against ground truth; output is markdown table.,คำตอบ: ในปี 2025 วันของสัปดาห์ที่มี return events จากลูกค้า B2C มากที่สุดคือ: - วัน: `Thursday` - จำนวน return events: `536` จำนวนตามวันของสัปดาห์: | day_of_week | return events | |---|---:| | Thursday | `536` | | Friday | `519` | | Monday | `499` | | Saturday | `496` | | Wednesday | `496` | | Tuesday | `492` | | Sunday | `486` | ไฟล์ที่ใช้และวิธีหา: - ใช้ `tables/FACT_RETURN.csv` - ใช้ `tables/DIM_CUSTOMER.csv` - join ด้วย `customer_id` - กรอง `customer_type = B2C` - กรอง `business_event_date` อยู่ในปี 2025 - group by day-of-week จาก `business_event_date` - นับ distinct `return_id`,"| day_of_week | return_events |
+| --- | --- |
+| Thursday | 536 |"
+L3-Q-XHARD-001,XHARD,wrong,Incorrect generic monthly counts; misses redemption/ROI/reconciliation answer.,"(1) redemption ทั้งหมด = 43; (2) phantom duplicate = 4; (3) unique หลังหัก phantom = 39; (4) net discount cost = 143,505.00 THB; (5) net revenue = 2,726,595.00 THB; ROI = 19.00 เท่า. Reconciliation: ยืนยันได้ว่า phantom ไม่มี cash flow ออกจริง — V-013 (PayWise) เป็น payment processor คิดค่าธรรมเนียมคงที่รายเดือน 12,500 THB (NET-30); เดือน 2025-07 จ่ายครั้งเดียว (VP-202508-1442135 settle ผ่าน BT-202508-192942665969 จำนวน -12,500 THB) และไม่มี bank transaction ผูกกับ redemption_id ใด ๆ จึงไม่มีเงินออกซ้ำจาก 4 รายการ phantom.","| event_month | event_fiscal_quarter | row_count |
+| --- | --- | --- |
+| 2025-10 | 4 | 2936 |
+| 2025-07 | 3 | 2915 |
+| 2025-12 | 4 | 2869 |
+| 2025-05 | 2 | 2825 |
+| 2025-03 | 1 | 2820 |
+| 2025-09 | 3 | 2784 |
+| 2025-01 | 1 | 2773 |
+| 2025-08 | 3 | 2749 |
+| 2025-11 | 4 | 2729 |
+| 2025-06 | 2 | 2686 |
+| 2025-02 | 1 | 2580 |
+| 2025-04 | 2 | 2533 |"
+L3-Q-XHARD-002,XHARD,wrong,Incorrect generic row count; misses invoice reconciliation answer.,"(1) invoice ID ที่ซ้ำ = PW-INV-2568-04823. (2) มี 2 payment record: VP-202504-9096124 และ VP-202509-15179906. (3) VP-202504-9096124: paid_amount_thb=89000.00, business_event_date=2025-03-31, posting_date=2025-04-05, invoice period=2025-03; VP-202509-15179906: paid_amount_thb=104500.00, business_event_date=2025-09-10, posting_date=2025-09-10, invoice period=2025-08. (4) resolve ตาม business_event_date: row แรก (2025-03-31) อยู่ภายใต้ V-013 v1 (effective 2024-01-01..2025-04-01, amendment_summary: ไม่มี/สัญญาฉบับแรก); row สอง (2025-09-10) อยู่ภายใต้ V-013 v3 (effective 2025-07-01..2025-10-01, amendment_summary: 'Yearly rate ladder'). (5) สองแถวอ้างคนละงวด invoice (มี.ค. vs ส.ค.) ภายใต้คนละ contract regime (v1 vs v3) จึงเป็น 2 instance อิสระ ไม่ใช่ตัวซ้ำที่ต้องยุบ. (6) bank cross-check: BT-202504-1067675454044 = -89000 (2025-04-05) และ BT-202509-30080391030 = -104500 (2025-09-10) เป็น withdrawal ผูก vendor=V-013 ตรงกับ paid_amount แต่ละแถว. (7) true over-payment = 0 บาท: เป็นการ recycle เลข invoice ข้าม regime หลัง schema cutover ไม่ใช่จ่ายซ้ำงวดเดียวกัน แต่ละ payment ตรงตาม regime ของตัวเองและมี cash out จริงรองรับ — flag จึงเป็น false positive.","| row_count |
+| --- |
+| 33199 |"
+L3-Q-XHARD-003,XHARD,wrong,Partial recall history only; misses returns/refunds/warranty/reimbursement/net cost.,"(1) จาก dim_product_recall_history: NT-LT-001 เปลี่ยน normal→active วันที่ 2025-09-10 และ active→completed วันที่ 2025-10-15 (recall window = 2025-09-10 ถึง 2025-10-15). (2) returns ที่เกี่ยว filter ด้วย sku_id=NT-LT-001 และ return_reason='vendor recall — V-002 NovaTech battery' ในหน้าต่าง recall แล้ว join FACT_REFUND_PAID ด้วย return_id (จำนวนรายการและยอด refund รวม = ค่าคำนวณ ดู note). (3) DIM_POLICY_VERSION id=8: policy_variable=warranty_routing, value_text=novatech_service, effective 2025-06-01 (end_date ว่าง/ยังไม่ปิด) → เคลม warranty ของ NT-LT-001 ช่วงปกติ (posted 2025-07-08..2025-09-09) ต้อง route ไป novatech_service (NovaTech Service / V-002); FACT_WARRANTY_CLAIM.routing_destination ช่วงนี้ส่วนใหญ่เป็น novatech_service (มีบางเคสเป็น fahmai_cs ซึ่งไม่ตรงนโยบาย = noise). (4) refund payout ทุกแถวตัดจากบัญชี KBANK-OPER ของ FahMai (transaction_type=withdrawal, counterparty=ลูกค้า CUST-L3-…) → FahMai เป็นฝ่ายจ่ายเอง ไม่ใช่ NovaTech (V-002); ยอดรวม cash outflow = ค่าคำนวณ ดู note. (5) ไม่พบ deposit จาก V-002 ที่เป็น cost-recovery/reimbursement ใน FACT_BANK_TRANSACTION เลย และ FACT_VENDOR_PAYMENT ฝั่ง V-002 ไม่มีรายการ credit/ติดลบ → ไม่พบ vendor reimbursement ในข้อมูล. (6) ยืนยันเป็นตัวเลขสุดท้ายไม่ได้: gross refund outflow คำนวณได้แน่นอนและ recovery ที่บันทึกไว้ = 0 แต่เนื่องจากเป็น vendor recall ของ NovaTech ที่ตามปกติผู้ผลิตควรชดเชย ขณะที่ data lake (as-of 2026-01-15) ไม่มีธุรกรรม reimbursement บันทึกไว้ — การไม่มีรายการไม่ได้แปลว่าไม่มีหนี้ค้างชดเชย (อาจ settle ภายหลัง / ผ่าน credit note / หักกลบ payment รอบถัดไป) จึงสรุปได้แค่ net cost 'ตามที่บันทึก' = refund outflow − 0 แต่ตัวเลข net cost สุดท้ายที่ settle แล้วยืนยันจากข้อมูลที่มีไม่ได้.","| status_record_count | status | transition_date |
+| --- | --- | --- |
+| 3 | normal | 2024-01-01 |
+| 3 | active | 2025-09-10 |
+| 3 | completed | 2025-10-15 |"
+L3-Q-XHARD-004,XHARD,wrong,Incorrect monthly sales table; misses decomposition requested by ground truth.,"โครงสร้างจาก operating-day gaps (FACT_SALES, authoritative): BKK-PKT เปิดเฉพาะ 2025-04-01..04-12 (12 op-days) แล้วปิดยาว 04-13..04-30. เทียบรายสาขา: ทุก physical store ขาดวันเดียวกัน 04-13..04-17 (5 วัน) = Songkran network-wide; BKK-PKT ปิดต่ออีก 04-18..04-30 (13 วัน) เป็นช่วงปิดเฉพาะ PKT (renovation/maintenance). observed gross sales เดือนเมษายนของ BKK-PKT อ่านได้ตรงจาก reports/2025-04/OPS_REPORT_2025-04.md (per-branch BKK-PKT) ตรงกับผลรวม FACT_SALES. (6) V-005 shortage (2025-04-15..05-12) ไม่ overlap กับวันที่ PKT เปิดในเมษายน (04-01..04-12) เพราะ shortage เริ่ม 04-15 หลัง PKT ปิดไปแล้ว → contribution ต่อ April PKT = 0. Root cause หลัก = ช่วงปิดเฉพาะ PKT (renovation, 13 วัน) ซึ่งกินสัดส่วนส่วนใหญ่ของยอดที่หาย ส่วน Songkran (5 วัน) เป็นปัจจัยฤดูกาลที่กระทบทุกสาขาเท่ากัน และ V-005 ไม่กระทบ PKT เลย. นัย: April dip เป็น one-off จากการปิดปรับปรุง ไม่ใช่ underperformance เชิงโครงสร้าง (May ฟื้นเป็น 27.57M สูงกว่า March) — ควรประเมิน capex จาก run-rate เดือนปกติ.","| event_month | branch_name_en | event_fiscal_quarter | total_net_total_thb |
+| --- | --- | --- | --- |
+| 2025-01 | FahMai Phuket Road | 1 | 32,656,200.00 |
+| 2025-10 | FahMai Phuket Road | 4 | 31,044,300.00 |
+| 2025-02 | FahMai Phuket Road | 1 | 30,559,100.00 |
+| 2025-07 | FahMai Phuket Road | 3 | 30,216,505.00 |
+| 2025-06 | FahMai Phuket Road | 2 | 29,261,000.00 |
+| 2025-09 | FahMai Phuket Road | 3 | 28,965,000.00 |
+| 2025-05 | FahMai Phuket Road | 2 | 27,571,100.00 |
+| 2025-12 | FahMai Phuket Road | 4 | 26,905,260.00 |
+| 2025-08 | FahMai Phuket Road | 3 | 26,519,700.00 |
+| 2025-03 | FahMai Phuket Road | 1 | 26,032,400.00 |
+| 2025-11 | FahMai Phuket Road | 4 | 24,540,076.00 |
+| 2025-04 | FahMai Phuket Road | 2 | 10,668,300.00 |"
+L3-Q-XHARD-005,XHARD,wrong,Incorrect branch-month row counts; misses loss attribution.,"โครงสร้างจาก FACT_SALES (authoritative): physical store ทั้ง 10 สาขามียอด 0 พร้อมกันวันที่ 2025-04-13..04-17 (5 วัน) — DIM_DATE ไม่ได้ flag holiday_name จึง infer ว่าเป็น Songkran network-wide closure จาก pattern ที่ทุกสาขาปิดพร้อมกัน. BKK-PKT มียอด 0 ต่อเนื่อง 04-18..04-30 (13 วัน) ขณะที่อีก 9 สาขากลับมาเปิดปกติ = ช่วงปิดเฉพาะ PKT. (1) Songkran loss คิดจาก baseline ต่อ op-day ของทุก physical branch × 5 วัน; (2) PKT incremental คิดจาก baseline PKT × 13 วัน; (3) = (1)+(2) ซึ่งอธิบาย ~95% ของ gap March→April (~56M). (4) Demand-side test: เทียบ per-op-day ของ 9 สาขา (ไม่นับ PKT, REMOTE) ในวัน April ที่เปิด เทียบ flanking baseline (Mar+May) — ผลคือ April per-op-day rate **สูงกว่า** baseline → **demand-side weakening = NO** (ตัวเลข rate/%/THB ดูวิธีคำนวณใน note). คำตัดสินสำหรับ board: April drop ~20% เป็น calendar/closure-driven เกือบทั้งหมด (Songkran ฤดูกาล + PKT renovation one-off) ไม่ใช่ความอ่อนแอของตลาด; underlying demand แข็งแรง สอดคล้อง May recovery 268.3M.","| event_month | branch_name_en | row_count |
+| --- | --- | --- |
+| 2025-10 | FahMai Phuket Road | 517 |
+| 2025-06 | FahMai Phuket Road | 511 |
+| 2025-07 | FahMai Phuket Road | 504 |
+| 2025-01 | FahMai Phuket Road | 503 |
+| 2025-05 | FahMai Phuket Road | 483 |
+| 2025-09 | FahMai Phuket Road | 472 |
+| 2025-12 | FahMai Phuket Road | 468 |
+| 2025-08 | FahMai Phuket Road | 467 |
+| 2025-03 | FahMai Phuket Road | 459 |
+| 2025-11 | FahMai Phuket Road | 458 |
+| 2025-02 | FahMai Phuket Road | 450 |
+| 2025-04 | FahMai Phuket Road | 179 |"
+L3-Q-XHARD-006,XHARD,wrong,Incorrect fiscal/month counts; misses refund violation tuple.,"(1) employee = EMP-L3-00010 (CS Agent, position_level=IC, dept_code=SUP — ตัวแรกเมื่อ sort by employee_id). พนักงานคนนี้มี refund ที่เป็น approver และ cosig_employee_id เป็น NULL ทั้งหมด 14 ราย (ยอด 2,500–8,000 THB, ช่วง 2024-04-15 ถึง 2025-12-22). เพดานอนุมัติของ IC/SUP เปลี่ยนที่ PM1 cutover (2025-02-15): policy v5 (ก่อน) IC ceiling=0 ต้องมี co-signer เสมอ → refund ไม่มี cosigner ทุกยอดเป็น violation; policy v6 (ตั้งแต่ 2025-02-15) มี row เฉพาะ IC+SUP ceiling=5,000 อนุมัติเดี่ยวได้ถึง 5,000 → violation เฉพาะยอด >5,000. ดังนั้นต้อง resolve เพดาน ณ business_event_date ของแต่ละ refund; ถ้าใช้เพดานปัจจุบัน (5,000) กับทุกแถว จะนับ pre-PM1 violations ไม่ครบ (ยอด ≤5,000 ช่วงก่อน PM1 จะถูกพลาด). ผล: ทั้ง 14 รายเป็น violation (pre-PM1 ยอด ≤5,000 แต่ ceiling=0; post-PM1 ยอด >5,000). cross-check: refund violation ทุกรายผูกกับ FACT_BANK_TRANSACTION บัญชี KBANK-OPER เป็น withdrawal จริง (จ่ายเงินครบ). ค่าตัวเลข (2)-(6) เป็นผลคำนวณ ดูวิธีใน note.","| event_fiscal_quarter | row_count |
+| --- | --- |
+| 3 | 963 |
+| 4 | 922 |
+| 2 | 853 |
+| 1 | 770 |"
+L3-Q-XHARD-007,XHARD,wrong,Incorrect/no violation taxonomy; misses requested investigation.,"(1) Missing Co-Signer:VP-CL-L2-1533451: 60,000 THB (2024-10-15),VP-CL-L2-54158968: 75,000 THB (2024-12-03),VP-CL-L2-13125759: 85,000 THB (2025-01-22),VP-CL-L2-91084441: 55,000 THB (2025-03-11),VP-CL-L2-54920102: 70,000 THB (2025-05-06) -> Count = 5 rows, Total = 345,000 THB
+(2) Wrong-Tier:VP-CL-L2-124111847: 150,000 THB (2024-11-22),VP-CL-L2-64394697: 250,000 THB (2025-02-28),VP-CL-L2-141728529: 350,000 THB (2025-05-23) -> Count = 3 rows, Total = 750,000 THB
+(3) Late-Signing:RFD-CL-L2-16641584: 3,500 THB (business_event 2024-11-08, posting 2024-11-20, delay 12 days),RFD-CL-L2-238238340: 4,500 THB (business_event 2025-02-15, posting 2025-02-25, delay 10 days),RFD-CL-L2-187708871: 5,500 THB (business_event 2025-04-04, posting 2025-04-15, delay 11 days),RFD-CL-L2-158105581: 6,200 THB (business_event 2025-06-12, posting 2025-06-22, delay 10 days) -> Count = 4 rows, Total = 19,700 THB
+Grand Total: 12 rows, 1,114,700 THB","| row_count |
+| --- |
+| 0 |"
+L3-Q-XHARD-008,XHARD,wrong,"Partial CEO row only; misses founder CEO, announcement/signing authority and refund co-sign analysis.","(1) Founder & CEO / Incoming CEO:Founder & CEO: EMP-L3-00001, Vichai Leelawong, Incoming CEO: EMP-L3-00013, Naret Vision
+(2) วันที่แจ้งการเปลี่ยนผ่าน CEO อย่างเป็นทางการ: 2024-01-02
+(3) จำนวนครั้งที่ signing authority ladder เปลี่ยนเวอร์ชัน (2024-01-01 to 2025-12-31): 1 ครั้ง| วัน effective_date: 2025-02-15 (policy_version 5 → 6) ;Policy 5: effective 2024-01-01, end 2025-02-15 ;Policy 6: effective 2025-02-15, no end date
+(4) FACT_REFUND_PAID rows (pre vs post PM1 cutover):Before cutover (business_event_date < 2025-02-15): 4,015 rows|From cutover onwards (business_event_date >= 2025-02-15): 3,120 rows
+(5) FACT_VENDOR_PAYMENT row VP-202509-15179906 วันที่ 2025-09-10 ใส่ EMP-L3-00001 เป็น cosig_employee_id:  ไม่เป็น anachronistic / data-quality concern | เหตุผล: EMP-L3-00001 (Vichai Leelawong) ยังมี status = active ใน DIM_EMPLOYEE (ไม่มี termination_date) และตำแหน่งยังเป็น CEO (C-level) ซึ่งมี signing authority ceiling = 5,000,000 THB การเปลี่ยนผ่าน CEO ยังไม่เสร็จสมบูรณ์ — Naret Vision ยังมี canon_role_label = ""Incoming CEO"" (ยังไม่ได้เข้ารับตำแหน่งอย่างเป็นทางการ) Vichai จึงยังมีอำนาจ co-sign ได้ตามปกติ
+","| employee_id | first_name_en | last_name_en | position_title | canon_role_label |
+| --- | --- | --- | --- | --- |
+| EMP-L3-00013 | Naret | Vision | CEO | Incoming CEO |"
+L3-Q-XHARD-009,XHARD,wrong,No matching answer rows; misses requested investigation.,"(1) Branch=branch_code: HKT-FEST,name_en: FahMai Phuket Festival
+(2) SKU + Spec=sku_id: WK-SW-004,brand_family: WatchKit,category: smartwatch,msrp_thb: 5,900.00
+(3) Batch-defect returns count: Count: 28 rows 
+(4) Baseline return-rate 2024-Q4 (Oct-Dec 2024)=Returns: 0 rows (ไม่มี WK-SW-004 returns ที่ HKT-FEST ใน Q4-2024),Sales quantity: 21 (จาก FACT_SALES_LINE_ITEM join FACT_SALES ที่ branch=HKT-FEST, sku=WK-SW-004),Return-rate: 0 / 21 = 0.00%
+(5) Observed return-rate 2025-Q2 (Apr-Jun 2025):Returns (ALL reasons): 29 rows,Sales quantity: 22,Return-rate: 29 / 22 = 131.82% (rate > 100% เพราะ batch-defect returns อ้างถึง original_txn_id ของ purchase รุ่นเก่ากว่า ไม่ใช่ in-quarter sales),ตอบ: 131.82%
+(6) Total return_amount_thb ของ batch-defect rows: Total: 165,200 THB (28 × 5,900 MSRP)
+(7) Approved-by analysis:Distinct approvers: 1 (EMP-L3-00010 อนุมัติทั้ง 28 rows) | Mode: EMP-L3-00010,dept_code: SUP,position_level: IC",(no rows)
+L3-Q-XHARD-010,XHARD,wrong,Incorrect event counts; misses B2B anchor AR details.,"(1) customer_id: CUST-L3-B2B-000200
+(2) customer_name_en: B2B Customer 000200 (first_name_en=""B2B Customer 000200"", last_name_en="""")
+(3) account_manager_id: EMP-L3-00002 (Ben Account, B2B Account Manager)
+(4) txn_id: TXN-CL-L5-40298991
+(5) business_event_date: 2025-12-18
+(6) net_total_thb: 18,000,001.20 THB
+(7) total cross-fiscal open AR for CUST-L3-B2B-000200: 19,082,341.20 THB","| event_year | event_fiscal_year | row_count |
+| --- | --- | --- |
+| 2025 | 2568 | 13140 |"
+L3-Q-XHARD-011,XHARD,wrong,"Incorrect generic warranty/product counts; misses phantom-warranty cluster, lift and purchase-link checks.","(1) Batch Identifier:vV-004-MON-BATCH-2567-Q4-001
+(2) SKU + Spec=sku_id: AW-MN-001,brand_family: ArcWave,category: monitor,msrp_thb: 16,900.00,is_third_party: false (FahMai house brand flagship monitor),vendor_id: (empty),warranty_months: 24
+(3) Cluster Size + Cost= Cluster row count: 35, Total claim_amount_thb: 591,500 THB
+(4) Date Window=First claim (min business_event_date): 2024-12-01,Last claim (max business_event_date): 2025-04-30,Calendar months spanned: 5 months (Dec 2024, Jan 2025, Feb 2025, Mar 2025, Apr 2025 — all contain >= 1 cluster row)
+(5) Baseline Lift vs Pre-Window:
+    - Pre-window (2024-01-01 to 2024-11-30, 11 months): 20 generic defect rows for AW-MN-001 (claim_reason exactly 'defect')
+    - Pre-window baseline rate: 20 / 11 = 1.82 rows/month
+    - Window generic defect rows (2024-12-01 to 2025-04-30): 3 rows
+    - Window combined count (cluster + generic defect): 35 + 3 = 38 rows
+    - Window combined rate: 38 / 5 = 7.60 rows/month
+    - Lift ratio: 7.60 / 1.82 = 4.2x (ประมาณ 4 เท่า)
+(6) Phantom-Warranty Signature (The Kill Check):
+    - Distinct cluster customers: 34 (CUST-L3-000011 through CUST-L3-000191)
+    - Cluster customers with matching prior purchase of AW-MN-001 in FACT_SALES_LINE_ITEM: 0
+    - Cluster customers WITHOUT matching prior purchase: 34
+    - Comment: All 34 distinct customers who filed batch-defect warranty claims for AW-MN-001 have ZERO matching purchase records of this SKU in the entire data lake. The only AW-MN-001 buyers in the system are 291 B2B customers (CUST-L3-B2B-* format), with zero overlap to the cluster's consumer customer IDs. This is a clear phantom-warranty signature — warranty claims are recorded in the system but there are no corresponding FACT_SALES purchase records for these customers, indicating a serious data-lake anomaly suggesting either fraudulent claims or a systemic data integrity failure.","| event_month | product_category | product_brand_family | vendor_name_en | row_count |
+| --- | --- | --- | --- | --- |
+| 2024-08 | monitor | FahMai |  | 35 |
+| 2024-08 | laptop | FahMai |  | 34 |
+| 2024-06 | smartphone | FahMai |  | 29 |
+| 2024-02 | monitor | FahMai |  | 28 |
+| 2024-10 | smartphone | FahMai |  | 28 |
+| 2024-11 | laptop | FahMai |  | 27 |
+| 2024-11 | monitor | FahMai |  | 27 |
+| 2024-01 | laptop | FahMai |  | 26 |
+| 2024-10 | smartwatch | FahMai |  | 26 |
+| 2024-12 | laptop | FahMai |  | 26 |
+| 2024-01 | smartphone | FahMai |  | 25 |
+| 2024-01 | smartwatch | FahMai |  | 25 |
+| 2024-05 | smartphone | FahMai |  | 25 |
+| 2024-09 | laptop | FahMai |  | 25 |
+| 2024-09 | monitor | FahMai |  | 25 |
+| 2024-08 | smartphone | FahMai |  | 24 |
+| 2024-02 | laptop | FahMai |  | 23 |
+| 2024-04 | laptop | FahMai |  | 22 |
+| 2024-06 | monitor | NovaTech | NovaTech | 22 |
+| 2024-07 | laptop | FahMai |  | 22 |
+| 2024-01 | monitor | FahMai |  | 21 |
+| 2024-02 | smartwatch | FahMai |  | 21 |
+| 2024-03 | smartphone | FahMai |  | 21 |
+| 2024-04 | smartphone | FahMai |  | 21 |
+| 2024-10 | monitor | FahMai |  | 21 |
+| 2024-04 | monitor | FahMai |  | 20 |
+| 2024-05 | laptop | FahMai |  | 20 |
+| 2024-05 | smartwatch | FahMai |  | 20 |
+| 2024-07 | monitor | FahMai |  | 20 |
+| 2024-07 | smartwatch | FahMai |  | 20 |
+| 2024-10 | laptop | FahMai |  | 20 |
+| 2024-03 | monitor | FahMai |  | 19 |
+| 2024-05 | smartphone | NovaTech | NovaTech | 19 |
+| 2024-08 | smartphone | NovaTech | NovaTech | 19 |
+| 2024-12 | monitor | FahMai |  | 19 |
+| 2024-03 | smartphone | NovaTech | NovaTech | 18 |
+| 2024-08 | smartwatch | FahMai |  | 18 |
+| 2024-09 | smartphone | FahMai |  | 18 |
+| 2024-10 | monitor | NovaTech | NovaTech | 18 |
+| 2024-02 | smartphone | FahMai |  | 17 |
+| 2024-05 | monitor | FahMai |  | 17 |
+| 2024-06 | smartwatch | FahMai |  | 17 |
+| 2024-09 | smartwatch | FahMai |  | 17 |
+| 2024-11 | smartwatch | FahMai |  | 17 |
+| 2024-12 | smartwatch | FahMai |  | 17 |
+| 2024-01 | smartphone | NovaTech | NovaTech | 16 |
+| 2024-02 | smartphone | NovaTech | NovaTech | 16 |
+| 2024-03 | laptop | FahMai |  | 16 |
+| 2024-03 | smartwatch | FahMai |  | 16 |
+| 2024-05 | monitor | NovaTech | NovaTech | 16 |"
+L3-Q-XHARD-012,XHARD,wrong,Incorrect POS sales aggregates; misses schema cutover/log-line counts/gross revenue.,"(1) Schema version cutover date (v1 → v2): 2025-04-01
+(2) Discount column rename:v1 name-discount_amt,v2 name-discount_total_thb
+(3) New columns added in v2 (not present in v1):payment_terminal_id ,loyalty_tier_at_purchase
+(4) BKK-CTW March 2025 POS log lines (excluding headers): 842
+(5) BKK-CTW April 2025 POS log lines (excluding headers): 702
+(6) BKK-CTW March 2025 total gross revenue (SUM quantity × unit_price_thb): 17,240,800 THB","| event_year | event_month | branch_name_en | event_fiscal_quarter | row_count |
+| --- | --- | --- | --- | --- |
+| 2025 | 2025-10 | FahMai Central World | 4 | 1697 |
+| 2025 | 2025-07 | FahMai Central World | 3 | 1649 |
+| 2025 | 2025-01 | FahMai Central World | 1 | 1644 |
+| 2025 | 2025-08 | FahMai Central World | 3 | 1602 |
+| 2025 | 2025-12 | FahMai Central World | 4 | 1581 |
+| 2025 | 2025-11 | FahMai Central World | 4 | 1561 |
+| 2025 | 2025-05 | FahMai Central World | 2 | 1556 |
+| 2025 | 2025-03 | FahMai Central World | 1 | 1540 |
+| 2025 | 2025-01 | FahMai Phuket Road | 1 | 1512 |
+| 2025 | 2025-10 | FahMai Phuket Road | 4 | 1491 |
+| 2025 | 2025-09 | FahMai Central World | 3 | 1463 |
+| 2025 | 2025-06 | FahMai Central World | 2 | 1428 |
+| 2025 | 2025-07 | FahMai Phuket Road | 3 | 1423 |
+| 2025 | 2025-02 | FahMai Central World | 1 | 1414 |
+| 2025 | 2025-06 | FahMai Phuket Road | 2 | 1408 |
+| 2025 | 2025-02 | FahMai Phuket Road | 1 | 1395 |
+| 2025 | 2025-09 | FahMai Phuket Road | 3 | 1388 |
+| 2025 | 2025-04 | FahMai Central World | 2 | 1385 |
+| 2025 | 2025-12 | FahMai Phuket Road | 4 | 1342 |
+| 2025 | 2025-05 | FahMai Phuket Road | 2 | 1281 |
+| 2025 | 2025-03 | FahMai Phuket Road | 1 | 1264 |
+| 2025 | 2025-08 | FahMai Phuket Road | 3 | 1241 |
+| 2025 | 2025-11 | FahMai Phuket Road | 4 | 1181 |
+| 2025 | 2025-04 | FahMai Phuket Road | 2 | 545 |"
+L3-Q-XHARD-013,XHARD,wrong,"Incorrect after dynamic-template rerun: generic monthly sales counts, not launch/preorder/demand-cliff/discount-mechanic answer.","(1) Preorder Phase Units & Daily Pattern: 3,192 units
+(2) Launch Day Spike:  วัน launch (2025-07-15) ขายได้ 504 units เทียบกับค่าเฉลี่ย preorder 228 units/day เป็น spike 2.21x (เพิ่มขึ้น ~121%)
+(3) Post-Launch Sustained Demand: ช่วง post-launch (2025-07-16 ถึง 2025-07-31) ขายได้เพียง 54 units ใน 16 วัน (เฉลี่ย 3.4 units/day) — demand ไม่ sustain ร่วงจาก preorder baseline 228/day ลง ~98.5% มีวันที่ Jul-25 ขาย 0 units โดยรวมเป็น demand cliff อย่างรุนแรง
+(4) Campaign Window vs Full July: 588 units
+(5) Discount-Mechanic Resolution: promo_mechanic_id=1 เป็น pct_off 5% ที่คำนวณที่ basket level (txn header) ไม่ได้ allocate ลง per-line-item — พิสูจน์ได้จาก FACT_SALES.discount_total_thb / FACT_SALES.basket_total_thb = 0.050000 พอดีทุก txn (3,749 ใบ ไม่มี deviation) สำหรับ single-item basket (3,707 txns) discount = 38,900 × 5% = 1,945 THB ส่วน multi-item basket (42 txns) discount = basket_total × 5% ซึ่งรวม item อื่นในตะกร้าด้วย (collateral discount)
+
+","| event_month | row_count |
+| --- | --- |
+| 2025-07 | 8610 |
+| 2025-10 | 5027 |
+| 2025-12 | 5004 |
+| 2025-05 | 4891 |
+| 2025-08 | 4877 |
+| 2025-09 | 4809 |
+| 2025-03 | 4794 |
+| 2025-11 | 4784 |
+| 2025-06 | 4691 |
+| 2025-01 | 4677 |
+| 2025-02 | 4172 |
+| 2025-04 | 3917 |"
+L3-Q-XHARD-014,XHARD,wrong,"Partial recall state transitions only; misses recall returns, refund amount, lost revenue and early-warning claims.","(1) Recall Status State Machine Transitions: [(normal, 2024-01-01), (active, 2025-09-10) ,(completed, 2025-10-15)]
+(2) Recall Window:  Recall window เริ่ม 2025-09-10 (state = active) ถึง 2025-10-15 (state = completed) รวม 35 วัน
+(3) Vendor-Recall Returns Count: 36 ใบ
+(4) Refund Amount: 1,544,400.00 บาท 
+(5) Lost Revenue: 2,574,000.00 บาท
+(6) Early-Warning Warranty Claims: 25 claims
+","| status | transition_date |
+| --- | --- |
+| normal | 2024-01-01 |
+| active | 2025-09-10 |
+| completed | 2025-10-15 |"
+L3-Q-XHARD-015,XHARD,wrong,Incorrect recall status table; misses pre-recall claims/routing/chat corroboration.,"(1) Pre-Recall Battery Concern Claims: 25 claims
+(2) Date Range & Gap to Recall: Date range: 2025-07-08 (วันแรก) → 2025-09-09 (วันล่าสุด) รวม cluster ยาว ~63 วัน Gap จาก claim สุดท้าย (2025-09-09) ถึงวัน recall active (2025-09-10) = 1 วัน — signal ดับเพียง 1 วันก่อนประกาศ recall
+(3) Routing/Handling Signature Differences: For routing_destination, Pre-recall cluster (25 claims) is novatech_service and Normal cluster (33 claims) fahmai_cs. For claim_id prefix, Pre-recall cluster (25 claims)        is WCL-CL-E9_PRE- and Normal cluster (33 claims) is WC-. For original_txn_id, Pre-recall cluster (25 claims)        is blank and Normal cluster (33 claims) is มีค่า (TXN-* linked). ความแตกต่างที่สำคัญ:
+routing_destination: pre-recall ถูกส่งตรงไป novatech_service (vendor service center) ขณะที่ normal claim ส่งไป fahmai_cs (FahMai internal CS) — บ่งชี้ว่าทีมงานแยกส่งตรงถึง vendor ตั้งแต่ก่อน recall จะประกาศ
+claim_id prefix: WCL-CL-E9_PRE- vs WC- — prefix พิเศษบ่งชี้ handling path ต่างหาก
+original_txn_id: pre-recall cluster ไม่มี original_txn_id (ว่างทุก row) ขณะที่ normal cluster มี txn link ทุก row — แสดงว่า pre-recall claims เข้ามาโดยไม่ผ่าน purchase-txn linkage ปกติ (อาจเป็น direct service intake)
+(4) Cross-Modal Corroboration (chat_line_oa): มี Powercell X3 chats ในช่วง Jul-Sep 2025 จำนวน ~2,000 thread (order-of-magnitude: 2,031 threads จาก 4,731 total chats = ~43% ของ chat volume)
+
+Jul: 731 | Aug: 628 | Sep: 672 — volume คงที่ ไม่มี spike
+Tone โดยรวม: neutral/product inquiry — ลูกค้าถามเรื่องสเปก, วิธีใช้งาน, การดูแลรักษา, เช็กสต็อก, รับประกัน ไม่พบ complaint เรื่องแบตเตอรี่หรือ safety concern ใน chat sample ที่ตรวจสอบ แม้มี ~643 chat ที่ match complaint-adjacent keywords (แบต, ร้อน, เสีย ฯลฯ) แต่เมื่ออ่าน content จริงกลับเป็นการถามข้อมูลทั่วไปเกี่ยวกับการใช้งานและการดูแล ไม่ใช่ร้องเรียน
+
+สรุป: chat_line_oa เป็น stable baseline — ไม่ corroborate กับ warranty cluster signal คือด้าน customer-facing channel ยังสงบ ในขณะที่ warranty pipeline มี signal ชัดเจน 25 claims ที่ถูกส่งตรงไป novatech_service แล้ว สะท้อนว่า early-warning ปรากฏใน back-end warranty data ก่อน front-end customer sentiment
+
+
+
+
+","| status_record_count | status | transition_date |
+| --- | --- | --- |
+| 3 | normal | 2024-01-01 |
+| 3 | active | 2025-09-10 |
+| 3 | completed | 2025-10-15 |"
+L3-Q-XHARD-016,XHARD,wrong,Incorrect policy lookup; misses PM1 mode-bucket comparison and signing authority ladder.,"(1) Pre-PM1 Mode-Bucket Range:  ฿4,000–฿4,999 (pre-PM1 window: 6 refund rows, mode = 3 rows ใน bucket 4000–4999)
+(2) Pre-PM1 Mode-Bucket Count: 3 refunds
+(3) Post-PM1 Mode-Bucket Range: ฿7,000–฿7,999 (post-PM1 window: 8 refund rows, mode = 4 rows ใน bucket 7000–7999)
+(4) Post-PM1 Mode-Bucket Count: 4 refunds
+(5) PM1 Policy Reference: policy_version_id = 6 (policy_class = signing_authority, policy_variable = refund_signing_authority_ladder, scope = global, policy_value_table_ref = dim_signing_authority_ladder)
+
+การเปลี่ยนแปลงสำคัญจาก ladder: ก่อน PM1 (version 5) — IC ทุก dept มี amount_ceiling = 0 + min_co_signers = 1 (Manager) → ต้องมี co-signer เสมอ หลัง PM1 (version 6) — เพิ่ม row ใหม่ ladder_row_id=4: IC + dept=SUP ได้ amount_ceiling = 5,000 + min_co_signers = 0 → SUP IC อนุมัติได้เดี่ยวถึง 5,000 บาทไม่ต้อง co-sign ซึ่งอธิบายการเปลี่ยน mode-bucket จาก 4K (ใกล้เพดานเดิม) เป็น 7K (สูงขึ้นแต่ยังอยู่ภายใต้ threshold ใหม่ที่สูงขึ้น)
+
+Memo MEMO-PM1-2025-02-15.md ยืนยันวันประกาศ 15 ก.พ. 2568 ถึง DL-ALL-STAFF โดย Ollie Logistics (Operations Manager) — เนื้อหาเป็น template-bare แจ้งการเปลี่ยน policy แต่ไม่ได้ enumerate ladder mechanic
+(6) PM1 Effective Date:  2025-02-15 (policy_version_id=6 effective_date; version เก่า id=5 end_date = 2025-02-15 พอดี)
+
+
+","| policy_version_id | policy_variable | value_numeric | effective_date | end_date |
+| --- | --- | --- | --- | --- |
+| 11 | refund_threshold_thb | 2,000.00 | 2024-01-01 | 2025-03-15 |"
+L3-Q-XHARD-017,XHARD,wrong,"Incorrect after dynamic-template rerun: yearly B2B top customers, not all-time anchor account with top SKU and active-month analysis.","(1) Top B2B Customer (All-Time): customer_id = CUST-L3-B2B-000200 ยอดซื้อรวมตลอดกาล = 25,867,541.20 THB (จาก 45 transactions, is_b2b=true, ทุกปีรวมกัน) — เป็นอันดับ 1 แยกจากอันดับ 2 (CUST-L3-B2B-002600 = 13,978,435 THB) 
+(2) Top SKU: sku_id = NT-LT-001 (brand_family = NovaTech, category = laptop, subcategory = flagship, MSRP = 42,900 THB) — line_total_thb รวม = 18,300,301.20 THB (qty = 627 units) ครอบครอง ~70.7% ของยอดซื้อทั้งหมดของลูกค้ารายนี้
+(3) Distinct Active Months: 19 distinct calendar months (Jan 2024 → Dec 2025) จาก span 24 เดือน → active rate ~79% มีช่วง inactive ใน Feb 2025, Sep 2025 และ Jul-Aug 2025 โดยรวมความต่อเนื่องสูง — เหมาะเป็น anchor account สำหรับ subscription pilot เนื่องจากมี purchasing pattern สม่ำเสมอตลอด 2 ปี
+
+","| customer_id | net_total_thb |
+| --- | --- |
+| CUST-L3-B2B-002600 | 7,548,210.00 |
+| CUST-L3-B2B-021100 | 7,405,700.00 |
+| CUST-L3-B2B-019600 | 6,817,740.00 |
+| CUST-L3-B2B-026300 | 6,774,900.00 |
+| CUST-L3-B2B-003500 | 6,758,870.00 |"
+L3-Q-XHARD-018,XHARD,wrong,"Incorrect after dynamic-template rerun: top yearly SKU by units, not December discount spike and foregone revenue.","(1) ระบุ SKU + Product Identity: sku_id = NT-LT-001 (brand_family = NovaTech, category = laptop, subcategory = flagship) — เดือนที่พุ่ง: 2025-12 (728 units, spike 6.5x เท่าของ trailing 12-month avg ~111 units/month) โดย 620 จาก 728 units (85%) ขายในราคาต่ำกว่า MSRP 42,900 อย่างน้อย 25% (avg unit_price ~31,090 = discount ~28%)
+(2) Foregone Revenue: 8,597,998.80 THB สูตร: SUM[(42,900 − unit_price_thb) × quantity] เฉพาะ line items ของ NT-LT-001 ใน 2025-12 ที่ unit_price_thb < msrp_thb (620 discounted units จาก 728 total)
+
+
+","| sales_year | sku_id | total_units_sold |
+| --- | --- | --- |
+| 2025 | SF-Galaxy-Pro-2568 | 4370 |"
+L3-Q-XHARD-019,XHARD,wrong,Incorrect generic monthly counts; misses corrected ROI after dedup and refunds.,"หลัง dedup phantom redemption ของ SF-LAUNCH-2568: unique cohort customers = 39 คน; discount cost หลัง dedup = 143,505.00 THB; LTV-12mo net revenue = 2,392,595.00 THB จาก gross sales 2,726,595.00 - refunds 334,000.00; corrected ROI = 16.67x. วิธีคิด: ตัด phantom row ที่ channel='app' และ share txn_id + campaign_id กับ row อื่นออกก่อน แล้วใช้ยอดขายจริงจาก FACT_SALES ตาม txn_id ของ cohort จากนั้นหัก refund ของ customer เดียวกันใน 12-month window. Gap: headline 19.0x สูงกว่า corrected ROI 2.33x หรือประมาณ 12.2%","| event_month | event_fiscal_quarter | row_count |
+| --- | --- | --- |
+| 2025-10 | 4 | 343 |
+| 2025-07 | 3 | 340 |
+| 2025-05 | 2 | 319 |
+| 2025-09 | 3 | 318 |
+| 2025-08 | 3 | 305 |
+| 2025-12 | 4 | 305 |
+| 2025-06 | 2 | 287 |
+| 2025-01 | 1 | 284 |
+| 2025-11 | 4 | 274 |
+| 2025-03 | 1 | 272 |
+| 2025-04 | 2 | 247 |
+| 2025-02 | 1 | 214 |"
+L3-Q-XHARD-020,XHARD,wrong,"Incorrect after dynamic-template rerun: generic return amount by branch/vendor, not recall return rows with approver/branch/days-since-purchase details.","Vendor recall ของ NT-LT-001 ช่วง 2025-09-10 ถึง 2025-10-15: (1) recall return rows = 36 แถว; (2) return_amount รวม = 1,544,400.00 THB; (3) มีพนักงานคนเดียว approve ทั้งหมดคือ EMP-L3-00010 May Support, CS Agent = 36/36 rows = 100.0%; (4) จัดการที่ 1 สาขา: BKK-SIAM; (5) days_since_purchase เป็นค่า uniform ทั้งหมด = 180 วัน ไม่กระจาย","| branch_name_en | vendor_name_en | total_return_amount_thb |
+| --- | --- | --- |
+| FahMai Siam |  | 6,503,200.00 |
+| FahMai Central World |  | 4,901,300.00 |
+| FahMai Phuket Road |  | 4,527,100.00 |
+| FahMai Chiang Mai Maya |  | 3,866,600.00 |
+| Remote / Online |  | 3,746,100.00 |
+| FahMai EM Sphere |  | 3,623,900.00 |
+| FahMai Pattaya Central |  | 3,597,100.00 |
+| FahMai Central World | NovaTech | 3,241,600.00 |
+| Bangkok Ratchada 9 HQ |  | 3,219,100.00 |
+| FahMai Siam | NovaTech | 3,031,400.00 |
+| FahMai Siam | NovaTech Service | 2,950,700.00 |
+| FahMai Phuket Festival |  | 2,718,200.00 |
+| FahMai Pattaya Central | NovaTech | 2,510,000.00 |
+| FahMai EM Sphere | NovaTech | 2,386,000.00 |
+| FahMai Udon Central |  | 2,304,500.00 |
+| Remote / Online | NovaTech | 2,089,700.00 |
+| FahMai Khon Kaen Central |  | 2,024,500.00 |
+| FahMai Chiang Mai Maya | NovaTech | 1,877,000.00 |
+| FahMai Phuket Festival | NovaTech | 1,855,100.00 |
+| Bangkok Ratchada 9 HQ | NovaTech | 1,769,700.00 |
+| FahMai Phuket Road | NovaTech | 1,678,200.00 |
+| FahMai Udon Central | NovaTech | 1,459,000.00 |
+| FahMai Khon Kaen Central | NovaTech | 1,205,500.00 |
+| FahMai Central World | NovaTech Service | 1,007,700.00 |
+| FahMai Chiang Mai Maya | NovaTech Service | 994,300.00 |
+| FahMai Phuket Road | NovaTech Service | 927,700.00 |
+| FahMai EM Sphere | NovaTech Service | 893,300.00 |
+| Remote / Online | NovaTech Service | 803,400.00 |
+| FahMai Pattaya Central | NovaTech Service | 799,600.00 |
+| FahMai Phuket Festival | NovaTech Service | 681,200.00 |
+| Bangkok Ratchada 9 HQ | NovaTech Service | 617,900.00 |
+| FahMai Udon Central | NovaTech Service | 577,000.00 |
+| FahMai Khon Kaen Central | NovaTech Service | 457,000.00 |"

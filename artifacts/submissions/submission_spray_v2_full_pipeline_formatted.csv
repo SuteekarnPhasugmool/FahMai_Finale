@@ -1,0 +1,101 @@
+id,response
+L3-Q-EASY-001,"MSRP ของสินค้า NT-LT-001 (NovaTech laptop flagship) เป็น 42,900.00 บาท"
+L3-Q-EASY-002,มีรายการ vendor payment ที่ปี-เดือนของ posting_date ไม่ตรงกับ business_event_date ทั้งหมด 767 แถว จาก 809 แถวทั้งหมด
+L3-Q-EASY-003,รายการขนส่งถูกจัดการโดย VeloShip (V-006) จำนวน 23182 รายการ คิดเป็น 100.00%
+L3-Q-EASY-004,พนักงานที่มีจำนวนรายการสูงสุดคือ EMP-L3-00010 จำนวน 730 ครั้ง
+L3-Q-EASY-005,"มี partner brand vendor ทั้งหมด 2 ราย คือ V-001 (NovaTech), V-002 (NovaTech Service)"
+L3-Q-EASY-006,"ช่วง 2024-01-01 ถึง 2025-12-31 สาขาที่มี transaction มากที่สุดคือ BKK-SIAM (FahMai Siam) จำนวน 18084 transactions net_total_thb รวม 1,039,386,349.00 บาท"
+L3-Q-EASY-007,"จำนวนลูกค้าแยกตาม loyalty_tier: none 7800 ราย, silver 7200 ราย, gold 7500 ราย, platinum 7500 ราย รวม 30000 ราย"
+L3-Q-EASY-008,DIM_BRANCH มีสาขา/สถานที่ทั้งหมด 11 แห่ง
+L3-Q-EASY-009,ณ วันที่ 2025-06-01 CEO คือ Naret Vision (EMP-L3-00013) ตำแหน่ง CEO handover 2025-01-15
+L3-Q-EASY-010,สินค้า AW-MN-001 (ArcWave monitor flagship) มีระยะเวลารับประกัน 24 เดือน
+L3-Q-EASY-011,"refund_signing_authority_ladder: policy_version_id 6, policy_class signing_authority, มีผลตั้งแต่ 2025-02-15 ถึง current"
+L3-Q-EASY-012,"MSRP ของสินค้า SF-Galaxy-Pro-2568 (SaiFah smartphone flagship) เป็น 38,900.00 บาท"
+L3-Q-EASY-013,DIM_VENDOR มี vendor ทั้งหมด 6 ราย
+L3-Q-EASY-014,สาขาที่มีรายการขายมากที่สุดคือ BKK-SIAM (FahMai Siam) จำนวน 18084 รายการ
+L3-Q-EASY-015,พนักงานที่มีจำนวนรายการสูงสุดคือ EMP-L3-00600 จำนวน 24 ครั้ง
+L3-Q-EASY-016,"return_window_days: policy_version_id 1, value_numeric 14.00 มีผลตั้งแต่ 2024-01-01 ถึง 2025-03-01"
+L3-Q-EASY-017,DIM_CUSTOMER มีลูกค้าประเภท B2B ทั้งหมด 300 ราย
+L3-Q-EASY-018,"point_earning_rate_per_thb: policy_version_id 3, value_numeric 0.0100 มีผลตั้งแต่ 2024-01-01 ถึง 2025-04-01"
+L3-Q-EASY-019,"point_earning_rate_per_thb: policy_version_id 4, value_numeric 0.0125 มีผลตั้งแต่ 2025-04-01 ถึง current"
+L3-Q-EASY-020,รายการขนส่งถูกจัดการโดย VeloShip (V-006) จำนวน 23182 รายการ คิดเป็น 100.00%
+L3-Q-EASY-021,"จำนวนลูกค้าแยกตาม loyalty_tier: none 7800 ราย, silver 7200 ราย, gold 7500 ราย, platinum 7500 ราย รวม 30000 ราย"
+L3-Q-EASY-022,"loyalty_tier=platinum, customer_count=7500"
+L3-Q-EASY-023,DIM_BANK_ACCOUNT มีบัญชีธนาคารทั้งหมด 14 บัญชี
+L3-Q-EASY-024,"refund_threshold_thb: policy_version_id 12, value_numeric 5,000.00 มีผลตั้งแต่ 2025-03-15 ถึง current"
+L3-Q-EASY-025,2025 11.11 Mega Sale 2568 442 รายการ; 2025 12.12 Mega Sale 2568 402 รายการ; 2024 11.11 Mega Sale 2567 267 รายการ; 2024 12.12 Mega Sale 2567 262 รายการ; 2024 Year-end Clearance 2567 87 รายการ; 2025 SF Galaxy Pro 2568 launch promo 86 รายการ; 2025 Year-end Clearance 2568 80 รายการ
+L3-Q-MED-001,ปี 2024 SKU ที่ขายได้มากที่สุดคือ SKU-MASS-063 จำนวน 1508 ชิ้น; ปี 2025 SKU ที่ขายได้มากที่สุดคือ SF-Galaxy-Pro-2568 จำนวน 4370 ชิ้น
+L3-Q-MED-002,"single largest deposit คือ 18,906,765.00 บาท วันที่ 2025-07-15 account_id OPER-REMOTE bank_txn_id BT-202507-1041521243094 source event B2C credit_card batch deposit REMOTE 2025-07-15 primary_sku SF-Galaxy-Pro-2568 promo SF-LAUNCH-2568"
+L3-Q-MED-003,ลูกค้า B2C ที่ earn คะแนนสะสมรวมสูงสุดคือ CUST-L3-023922 จำนวน 15738 points loyalty_tier ปัจจุบัน platinum
+L3-Q-MED-004,ลูกค้า CUST-L3-B2B-020600 รายการ TXN-202510-18020600 ชำระล่าช้า 14 วัน due 2025-12-17 received 2025-12-31
+L3-Q-MED-005,ปี 2025 SKU ที่มี stockout มากที่สุดคือ SKU-MASS-048 จำนวน 10 events กระทบ 9 สาขา
+L3-Q-MED-006,"MEGA-1111-2567: redemption 267 ครั้ง discount 1,308,360.00 บาท; MEGA-1111-2568: redemption 442 ครั้ง discount 2,868,084.00 บาท"
+L3-Q-MED-007,"B2C basket สูงสุดคือ txn_id TXN-202411-03026757 ที่สาขา BKK-EMSP (FahMai EM Sphere) วันที่ 2024-11-03 basket_total_thb 320,300.00 บาท"
+L3-Q-MED-008,"CUST-L3-B2B-002600 net_total_thb 7,548,210.00; CUST-L3-B2B-021100 net_total_thb 7,405,700.00; CUST-L3-B2B-019600 net_total_thb 6,817,740.00; CUST-L3-B2B-026300 net_total_thb 6,774,900.00; CUST-L3-B2B-003500 net_total_thb 6,758,870.00"
+L3-Q-MED-009,"return_window_days: policy_version_id 1, value_numeric 14.00 มีผลตั้งแต่ 2024-01-01 ถึง 2025-03-01"
+L3-Q-MED-010,"refund_threshold_thb: policy_version_id 12, value_numeric 5,000.00 มีผลตั้งแต่ 2025-03-15 ถึง current"
+L3-Q-MED-011,ช่วง 2025-12-25 ถึง 2025-12-31 มีรายการคืนสินค้าทั้งหมด 74 รายการ แยกตามเหตุผล: customer_change_of_mind = 74 รายการ
+L3-Q-MED-012,"Credit volume สูงสุดช่วง 2024-01-01 ถึง 2025-12-31 โดยไม่นับ KBANK-OPER คือ OPER-BKK-SIAM ยอดรวม 579,680,857.00 THB"
+L3-Q-MED-013,"DN-LT-010 (Dawn) gross_revenue_thb 228,465,900.00; SF-Galaxy-Pro-2568 (SaiFah) gross_revenue_thb 169,993,000.00; SKU-MASS-019 (FahMai) gross_revenue_thb 159,538,600.00"
+L3-Q-MED-014,"Pre-launch ก่อน 2025-07-15: offline (NON_REMOTE_BRANCHES) avg 58,040.03 บาท จาก 79321 transactions; online (REMOTE) avg 37,993.83 บาท จาก 10049 transactions"
+L3-Q-MED-015,มี recall status history 3 records: normal 2024-01-01; active 2025-09-10; completed 2025-10-15
+L3-Q-MED-016,highest: HKT-FEST sales 3970 returns 271 rate 6.83%; lowest: REMOTE sales 8150 returns 316 rate 3.88%
+L3-Q-MED-017,"DN-LT-010 transaction ที่ใหญ่ที่สุดมียอด 254,700.00 บาท จำนวน 3 เครื่อง มี 4 transactions ที่ tie กัน: TXN-202411-09020300 TXN-202506-02002742 TXN-202508-12023200 TXN-202509-14028900"
+L3-Q-MED-018,"ค่าธรรมเนียมธนาคารปี 2025 (fee) จำนวน 24 รายการ ยอดรวม -15,600.00 THB ค่าสัมบูรณ์ 15,600.00 บาท"
+L3-Q-MED-019,"Distinct sku_id ต่อเดือน ปี 2025: ('109', '109', '109', '109', '109', '109', '110', '110', '110', '110', '110', '110'); SKU ที่เพิ่มในปีคือ SF-Galaxy-Pro-2568"
+L3-Q-MED-020,ปี 2025 วันของสัปดาห์ที่มี B2C return events มากที่สุดคือ Thursday จำนวน 536 รายการ
+L3-Q-HARD-001,"duplicate vendor_invoice_id PW-INV-2568-04823 ของ vendor V-013 มี 2 payment rows: VP-202504-9096124 amount 89,000.00 business 2025-03-31 posting 2025-04-05; VP-202509-15179906 amount 104,500.00 business 2025-09-10 posting 2025-09-10"
+L3-Q-HARD-002,"campaign SF-LAUNCH-2568 มี redemption rows 5, phantom duplicates 1, after dedup 4, discount after dedup 11,705.00"
+L3-Q-HARD-003,remote sales spike วันที่ 2025-07-15 มี 512 transactions; dominant SKU SF-Galaxy-Pro-2568 line items 501 units 501
+L3-Q-HARD-004,"hardware batch defect return: sku WK-SW-004 branch HKT-FEST (FahMai Phuket Festival) จำนวน 28 รายการ รวม 165,200.00 บาท"
+L3-Q-HARD-005,shipping posting mismatch 8 rows business_event_date 2024-08-22 ถึง 2024-08-24 posting_date 2024-09-30 ถึง 2024-09-30 max lag 39 วัน
+L3-Q-HARD-006,vendor payment cross-month posting 767 rows จากทั้งหมด 809 rows max lag 28 วัน
+L3-Q-HARD-007,"REMOTE revenue spike: ปี 2025 Q3 revenue 178,707,675.00 baseline 41,816,611.14 ratio 4.27"
+L3-Q-HARD-008,row_count=65334
+L3-Q-HARD-009,DIM_BRANCH มีสาขา/สถานที่ทั้งหมด 11 แห่ง
+L3-Q-HARD-010,ปี 2025 row_count 60253; ปี 2024 row_count 56852
+L3-Q-HARD-011,"account OPER-REMOTE month deposits 150,986,075.00 (89 rows), annual deposits 305,078,991.00 (1030 rows), share 49.49%"
+L3-Q-HARD-012,"vendor concentration: V-001 paid 16,320,000.00 share 48.91% duplicate_invoice_ids 0; V-002 paid 8,064,000.00 share 24.17% duplicate_invoice_ids 0; V-006 paid 3,552,000.00 share 10.65% duplicate_invoice_ids 0; V-013 paid 2,032,350.00 share 6.09% duplicate_invoice_ids 1; V-014 paid 2,016,000.00 share 6.04% duplicate_invoice_ids 0; V-018 paid 1,382,400.00 share 4.14% duplicate_invoice_ids 0"
+L3-Q-HARD-013,opening_balance total 12652 จาก 11 rows/11 branches; top branch REMOTE quantity 12152; same-day transfer_in rows 10 quantity 500
+L3-Q-HARD-014,current CEO EMP-L3-00013 Naret Vision; top refund approver EMP-L3-00005 Fin Approver Finance Manager rows 7116; same person: no
+L3-Q-HARD-015,"duplicate vendor_invoice_id PW-INV-2568-04823 ของ vendor V-013 มี 2 payment rows: VP-202504-9096124 amount 89,000.00 business 2025-03-31 posting 2025-04-05; VP-202509-15179906 amount 104,500.00 business 2025-09-10 posting 2025-09-10"
+L3-Q-HARD-016,"campaign SF-LAUNCH-2568 มี redemption rows 43, phantom duplicates 4, after dedup 39, discount after dedup 143,505.00"
+L3-Q-HARD-017,DIM_VENDOR มี vendor ทั้งหมด 6 ราย
+L3-Q-HARD-018,row_count=7133
+L3-Q-HARD-019,"IC refund approver rows 14 amount 77,250.00; approver EMP-L3-00010 May Support CS Agent dept SUP level IC"
+L3-Q-HARD-020,"non-FIN manager refund rows 4 amount 19,700.00; approver EMP-L3-00008 Ollie Logistics Operations Manager dept OPS"
+L3-Q-XHARD-001,"campaign SF-LAUNCH-2568 redemptions 43, phantom 4, unique after dedup 39, net discount 143,505.00, dedup revenue 2,726,595.00, ROI 19.00, PayWise paid 12,500.00"
+L3-Q-XHARD-002,"vendor V-013 invoice PW-INV-2568-04823 payment records 2 (VP-202504-9096124; VP-202509-15179906), amounts/dates 89000.0 @ 2025-03-31/2025-04-05; 104500.0 @ 2025-09-10/2025-09-10, contracts v1: base contract; v3: Yearly rate ladder, instances after dedupe 2, cash outflow 193,500.00, overpayment 0"
+L3-Q-XHARD-003,status history 3 records: normal 2024-01-01; active 2025-09-10; completed 2025-10-15
+L3-Q-XHARD-004,"monthly branch net totals: 2025-01 FahMai Phuket Road 32,656,200.00; 2025-10 FahMai Phuket Road 31,044,300.00; 2025-02 FahMai Phuket Road 30,559,100.00; 2025-07 FahMai Phuket Road 30,216,505.00; 2025-06 FahMai Phuket Road 29,261,000.00; 2025-09 FahMai Phuket Road 28,965,000.00; 2025-05 FahMai Phuket Road 27,571,100.00; 2025-12 FahMai Phuket Road 26,905,260.00; 2025-08 FahMai Phuket Road 26,519,700.00; 2025-03 FahMai Phuket Road 26,032,400.00; 2025-11 FahMai Phuket Road 24,540,076.00; 2025-04 FahMai Phuket Road 10,668,300.00"
+L3-Q-XHARD-005,monthly branch row counts: 2025-10 FahMai Phuket Road 517; 2025-06 FahMai Phuket Road 511; 2025-07 FahMai Phuket Road 504; 2025-01 FahMai Phuket Road 503; 2025-05 FahMai Phuket Road 483; 2025-09 FahMai Phuket Road 472; 2025-12 FahMai Phuket Road 468; 2025-08 FahMai Phuket Road 467; 2025-03 FahMai Phuket Road 459; 2025-11 FahMai Phuket Road 458; 2025-02 FahMai Phuket Road 450; 2025-04 FahMai Phuket Road 179
+L3-Q-XHARD-006,"employee EMP-L3-00010 May Support pre-PM1 violations 6 amount 21,750.00; post-PM1 violations 8 amount 55,500.00; total 77,250.00"
+L3-Q-XHARD-007,row_count=0
+L3-Q-XHARD-008,CEO ณ 2025-12-31 คือ EMP-L3-00013 Naret Vision (CEO) handover 2024-01-01
+L3-Q-XHARD-009,0
+L3-Q-XHARD-010,DIM_CUSTOMER มีลูกค้าประเภท B2B ทั้งหมด 300 ราย
+L3-Q-XHARD-011,"grouped rows: event_month=2024-08, product_category=monitor, product_brand_family=FahMai, vendor_name_en=, row_count=35; event_month=2024-08, product_category=laptop, product_brand_family=FahMai, vendor_name_en=, row_count=34; event_month=2024-06, product_category=smartphone, product_brand_family=FahMai, vendor_name_en=, row_count=29; event_month=2024-02, product_category=monitor, product_brand_family=FahMai, vendor_name_en=, row_count=28; event_month=2024-10, product_category=smartphone, product_brand_family=FahMai, vendor_name_en=, row_count=28; event_month=2024-11, product_category=laptop, product_brand_family=FahMai, vendor_name_en=, row_count=27; event_month=2024-11, product_category=monitor, product_brand_family=FahMai, vendor_name_en=, row_count=27; event_month=2024-01, product_category=laptop, product_brand_family=FahMai, vendor_name_en=, row_count=26; event_month=2024-10, product_category=smartwatch, product_brand_family=FahMai, vendor_name_en=, row_count=26; event_month=2024-12, product_category=laptop, product_brand_family=FahMai, vendor_name_en=, row_count=26; event_month=2024-01, product_category=smartphone, product_brand_family=FahMai, vendor_name_en=, row_count=25; event_month=2024-01, product_category=smartwatch, product_brand_family=FahMai, vendor_name_en=, row_count=25; event_month=2024-05, product_category=smartphone, product_brand_family=FahMai, vendor_name_en=, row_count=25; event_month=2024-09, product_category=laptop, product_brand_family=FahMai, vendor_name_en=, row_count=25; event_month=2024-09, product_category=monitor, product_brand_family=FahMai, vendor_name_en=, row_count=25; event_month=2024-08, product_category=smartphone, product_brand_family=FahMai, vendor_name_en=, row_count=24; event_month=2024-02, product_category=laptop, product_brand_family=FahMai, vendor_name_en=, row_count=23; event_month=2024-04, product_category=laptop, product_brand_family=FahMai, vendor_name_en=, row_count=22; event_month=2024-06, product_category=monitor, product_brand_family=NovaTech, vendor_name_en=NovaTech, row_count=22; event_month=2024-07, product_category=laptop, product_brand_family=FahMai, vendor_name_en=, row_count=22"
+L3-Q-XHARD-012,ปี 2025 row_count 1697; ปี 2025 row_count 1649; ปี 2025 row_count 1644; ปี 2025 row_count 1602; ปี 2025 row_count 1581; ปี 2025 row_count 1561; ปี 2025 row_count 1556; ปี 2025 row_count 1540; ปี 2025 row_count 1512; ปี 2025 row_count 1491; ปี 2025 row_count 1463; ปี 2025 row_count 1428; ปี 2025 row_count 1423; ปี 2025 row_count 1414; ปี 2025 row_count 1408; ปี 2025 row_count 1395; ปี 2025 row_count 1388; ปี 2025 row_count 1385; ปี 2025 row_count 1342; ปี 2025 row_count 1281; ปี 2025 row_count 1264; ปี 2025 row_count 1241; ปี 2025 row_count 1181; ปี 2025 row_count 545
+L3-Q-XHARD-013,"launch postmortem sku SF-Galaxy-Pro-2568 campaign SF-LAUNCH-2568: preorder units 3192 avg daily 228.00 pattern uniform; launch-day units 504 spike 2.21x; campaign units 558, full July 3750, discount 7,542,185.00"
+L3-Q-XHARD-014,"recall NT-LT-001 states normal:2024-01-01; active:2025-09-10; completed:2025-10-15; active 2025-09-10 completed 2025-10-15; returns 36 amount 1,544,400.00; refund 1,544,400.00; lost revenue 2,574,000.00; early warnings 25"
+L3-Q-XHARD-015,status history 3 records: normal 2024-01-01; active 2025-09-10; completed 2025-10-15
+L3-Q-XHARD-016,"policy refund_threshold_thb version 11 value 2,000.00 effective 2024-01-01 end 2025-03-15"
+L3-Q-XHARD-017,"B2B anchor customer CUST-L3-B2B-000200 total spent 25,867,541.20 transactions 45; top SKU NT-LT-001 NovaTech laptop amount 18,300,301.20 units 627; active months 19"
+L3-Q-XHARD-018,0
+L3-Q-XHARD-019,"campaign SF-LAUNCH-2568 cohort customers 39; discount 143,505.00; gross sales 2,726,595.00; refunds 334,000.00; 12mo LTV net revenue 2,392,595.00; corrected ROI 16.67"
+L3-Q-XHARD-020,"vendor recall returns 36 amount 1,544,400.00; top approver EMP-L3-00010 May Support rows 36 pct 100.00%; branches BKK-SIAM; days since purchase min/max/avg 180/180/180.00"
+L3-Q-REF-001,"loyalty points by quarter: event_year=2025, event_fiscal_quarter=3, total_points_delta=1,268,959.00; event_year=2025, event_fiscal_quarter=2, total_points_delta=1,200,471.00; event_year=2025, event_fiscal_quarter=4, total_points_delta=1,046,572.00; event_year=2025, event_fiscal_quarter=1, total_points_delta=25,591.00"
+L3-Q-REF-008,"vendor paid totals: NovaTech 16,320,000.00; NovaTech Service 8,064,000.00; VeloShip 3,552,000.00; PayWise 2,032,350.00; LegacyShip 2,016,000.00; NorthernShip 1,382,400.00"
+L3-Q-REF-019,"total_refund_amount_thb=75,543,550.00"
+L3-Q-REF-021,"loyalty points by quarter: event_year=2025, event_fiscal_quarter=3, total_points_delta=1,268,959.00; event_year=2025, event_fiscal_quarter=2, total_points_delta=1,200,471.00; event_year=2025, event_fiscal_quarter=4, total_points_delta=1,046,572.00; event_year=2025, event_fiscal_quarter=1, total_points_delta=25,591.00"
+L3-Q-REF-023,"monthly branch basket totals: event_month=2025-01, branch_name_en=FahMai Phuket Road, total_basket_total_thb=32,656,200.00; event_month=2025-10, branch_name_en=FahMai Phuket Road, total_basket_total_thb=31,044,300.00; event_month=2025-02, branch_name_en=FahMai Phuket Road, total_basket_total_thb=30,559,100.00; event_month=2025-07, branch_name_en=FahMai Phuket Road, total_basket_total_thb=30,248,700.00; event_month=2025-06, branch_name_en=FahMai Phuket Road, total_basket_total_thb=29,261,000.00; event_month=2025-09, branch_name_en=FahMai Phuket Road, total_basket_total_thb=28,965,000.00; event_month=2025-12, branch_name_en=FahMai Phuket Road, total_basket_total_thb=28,146,600.00; event_month=2025-05, branch_name_en=FahMai Phuket Road, total_basket_total_thb=27,571,100.00; event_month=2025-08, branch_name_en=FahMai Phuket Road, total_basket_total_thb=26,519,700.00; event_month=2025-03, branch_name_en=FahMai Phuket Road, total_basket_total_thb=26,032,400.00; event_month=2025-11, branch_name_en=FahMai Phuket Road, total_basket_total_thb=25,059,700.00; event_month=2025-04, branch_name_en=FahMai Phuket Road, total_basket_total_thb=10,668,300.00"
+L3-Q-INJ-005,"sku quarter counts: sku_id=SF-Galaxy-Pro-2568, event_fiscal_quarter=3, row_count=4001; sku_id=NT-LT-001, event_fiscal_quarter=4, row_count=1288; sku_id=SKU-MASS-086, event_fiscal_quarter=4, row_count=823; sku_id=SKU-MASS-040, event_fiscal_quarter=4, row_count=785; sku_id=SKU-MASS-037, event_fiscal_quarter=4, row_count=782; sku_id=SKU-MASS-080, event_fiscal_quarter=4, row_count=778; sku_id=SKU-MASS-072, event_fiscal_quarter=4, row_count=775; sku_id=SKU-MASS-049, event_fiscal_quarter=3, row_count=774; sku_id=SKU-MASS-007, event_fiscal_quarter=4, row_count=773; sku_id=SKU-MASS-049, event_fiscal_quarter=4, row_count=771; sku_id=SKU-MASS-039, event_fiscal_quarter=3, row_count=770; sku_id=SKU-MASS-091, event_fiscal_quarter=4, row_count=770; sku_id=SKU-MASS-050, event_fiscal_quarter=3, row_count=769; sku_id=SKU-MASS-081, event_fiscal_quarter=4, row_count=767; sku_id=SKU-MASS-083, event_fiscal_quarter=4, row_count=767; sku_id=SKU-MASS-061, event_fiscal_quarter=3, row_count=765; sku_id=SKU-MASS-029, event_fiscal_quarter=4, row_count=762; sku_id=SKU-MASS-089, event_fiscal_quarter=3, row_count=762; sku_id=SKU-MASS-100, event_fiscal_quarter=4, row_count=762; sku_id=SKU-MASS-056, event_fiscal_quarter=4, row_count=761"
+L3-Q-INJ-009,row_count=7235
+L3-Q-INJ-011,"total_discount_applied_thb=12,592,289.00"
+L3-Q-INJ-012,0
+L3-Q-INJ-013,"total_refund_amount_thb=150,299,150.00"
+L3-Q-INJ-015,"total_refund_amount_thb=150,299,150.00"
+L3-Q-INJ-017,0
+L3-Q-INJ-018,"employee basket totals: employee_id=, total_basket_total_thb=6,385,646,100.00; employee_id=EMP-L3-00011, total_basket_total_thb=143,618,800.00; employee_id=EMP-L3-00002, total_basket_total_thb=18,000,001.20"
+L3-Q-INJ-021,"monthly discount totals: event_month=2025-12, event_fiscal_quarter=4, total_discount_applied_thb=4,771,030.00; event_month=2025-11, event_fiscal_quarter=4, total_discount_applied_thb=2,868,084.00; event_month=2025-07, event_fiscal_quarter=3, total_discount_applied_thb=317,980.00"
+L3-Q-INJ-022,0

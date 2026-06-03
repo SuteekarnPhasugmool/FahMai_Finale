@@ -494,14 +494,65 @@ CROSS JOIN approver_profile ap
         )
 
     if "ceo" in q and ("incoming ceo" in q or "เปลี่ยนผ่าน" in q or "หลังการเปลี่ยนผ่าน" in q):
+        as_of_date = max(dates) if dates else ""
+        handover_date = min(dates) if len(dates) >= 2 else ""
         return (
-            """
-SELECT employee_id, first_name_en, last_name_en, position_title, canon_role_label
+            f"""
+SELECT
+  {sql_quote(as_of_date)} AS as_of_date,
+  {sql_quote(handover_date)} AS handover_date,
+  employee_id,
+  first_name_en,
+  last_name_en,
+  position_title,
+  canon_role_label
 FROM DIM_EMPLOYEE
 WHERE canon_role_label = 'Incoming CEO'
 LIMIT 1
 """.strip(),
             "Deterministic intent: CEO after leadership transition.",
+        )
+
+    if "msrp" in q and "สินค้า" in q:
+        sku_ids = extract_sku_ids(question)
+        if not sku_ids:
+            return None
+        sku_id = sku_ids[0]
+        return (
+            f"""
+SELECT
+  'sku_id' AS id_column,
+  sku_id,
+  brand_family,
+  category,
+  subcategory,
+  msrp_thb
+FROM DIM_PRODUCT
+WHERE sku_id = {sql_quote(sku_id)}
+LIMIT 1
+""".strip(),
+            "Deterministic intent: product MSRP lookup with product context.",
+        )
+
+    if ("warranty" in q or "รับประกัน" in q) and "สินค้า" in q:
+        sku_ids = extract_sku_ids(question)
+        if not sku_ids:
+            return None
+        sku_id = sku_ids[0]
+        return (
+            f"""
+SELECT
+  'sku_id' AS id_column,
+  sku_id,
+  brand_family,
+  category,
+  subcategory,
+  warranty_months
+FROM DIM_PRODUCT
+WHERE sku_id = {sql_quote(sku_id)}
+LIMIT 1
+""".strip(),
+            "Deterministic intent: product warranty lookup with product context.",
         )
 
     if "return_window_days" in q or ("คืนสินค้าได้ภายใน" in q and "นโยบาย" in q):
@@ -537,6 +588,97 @@ LIMIT 1
         target_date = dates[-1]
         return policy_lookup("refund_threshold_thb", target_date), "Deterministic intent: refund threshold policy lookup."
 
+    if "partner brand" in q and "vendor" in q:
+        return (
+            """
+SELECT
+  'DIM_VENDOR' AS source_table,
+  'vendor' AS entity_type,
+  COUNT(*) OVER () AS partner_brand_vendor_count,
+  vendor_id,
+  name_en
+FROM DIM_VENDOR
+WHERE is_partner_brand = 1
+ORDER BY vendor_id
+""".strip(),
+            "Deterministic intent: partner-brand vendor count and IDs.",
+        )
+
+    if "dim_customer" in q and "b2b" in q and ("กี่ราย" in q or "ทั้งหมด" in q):
+        return (
+            """
+SELECT
+  'DIM_CUSTOMER' AS source_table,
+  'customer_type' AS filter_column,
+  'B2B' AS customer_type,
+  COUNT(*) AS b2b_customer_count
+FROM DIM_CUSTOMER
+WHERE customer_type = 'B2B'
+""".strip(),
+            "Deterministic intent: B2B customer directory count.",
+        )
+
+    if (
+        "dim_branch" in q
+        and "fact_inventory_monthly_snapshot" not in q
+        and "fact_sales" not in q
+        and ("สาขา" in q or "สถานที่" in q or "branch" in q)
+        and ("กี่" in q or "ทั้งหมด" in q)
+    ):
+        return (
+            """
+SELECT
+  'DIM_BRANCH' AS source_table,
+  'branch' AS entity_type,
+  COUNT(*) AS branch_location_count
+FROM DIM_BRANCH
+""".strip(),
+            "Deterministic intent: branch/location directory count.",
+        )
+
+    if "dim_bank_account" in q and ("bank account" in q or "บัญชีธนาคาร" in q):
+        return (
+            """
+SELECT
+  'DIM_BANK_ACCOUNT' AS source_table,
+  'bank_account' AS entity_type,
+  COUNT(*) AS bank_account_count
+FROM DIM_BANK_ACCOUNT
+""".strip(),
+            "Deterministic intent: bank account directory count.",
+        )
+
+    if "fact_loyalty_ledger" in q and "earned" in q and ("b2c" in q or "ลูกค้า b2c" in q):
+        return (
+            """
+WITH earned_points AS (
+  SELECT
+    l.customer_id,
+    SUM(l.points_delta) AS total_earned_points
+  FROM FACT_LOYALTY_LEDGER l
+  JOIN DIM_CUSTOMER c ON l.customer_id = c.customer_id
+  WHERE l.event_type = 'earned'
+    AND c.customer_type = 'B2C'
+  GROUP BY l.customer_id
+),
+ranked AS (
+  SELECT *
+  FROM earned_points
+  ORDER BY total_earned_points DESC, customer_id
+  LIMIT 1
+)
+SELECT
+  'customer_id' AS id_column,
+  r.customer_id,
+  r.total_earned_points,
+  c.loyalty_tier AS current_loyalty_tier,
+  c.customer_type
+FROM ranked r
+JOIN DIM_CUSTOMER c ON r.customer_id = c.customer_id
+""".strip(),
+            "Deterministic intent: top B2C customer by earned loyalty points.",
+        )
+
     if "loyalty_tier" in q and ("สูงที่สุด" in q or "tier สูงสุด" in q):
         return (
             """
@@ -556,6 +698,35 @@ LIMIT 1
             "Deterministic intent: highest loyalty tier by business order.",
         )
 
+    if "loyalty_tier" in q and ("dim_customer" in q or "ลูกค้าทั้งหมด" in q or "แต่ละ tier" in q or "แต่ละ loyalty" in q):
+        return (
+            """
+WITH tier_counts AS (
+  SELECT loyalty_tier, COUNT(*) AS customer_count
+  FROM DIM_CUSTOMER
+  WHERE loyalty_tier IS NOT NULL AND loyalty_tier <> ''
+  GROUP BY loyalty_tier
+),
+total AS (
+  SELECT SUM(customer_count) AS total_customer_count FROM tier_counts
+)
+SELECT
+  tc.loyalty_tier,
+  tc.customer_count,
+  t.total_customer_count
+FROM tier_counts tc
+CROSS JOIN total t
+ORDER BY CASE tc.loyalty_tier
+  WHEN 'none' THEN 1
+  WHEN 'silver' THEN 2
+  WHEN 'gold' THEN 3
+  WHEN 'platinum' THEN 4
+  ELSE 99
+END
+""".strip(),
+            "Deterministic intent: customer count by loyalty tier with total.",
+        )
+
     if (
         ("shipping" in q or "shipment" in q or "ขนส่ง" in q)
         and ("vendor" in q or "ผู้ให้บริการ" in q or "รับผิดชอบ" in q or "จัดการ" in q)
@@ -566,16 +737,20 @@ LIMIT 1
             """
 WITH vendor_counts AS (
   SELECT
+    s.vendor_id,
     v.name_en,
     COUNT(*) AS total_shipments
   FROM FACT_SHIPPING s
   JOIN DIM_VENDOR v ON s.vendor_id = v.vendor_id
-  GROUP BY v.name_en
+  GROUP BY s.vendor_id, v.name_en
 ),
 total AS (
   SELECT SUM(total_shipments) AS all_shipments FROM vendor_counts
 )
 SELECT
+  'FACT_SHIPPING' AS source_table,
+  'vendor' AS entity_type,
+  vc.vendor_id,
   vc.name_en,
   vc.total_shipments,
   100.0 * vc.total_shipments / t.all_shipments AS vendor_share_pct
@@ -584,6 +759,26 @@ CROSS JOIN total t
 ORDER BY vc.total_shipments DESC, vc.name_en
 """.strip(),
             "Deterministic intent: shipping vendor count and share.",
+        )
+
+    if (
+        "dim_vendor" in q
+        and "fact_shipping" not in q
+        and "fact_vendor_payment" not in q
+        and "line works" not in q
+        and "vendor concentration" not in q
+        and ("vendor" in q or "คู่ค้า" in q or "ซัพพลายเออร์" in q)
+        and ("กี่ราย" in q or "ทั้งหมด" in q)
+    ):
+        return (
+            """
+SELECT
+  'DIM_VENDOR' AS source_table,
+  'vendor' AS entity_type,
+  COUNT(*) AS vendor_count
+FROM DIM_VENDOR
+""".strip(),
+            "Deterministic intent: vendor directory count with source context.",
         )
 
     if "line works" in q and "fact_shipping" in q and ("ล่าช้า" in q or "delay" in q):
@@ -933,12 +1128,54 @@ WHERE posting_date <> business_event_date
         return (
             """
 SELECT
+  'FACT_VENDOR_PAYMENT' AS source_table,
+  'vendor_payment' AS row_type,
   SUM(CASE WHEN substr(posting_date, 1, 7) <> substr(business_event_date, 1, 7) THEN 1 ELSE 0 END) AS cross_month_posting_count,
   COUNT(*) AS total_vendor_payment_rows,
   MAX(ABS(CAST(julianday(posting_date) - julianday(business_event_date) AS INTEGER))) AS max_lag_days
 FROM FACT_VENDOR_PAYMENT
 """.strip(),
             "Deterministic intent: vendor payment cross-month posting mismatch.",
+        )
+
+    if ("รายการขาย" in q or "transactions" in q) and ("สาขา" in q or "branch" in q) and ("มากที่สุด" in q or "highest" in q) and "net_total_thb" not in q:
+        return (
+            """
+SELECT
+  fs.branch_code,
+  b.name_en AS sales_branch_name,
+  COUNT(DISTINCT fs.txn_id) AS total_transactions
+FROM FACT_SALES fs
+JOIN DIM_BRANCH b ON fs.branch_code = b.branch_code
+GROUP BY fs.branch_code, b.name_en
+ORDER BY total_transactions DESC, fs.branch_code
+LIMIT 1
+""".strip(),
+            "Deterministic intent: all-time top branch by sales transaction count.",
+        )
+
+    if "transaction" in q and "net_total_thb" in q and ("สาขา" in q or "branch" in q) and ("มากที่สุด" in q or "highest" in q):
+        year_filter = date_filter_sql("business_event_date", years)
+        where_clause = f"WHERE {year_filter}" if year_filter else ""
+        year_start = f"{min(years)}-01-01" if years else ""
+        year_end = f"{max(years)}-12-31" if years else ""
+        return (
+            f"""
+SELECT
+  {sql_quote(year_start)} AS year_start_date,
+  {sql_quote(year_end)} AS year_end_date,
+  fs.branch_code,
+  b.name_en AS sales_branch_name,
+  COUNT(DISTINCT fs.txn_id) AS total_transactions,
+  SUM(fs.net_total_thb) AS total_net_revenue_thb
+FROM FACT_SALES fs
+JOIN DIM_BRANCH b ON fs.branch_code = b.branch_code
+{where_clause}
+GROUP BY fs.branch_code, b.name_en
+ORDER BY total_transactions DESC, total_net_revenue_thb DESC, fs.branch_code
+LIMIT 1
+""".strip(),
+            "Deterministic intent: top branch by sales transaction count with revenue.",
         )
 
     if "fact_promo_redemption" in q and ("phantom" in q or "duplicate" in q or "ซ้ำ" in q) and ("campaign" in q or "promo" in q):
@@ -1196,7 +1433,15 @@ CROSS JOIN cohort_refunds cr
             "Deterministic intent: campaign cohort LTV ROI after phantom dedup.",
         )
 
-    if "single largest deposit" in q or ("largest deposit" in q and "fact_bank_transaction" in q):
+    if (
+        "single largest deposit" in q
+        or ("largest deposit" in q and "fact_bank_transaction" in q)
+        or (
+            "fact_bank_transaction" in q
+            and ("รายการฝากเงิน" in q or "ยอดสูงที่สุด" in q)
+            and ("deposit" in q or "credit" in q or "ฝากเงิน" in q)
+        )
+    ):
         return (
             """
 WITH largest_deposit AS (
@@ -1251,6 +1496,37 @@ LEFT JOIN sku_counts sc ON 1 = 1
 GROUP BY ld.bank_txn_id
 """.strip(),
             "Deterministic intent: largest bank deposit with source-event context.",
+        )
+
+    if (
+        "roi ratio" in q
+        and "dim_promo_campaign" in q
+        and "fact_sales" in q
+        and ("discount_total_thb" in q or "discount" in q)
+    ):
+        return (
+            """
+WITH campaign_roi AS (
+  SELECT
+    fs.promo_campaign_id AS campaign_id,
+    pc.description_en,
+    COUNT(*) AS transaction_count,
+    SUM(fs.net_total_thb) AS net_total_thb,
+    SUM(fs.discount_total_thb) AS discount_total_thb,
+    SUM(fs.net_total_thb) / NULLIF(SUM(fs.discount_total_thb), 0) AS roi_ratio
+  FROM FACT_SALES fs
+  LEFT JOIN DIM_PROMO_CAMPAIGN pc ON fs.promo_campaign_id = pc.campaign_id
+  WHERE fs.promo_campaign_id IS NOT NULL
+    AND fs.promo_campaign_id <> ''
+  GROUP BY fs.promo_campaign_id, pc.description_en
+  HAVING SUM(fs.discount_total_thb) > 0
+)
+SELECT *
+FROM campaign_roi
+ORDER BY roi_ratio DESC, net_total_thb DESC, campaign_id
+LIMIT 1
+""".strip(),
+            "Deterministic intent: campaign ROI ratio from sales net revenue and discount cost.",
         )
 
     if "b2b" in q and "จ่ายเงินช้าที่สุด" in q:
@@ -1338,6 +1614,9 @@ CROSS JOIN active_months am
         return (
             f"""
 SELECT
+  {sql_quote(str(years[-1] if years else ""))} AS stockout_year,
+  {sql_quote(str((years[-1] + 543) if years else ""))} AS stockout_buddhist_year,
+  'sku_id' AS id_column,
   ims.sku_id,
   COUNT(*) AS stockout_events,
   COUNT(DISTINCT ims.branch_code) AS affected_retail_branches
@@ -1574,13 +1853,39 @@ LIMIT {top_n}
             "Deterministic intent: top-N B2B customers by yearly net sales.",
         )
 
+    if "b2c" in q and "basket_total_thb" in q and ("สูงที่สุด" in q or "largest" in q or "มากที่สุด" in q):
+        return (
+            """
+SELECT
+  fs.txn_id,
+  fs.branch_code,
+  b.name_en AS sales_branch_name,
+  fs.business_event_date,
+  fs.basket_total_thb,
+  fs.is_b2b
+FROM FACT_SALES fs
+JOIN DIM_BRANCH b ON fs.branch_code = b.branch_code
+WHERE fs.is_b2b = 0
+ORDER BY fs.basket_total_thb DESC, fs.business_event_date, fs.txn_id
+LIMIT 1
+""".strip(),
+            "Deterministic intent: largest B2C basket with transaction context.",
+        )
+
     if "credit volume" in q and "kbank-oper" in q:
         excluded_account = extract_code_after("account_id", question) or "KBANK-OPER"
         credit_date_filter = date_filter_sql("business_event_date", years)
         credit_date_predicate = f"\n  AND {credit_date_filter}" if credit_date_filter else ""
+        year_start = f"{min(years)}-01-01" if years else ""
+        year_end = f"{max(years)}-12-31" if years else ""
         return (
             f"""
-SELECT account_id, SUM(amount_thb) AS credit_volume_thb
+SELECT
+  {sql_quote(year_start)} AS year_start_date,
+  {sql_quote(year_end)} AS year_end_date,
+  {sql_quote(excluded_account)} AS excluded_account_id,
+  account_id,
+  SUM(amount_thb) AS credit_volume_thb
 FROM FACT_BANK_TRANSACTION
 WHERE amount_thb > 0
   AND account_id <> {sql_quote(excluded_account)}
@@ -1590,6 +1895,25 @@ ORDER BY credit_volume_thb DESC
 LIMIT 1
 """.strip(),
             "Deterministic intent: credit volume by bank account excluding central operating account.",
+        )
+
+    if "transaction_type='fee'" in q or ("ค่าธรรมเนียม" in q and "fact_bank_transaction" in q):
+        year_filter = date_filter_sql("business_event_date", years)
+        fee_predicate = f"\n  AND {year_filter}" if year_filter else ""
+        year = years[-1] if years else ""
+        return (
+            f"""
+SELECT
+  {sql_quote(str(year))} AS fee_year,
+  transaction_type,
+  COUNT(*) AS total_count,
+  SUM(amount_thb) AS total_amount_thb,
+  ABS(SUM(amount_thb)) AS absolute_fee_amount_thb
+FROM FACT_BANK_TRANSACTION
+WHERE transaction_type = 'fee'{fee_predicate}
+GROUP BY transaction_type
+""".strip(),
+            "Deterministic intent: bank fee count and signed/absolute amount.",
         )
 
     if "oper-remote" in q and "deposit" in q and ("สัดส่วน" in q or "เปอร์เซ็นต์" in q or "percent" in q):
@@ -1715,6 +2039,39 @@ LIMIT {top_n}
             "Deterministic intent: top SKU gross revenue from line items.",
         )
 
+    if "fact_sales_line_item" in q and "txn_id" in q and ("transaction" in q or "รายการขาย" in q):
+        sku_ids = extract_sku_ids(question)
+        if not sku_ids:
+            return None
+        sku_id = sku_ids[0]
+        return (
+            f"""
+WITH per_txn AS (
+  SELECT
+    txn_id,
+    sku_id,
+    SUM(line_total_thb) AS sku_line_total_thb,
+    SUM(quantity) AS sku_quantity
+  FROM FACT_SALES_LINE_ITEM
+  WHERE sku_id = {sql_quote(sku_id)}
+  GROUP BY txn_id, sku_id
+),
+max_total AS (
+  SELECT MAX(sku_line_total_thb) AS max_sku_line_total_thb
+  FROM per_txn
+)
+SELECT
+  p.sku_id,
+  p.txn_id,
+  p.sku_line_total_thb,
+  p.sku_quantity
+FROM per_txn p
+JOIN max_total m ON p.sku_line_total_thb = m.max_sku_line_total_thb
+ORDER BY p.txn_id
+""".strip(),
+            "Deterministic intent: largest transaction(s) for one SKU by line total.",
+        )
+
     if "basket size" in q and "pre-launch" in q and "offline" in q and "online" in q:
         sku_ids = extract_sku_ids(question)
         if not sku_ids:
@@ -1737,12 +2094,78 @@ bucketed AS (
   FROM FACT_SALES, launch
   WHERE business_event_date < launch.launch_date
 )
-SELECT channel_group, AVG(basket_total_thb) AS avg_basket_total_thb, COUNT(*) AS transaction_count
+SELECT
+  (SELECT launch_date FROM launch) AS launch_date,
+  CASE WHEN channel_group = 'online' THEN 'REMOTE' ELSE 'NON_REMOTE_BRANCHES' END AS branch_scope,
+  channel_group,
+  AVG(basket_total_thb) AS avg_basket_total_thb,
+  COUNT(*) AS transaction_count
 FROM bucketed
 GROUP BY channel_group
 ORDER BY CASE channel_group WHEN 'offline' THEN 1 ELSE 2 END
 """.strip(),
             "Deterministic intent: pre-launch average basket by online/offline channel.",
+        )
+
+    if "fact_return" in q and "return_reason" in q and ("2025-12-25" in q or "สัปดาห์สุดท้าย" in q):
+        day_range = date_range_from_question(question, dates, years)
+        if not day_range:
+            return None
+        return (
+            f"""
+WITH scoped AS (
+  SELECT *
+  FROM FACT_RETURN
+  WHERE business_event_date BETWEEN {sql_quote(day_range[0])} AND {sql_quote(day_range[1])}
+),
+total AS (
+  SELECT COUNT(*) AS total_returns FROM scoped
+)
+SELECT
+  {sql_quote(day_range[0])} AS window_start_date,
+  {sql_quote(day_range[1])} AS window_end_date,
+  t.total_returns,
+  s.return_reason,
+  COUNT(*) AS count_per_reason
+FROM scoped s
+CROSS JOIN total t
+GROUP BY t.total_returns, s.return_reason
+ORDER BY count_per_reason DESC, s.return_reason
+""".strip(),
+            "Deterministic intent: return counts by reason in an explicit date window.",
+        )
+
+    if "distinct" in q and "sku_id" in q and ("แต่ละเดือน" in q or "แยกตามเดือน" in q or "tuple 12" in q):
+        year = years[-1] if years else None
+        if not year:
+            return None
+        return (
+            f"""
+WITH monthly AS (
+  SELECT
+    substr(business_event_date, 1, 7) AS sales_month,
+    COUNT(DISTINCT sku_id) AS distinct_sku_count
+  FROM FACT_SALES_LINE_ITEM
+  WHERE business_event_date BETWEEN '{year}-01-01' AND '{year}-12-31'
+  GROUP BY sales_month
+),
+launched AS (
+  SELECT GROUP_CONCAT(sku_id, ',') AS sku_id_added_in_year
+  FROM DIM_PRODUCT
+  WHERE launch_date BETWEEN '{year}-01-01' AND '{year}-12-31'
+)
+SELECT
+  {sql_quote(str(year))} AS sales_year,
+  'sku_id' AS counted_column,
+  'SKU' AS counted_entity,
+  m.sales_month,
+  m.distinct_sku_count,
+  l.sku_id_added_in_year
+FROM monthly m
+CROSS JOIN launched l
+ORDER BY m.sales_month
+""".strip(),
+            "Deterministic intent: monthly distinct SKU counts with launched-SKU context.",
         )
 
     if "opening_balance" in q and "fact_inventory_movement" in q:
@@ -2016,6 +2439,7 @@ SELECT * FROM ranked_low
         return (
             f"""
 SELECT
+  {sql_quote(str(years[-1] if years else ""))} AS return_year,
   CASE d.day_of_week
     WHEN 1 THEN 'Monday'
     WHEN 2 THEN 'Tuesday'
@@ -2706,6 +3130,12 @@ def execute_sql(conn: sqlite3.Connection, sql: str, query_timeout: int | None = 
 
 
 def markdown_table(rows: Iterable[sqlite3.Row]) -> str:
+    def cell_text(value: object) -> str:
+        if value is None:
+            return ""
+        text = str(value)
+        return text.replace("\\", "\\\\").replace("|", "\\|")
+
     rows = list(rows)
     if not rows:
         return "(no rows)"
@@ -2720,7 +3150,7 @@ def markdown_table(rows: Iterable[sqlite3.Row]) -> str:
             value = row[header]
             if isinstance(value, float):
                 value = f"{value:.4f}" if abs(value) < 1 and value != 0 else f"{value:,.2f}"
-            values.append("" if value is None else str(value))
+            values.append(cell_text(value))
         lines.append("| " + " | ".join(values) + " |")
     return "\n".join(lines)
 
