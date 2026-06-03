@@ -12,6 +12,7 @@
 |---|---|
 | `agentic_ai/fahmai_sql_agent.py` | CLI agent หลัก รับ prompt, เรียก LLM, generate/validate/execute SQL |
 | `agentic_ai/run_all_questions.py` | batch runner สำหรับรันทุกคำถามใน `questions.csv` แล้วเขียน `id,question,answer` เป็น CSV |
+| `agentic_ai/format_submission.py` | post-process markdown table answers ให้เป็น `id,response` ตาม `sample_submission.csv` |
 | `agentic_ai/join_catalog.py` | semantic catalog ของ enriched views, metrics, dimensions และ routing keywords |
 | `sql/create_joined_views.sql` | SQL สำหรับสร้าง enriched views ที่ join FACT กับ DIM ที่เหมาะสมไว้แล้ว |
 | `scripts/build_enterprise_ai_safe_tables.py` | redaction layer สำหรับทำ CSV ให้ enterprise AI-safe โดย preserve schema และ row count |
@@ -19,10 +20,11 @@
 | `ENTERPRISE_AI_SAFE_ANALYTICS_PIPELINE.md` | เอกสาร flow ของ enterprise AI-safe layer |
 | `README_AGENTIC_AI.md` | quick start และตัวอย่างคำสั่งใช้งาน |
 | `questions.csv` | ชุดคำถามจริงสำหรับทดสอบ agent |
-| `final_answers.csv` | output batch run ล่าสุดในรูปแบบ `id,question,answer` |
-| `final_answers_dynamic_template_check_v2.csv` | output rerun ล่าสุด 100 ข้อในรูปแบบ markdown table |
-| `fahmai_easy_xhard_gt.csv` | ground truth สำหรับประเมิน EASY ถึง XHARD |
-| `easy_xhard_accuracy_report_dynamic_template_check_v2.csv` | report ตรวจคำตอบล่าสุดเทียบ ground truth แบบ strict |
+| `sample_submission.csv` | template submission format ในรูปแบบ `id,response` |
+| `artifacts/final_answers/` | raw batch outputs ในรูปแบบ `id,question,answer` |
+| `artifacts/submissions/` | submission-ready outputs ในรูปแบบ `id,response` |
+| `artifacts/ground_truth/` | ground truth CSVs สำหรับ evaluation เท่านั้น |
+| `artifacts/reports/` | accuracy/evaluation reports |
 | `fahmai_agentic.db` | SQLite database ที่ agent สร้างจาก CSV และใช้ query |
 
 ## Data Flow
@@ -420,19 +422,19 @@ python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-MED-
 
 ```bash
 python3 agentic_ai/run_all_questions.py \
-  --output final_answers_rerun.csv \
+  --output artifacts/final_answers/final_answers_rerun.csv \
   --fallback-to-rules \
   --question-timeout 120 \
   --query-timeout 30
 ```
 
-รันรอบล่าสุดที่ใช้สร้าง `final_answers_dynamic_template_check_v2.csv`:
+รันรอบล่าสุดที่ใช้สร้าง markdown table answers:
 
 ```bash
 export THAILLM_API_KEY="your-token"
 
 python3 agentic_ai/run_all_questions.py \
-  --output final_answers_dynamic_template_check_v2.csv \
+  --output artifacts/final_answers/final_answers_dynamic_template_check_v2.csv \
   --overwrite \
   --fallback-to-rules \
   --question-timeout 120 \
@@ -447,11 +449,21 @@ id,question,answer
 
 ใน batch output นี้ column `answer` คือ markdown table จาก SQL result ไม่ใช่คำตอบที่ผ่าน final-answer formatter
 
+แปลง markdown table answers เป็น submission format:
+
+```bash
+python3 agentic_ai/format_submission.py \
+  --answers-csv artifacts/final_answers/final_answers_spray_v2_full_pipeline_rules_v2.csv \
+  --easy-med-formatted-csv artifacts/final_answers/final_answers_spray_v2_easy_med_formatted.csv \
+  --sample-csv sample_submission.csv \
+  --output artifacts/submissions/submission_spray_v2_full_pipeline_question_formatted.csv
+```
+
 ถ้าไม่ต้องการทับไฟล์เดิม ให้ใช้ชื่อไฟล์ใหม่ใน `--output` และไม่ใส่ `--overwrite`
 
 ## Latest Accuracy Check
 
-ตรวจ `final_answers_dynamic_template_check_v2.csv` เทียบกับ `fahmai_easy_xhard_gt.csv` ด้วยเกณฑ์ strict:
+ตรวจ `artifacts/final_answers/final_answers_dynamic_template_check_v2.csv` เทียบกับ `artifacts/ground_truth/fahmai_easy_xhard_gt.csv` ด้วยเกณฑ์ strict:
 
 ```text
 คำตอบต้องมีสาระสำคัญครบตาม ground truth
@@ -471,7 +483,7 @@ partial answer ยังนับเป็น wrong
 report อยู่ที่:
 
 ```text
-easy_xhard_accuracy_report_dynamic_template_check_v2.csv
+artifacts/reports/easy_xhard_accuracy_report_dynamic_template_check_v2.csv
 ```
 
 ข้อสังเกต: EASY/MED เป็นคำถาม structured table จึงตอบได้ดีหลังเพิ่ม deterministic templates ส่วน HARD/XHARD หลายข้อ ground truth ต้องใช้ evidence นอก SQL tables เช่น policy memo, logs, reports, chat, recall/warranty trail และ reconciliation logic หลายขั้น จึงควรเพิ่ม retrieval/reconciliation layer ก่อนคาดหวัง accuracy สูงในกลุ่มนี้

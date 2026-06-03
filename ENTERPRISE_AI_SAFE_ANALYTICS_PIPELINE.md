@@ -142,6 +142,8 @@ python3 agentic_ai/run_all_questions.py \
 ```
 
 The batch runner should write `final_answers.csv` without SQLite schema errors.
+For committed benchmark artifacts, keep generated answer CSVs under
+`artifacts/final_answers/`.
 
 ## Latest Evaluation Snapshot
 
@@ -150,13 +152,13 @@ intent-based deterministic templates before falling back to ThaiLLM. The latest
 rerun artifact is:
 
 ```text
-final_answers_dynamic_template_check_v2.csv
+artifacts/final_answers/final_answers_dynamic_template_check_v2.csv
 ```
 
 The strict EASY-to-XHARD ground-truth report is:
 
 ```text
-easy_xhard_accuracy_report_dynamic_template_check_v2.csv
+artifacts/reports/easy_xhard_accuracy_report_dynamic_template_check_v2.csv
 ```
 
 Latest strict accuracy:

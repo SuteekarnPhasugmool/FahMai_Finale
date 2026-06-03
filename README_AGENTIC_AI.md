@@ -23,9 +23,13 @@ This adds a small prompt-to-SQL agent over FahMai's structured FACT/DIM data.
 
 - `agentic_ai/run_all_questions.py`
   - Batch runner for `questions.csv`.
-  - Writes `id,question,answer` rows to a CSV such as `final_answers.csv`, where `answer` contains the markdown table result.
+  - Writes `id,question,answer` rows to a CSV such as `artifacts/final_answers/final_answers_rerun.csv`, where `answer` contains the markdown table result.
   - Supports resume by skipping question IDs already present in the output file.
   - Adds per-question and per-query timeouts for long benchmark runs.
+
+- `agentic_ai/format_submission.py`
+  - Converts markdown-table answers into `sample_submission.csv` compatible `id,response` rows.
+  - Uses question-aware formatting for tuple, multi-part, and evidence-limited answers.
 
 - `scripts/build_enterprise_ai_safe_tables.py`
   - Enterprise AI-safe redaction layer for sensitive CSV values.
@@ -134,11 +138,11 @@ Rebuild the generated DB from CSV:
 python3 agentic_ai/fahmai_sql_agent.py --rebuild-db "ยอดขายตามสาขาปี 2025"
 ```
 
-Run every question in `questions.csv` and write markdown table results to a new CSV without overwriting the committed `final_answers.csv`:
+Run every question in `questions.csv` and write markdown table results to a new CSV under `artifacts/final_answers/`:
 
 ```bash
 python3 agentic_ai/run_all_questions.py \
-  --output final_answers_rerun.csv \
+  --output artifacts/final_answers/final_answers_rerun.csv \
   --fallback-to-rules \
   --question-timeout 120 \
   --query-timeout 30
@@ -150,15 +154,25 @@ Latest benchmark-style rerun:
 export THAILLM_API_KEY="your-token"
 
 python3 agentic_ai/run_all_questions.py \
-  --output final_answers_dynamic_template_check_v2.csv \
+  --output artifacts/final_answers/final_answers_dynamic_template_check_v2.csv \
   --overwrite \
   --fallback-to-rules \
   --question-timeout 120 \
   --query-timeout 30
 ```
 
-The latest strict check against `fahmai_easy_xhard_gt.csv` is saved in
-`easy_xhard_accuracy_report_dynamic_template_check_v2.csv`:
+Create a submission-style CSV from a markdown-table answer file:
+
+```bash
+python3 agentic_ai/format_submission.py \
+  --answers-csv artifacts/final_answers/final_answers_spray_v2_full_pipeline_rules_v2.csv \
+  --easy-med-formatted-csv artifacts/final_answers/final_answers_spray_v2_easy_med_formatted.csv \
+  --sample-csv sample_submission.csv \
+  --output artifacts/submissions/submission_spray_v2_full_pipeline_question_formatted.csv
+```
+
+The latest strict check against `artifacts/ground_truth/fahmai_easy_xhard_gt.csv` is saved in
+`artifacts/reports/easy_xhard_accuracy_report_dynamic_template_check_v2.csv`:
 
 | Level | Correct | Total | Accuracy |
 |---|---:|---:|---:|
