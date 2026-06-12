@@ -2,6 +2,12 @@
 
 This adds a small prompt-to-SQL agent over FahMai's structured FACT/DIM data.
 
+## Project Context
+
+This repository is one part of a larger team project called **Enterprise Data Agent**. The full project built an agentic AI pipeline for enterprise question answering across structured and unstructured business data, including tables, reports, documents, and OCR-based sources.
+
+My part focused on the structured-data tool: a SQL agent that selects relevant tables or enriched views, generates and executes SQL queries, validates them against the live schema, and returns answers in structured markdown format.
+
 ## What Was Added
 
 - `sql/create_joined_views.sql`

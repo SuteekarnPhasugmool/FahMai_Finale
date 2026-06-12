@@ -2,6 +2,14 @@
 
 This repository contains the runnable pipeline for answering FahMai benchmark questions over structured FACT/DIM CSV tables.
 
+## Project Context
+
+This work is part of a larger team project: **Enterprise Data Agent**.
+
+The full project goal was to build an agentic AI pipeline for enterprise question answering across structured and unstructured business data. At the system level, the project combines SQL querying, retrieval, and reasoning components so answers can be grounded in enterprise data, traced back to source evidence, and extended across tables, reports, documents, and OCR-based sources.
+
+This repository focuses on **my part of the team project**: the tool-to-SQL agent for structured business tables. My scope was to build the component that selects relevant tables/views, generates and executes SQL queries, validates them against the live schema, and returns structured markdown-table answers. Retrieval over unstructured reports, documents, chat logs, and OCR outputs belongs to the broader Enterprise Data Agent system, but is not the main focus of this cleaned repository.
+
 ## What Is Kept In Main
 
 Only files needed to run or understand the pipeline are committed:
