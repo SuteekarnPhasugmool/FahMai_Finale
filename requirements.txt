@@ -1,0 +1,3 @@
+# Runtime uses only the Python standard library.
+# pytest is needed for the lightweight regression tests.
+pytest>=8.0

@@ -10,6 +10,15 @@ The full project goal was to build an agentic AI pipeline for enterprise questio
 
 This repository focuses on **my part of the team project**: the tool-to-SQL agent for structured business tables. My scope was to build the component that selects relevant tables/views, generates and executes SQL queries, validates them against the live schema, and returns structured markdown-table answers. Retrieval over unstructured reports, documents, chat logs, and OCR outputs belongs to the broader Enterprise Data Agent system, but is not the main focus of this cleaned repository.
 
+## Resume Highlights
+
+- Built a schema-aware SQL agent for enterprise FACT/DIM analytics data.
+- Designed enriched semantic views to make FACT-to-DIM joins safer and easier for downstream query generation.
+- Implemented deterministic routing, local rule planning, ThaiLLM SQL generation, read-only SQL validation, and SQLite execution.
+- Added live schema validation and repair paths to reduce hallucinated table or column references.
+- Created batch evaluation tooling and deterministic submission formatting that does not rely on ground-truth leakage.
+- Cleaned the repository for portfolio use by keeping source, schema, tables, questions, docs, and tests while ignoring generated artifacts.
+
 ## What Is Kept In Main
 
 Only files needed to run or understand the pipeline are committed:
@@ -26,6 +35,26 @@ Only files needed to run or understand the pipeline are committed:
 - `tests/`: lightweight regression checks.
 
 Generated files are intentionally ignored by git: SQLite databases, `artifacts/`, final answer CSVs, submission CSVs, report CSVs, and local ground-truth CSVs.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Q["User question / question_id"] --> R["Intent templates"]
+    R -->|match| SQL["SQL query"]
+    R -->|no match| P["Rule planner or ThaiLLM SQL planner"]
+    P --> SQL
+    SQL --> V["Read-only + schema validation"]
+    V --> X["SQLite execution"]
+    X --> M["Markdown table answer"]
+    M --> B["Batch CSV: id,question,answer"]
+    M --> F["Optional formatter"]
+    F --> S["Submission CSV: id,response"]
+
+    T["FACT/DIM CSV tables"] --> DB["Generated SQLite DB"]
+    J["Approved joined views"] --> DB
+    DB --> X
+```
 
 ## Pipeline Flow
 
@@ -59,6 +88,12 @@ Generated files are intentionally ignored by git: SQLite databases, `artifacts/`
 
 ## Quick Start
 
+Install test dependencies if needed:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
 Rebuild the SQLite database and smoke-test an enriched view:
 
 ```bash
@@ -73,6 +108,14 @@ Run one question without an LLM:
 python3 agentic_ai/fahmai_sql_agent.py \
   --question-id L3-Q-EASY-001 \
   --fallback-to-rules
+```
+
+Example markdown output shape:
+
+```text
+| customer_type | customer_count |
+| --- | --- |
+| B2B | 300 |
 ```
 
 Run one question with ThaiLLM:
