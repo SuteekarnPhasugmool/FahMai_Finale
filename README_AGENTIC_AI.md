@@ -23,7 +23,7 @@ This adds a small prompt-to-SQL agent over FahMai's structured FACT/DIM data.
 
 - `agentic_ai/run_all_questions.py`
   - Batch runner for `questions.csv`.
-  - Writes `id,question,answer` rows to a CSV such as `artifacts/final_answers/final_answers_rerun.csv`, where `answer` contains the markdown table result.
+  - Writes `id,question,answer` rows to a local artifact CSV such as `artifacts/final_answers/final_answers.csv`, where `answer` contains the markdown table result.
   - Supports resume by skipping question IDs already present in the output file.
   - Adds per-question and per-query timeouts for long benchmark runs.
 
@@ -35,6 +35,18 @@ This adds a small prompt-to-SQL agent over FahMai's structured FACT/DIM data.
   - Enterprise AI-safe redaction layer for sensitive CSV values.
   - Preserves table names, headers, and row counts so the SQLite pipeline remains compatible.
   - Writes an audit report to `data_governance/enterprise_ai_safe_redaction_summary.csv`.
+
+## Pipeline Flow
+
+1. CSV tables are loaded into a generated SQLite database.
+2. Enriched `VW_FACT_*_ENRICHED` views are created with explicit FACT-to-DIM joins.
+3. A question is routed through deterministic templates first.
+4. If no template matches, the planner uses local rules or ThaiLLM depending on CLI flags.
+5. Generated SQL is checked as read-only and validated against the live SQLite schema.
+6. The query result is returned as a markdown table.
+7. Optional post-processing can convert markdown tables into `sample_submission.csv` style `id,response` rows.
+
+Generated outputs belong under `artifacts/`, which is ignored by git. Local ground-truth and report CSVs are also ignored so main keeps only runnable source, schema, tables, questions, and documentation.
 
 ## Run
 
@@ -99,7 +111,7 @@ python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-EASY
 python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-MED-001
 ```
 
-The pipeline now ends at the markdown result table. There is no final-answer formatter stage:
+The core SQL pipeline returns a markdown result table:
 
 ```bash
 python3 agentic_ai/fahmai_sql_agent.py \
@@ -138,23 +150,23 @@ Rebuild the generated DB from CSV:
 python3 agentic_ai/fahmai_sql_agent.py --rebuild-db "ยอดขายตามสาขาปี 2025"
 ```
 
-Run every question in `questions.csv` and write markdown table results to a new CSV under `artifacts/final_answers/`:
+Run every question in `questions.csv` and write markdown table results to a local CSV under `artifacts/final_answers/`:
 
 ```bash
 python3 agentic_ai/run_all_questions.py \
-  --output artifacts/final_answers/final_answers_rerun.csv \
+  --output artifacts/final_answers/final_answers.csv \
   --fallback-to-rules \
   --question-timeout 120 \
   --query-timeout 30
 ```
 
-Latest benchmark-style rerun:
+Run every question with ThaiLLM SQL generation and rule fallback:
 
 ```bash
 export THAILLM_API_KEY="your-token"
 
 python3 agentic_ai/run_all_questions.py \
-  --output artifacts/final_answers/final_answers_dynamic_template_check_v2.csv \
+  --output artifacts/final_answers/final_answers_llm.csv \
   --overwrite \
   --fallback-to-rules \
   --question-timeout 120 \
@@ -165,22 +177,13 @@ Create a submission-style CSV from a markdown-table answer file:
 
 ```bash
 python3 agentic_ai/format_submission.py \
-  --answers-csv artifacts/final_answers/final_answers_spray_v2_full_pipeline_rules_v2.csv \
-  --easy-med-formatted-csv artifacts/final_answers/final_answers_spray_v2_easy_med_formatted.csv \
+  --answers-csv artifacts/final_answers/final_answers.csv \
   --sample-csv sample_submission.csv \
-  --output artifacts/submissions/submission_spray_v2_full_pipeline_question_formatted.csv
+  --output artifacts/submissions/submission.csv
 ```
 
-The latest strict check against `artifacts/ground_truth/fahmai_easy_xhard_gt.csv` is saved in
-`artifacts/reports/easy_xhard_accuracy_report_dynamic_template_check_v2.csv`:
-
-| Level | Correct | Total | Accuracy |
-|---|---:|---:|---:|
-| EASY | 25 | 25 | 100.00% |
-| MED | 20 | 20 | 100.00% |
-| HARD | 1 | 20 | 5.00% |
-| XHARD | 0 | 20 | 0.00% |
-| Total | 46 | 85 | 54.12% |
+If you have local ground-truth files, keep them outside git, for example under
+`artifacts/ground_truth/`, and write evaluation reports under `artifacts/reports/`.
 
 ## Enriched Views
 
@@ -214,5 +217,5 @@ The latest strict check against `artifacts/ground_truth/fahmai_easy_xhard_gt.csv
 - In `--planner llm-sql` mode, the LLM writes one read-only SQLite `SELECT` from the full schema. Python validates that it is read-only, validates table/column resolution with SQLite `EXPLAIN QUERY PLAN`, applies a small alias repair layer for common friendly names, and retries with the LLM if SQLite reports a column/syntax error.
 - Intent-based deterministic templates are checked before LLM calls in both the single-question CLI and the batch runner. They are keyed by question wording/intent, not by fixed `question_id`, to reduce brittle benchmark-specific behavior.
 - Long-running queries can be interrupted by the batch runner with `--query-timeout`.
-- The pipeline intentionally stops at the markdown table returned from SQL. It does not run a final-answer formatter LLM stage.
-- `questions.csv` contains some questions that require narrative files, logs, chat transcripts, or prompt-injection resistance. The SQL agent is best for DIM/FACT table questions; the latest EASY/MED results are strong, while HARD/XHARD needs a retrieval/reconciliation layer over `docs/`, `logs/`, `reports/`, chat artifacts, and rendered evidence.
+- The core SQL pipeline intentionally stops at the markdown table returned from SQL. `format_submission.py` is a deterministic optional post-processing step, not an LLM formatter.
+- `questions.csv` contains some questions that require narrative files, logs, chat transcripts, or prompt-injection resistance. The SQL agent is best for DIM/FACT table questions; HARD/XHARD questions that depend on external evidence need a retrieval/reconciliation layer over local docs, logs, reports, chat artifacts, and rendered evidence.

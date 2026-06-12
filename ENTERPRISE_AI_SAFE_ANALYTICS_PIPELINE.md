@@ -141,50 +141,35 @@ python3 agentic_ai/run_all_questions.py \
   --fallback-to-rules
 ```
 
-The batch runner should write `final_answers.csv` without SQLite schema errors.
-For committed benchmark artifacts, keep generated answer CSVs under
-`artifacts/final_answers/`.
+The batch runner should write `artifacts/final_answers/final_answers.csv`
+without SQLite schema errors.
+Generated answer CSVs should be written under `artifacts/final_answers/`,
+which is ignored by git.
 
-## Latest Evaluation Snapshot
+## Evaluation Artifacts
 
 The current main-branch flow ends at SQL markdown tables and uses
-intent-based deterministic templates before falling back to ThaiLLM. The latest
-rerun artifact is:
+intent-based deterministic templates before falling back to ThaiLLM.
+Rerun artifacts should be kept locally, for example:
 
 ```text
-artifacts/final_answers/final_answers_dynamic_template_check_v2.csv
+artifacts/final_answers/final_answers.csv
 ```
 
-The strict EASY-to-XHARD ground-truth report is:
+If you have local ground-truth CSVs, keep them outside git and write reports
+under:
 
 ```text
-artifacts/reports/easy_xhard_accuracy_report_dynamic_template_check_v2.csv
+artifacts/reports/
 ```
-
-Latest strict accuracy:
-
-| Level | Correct | Total | Accuracy |
-|---|---:|---:|---:|
-| EASY | 25 | 25 | 100.00% |
-| MED | 20 | 20 | 100.00% |
-| HARD | 1 | 20 | 5.00% |
-| XHARD | 0 | 20 | 0.00% |
-| Total | 46 | 85 | 54.12% |
 
 HARD/XHARD questions often require non-table evidence such as docs, logs,
 reports, chat transcripts, rendered files, and multi-step reconciliation. The
 structured SQL pipeline should therefore be treated as the table-answering layer
 and paired with retrieval/reconciliation for those harder question families.
 
-## Staging Branch Handoff
+## Main Branch Handoff
 
-This work is intended for the existing `staging` branch:
-
-```bash
-git fetch origin
-git checkout staging
-git pull --ff-only origin staging
-python3 tests/test_enterprise_ai_safe_tables.py -v
-python3 agentic_ai/fahmai_sql_agent.py --rebuild-db --sql "SELECT COUNT(*) AS n FROM VW_FACT_SALES_ENRICHED"
-git push origin staging
-```
+The main branch keeps source code, structured tables, questions, tests, and
+documentation. Generated DBs and CSV artifacts are rebuilt locally with the run
+commands above.

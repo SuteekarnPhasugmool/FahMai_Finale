@@ -17,6 +17,8 @@ def read_csv(path: Path) -> list[dict[str, str]]:
 
 
 def split_markdown_row(line: str) -> list[str]:
+    # markdown_table() escapes literal pipes as \|; protect them before the
+    # structural split so values such as related_entity_id stay intact.
     placeholder = "\u241f"
     protected = line.strip().replace("\\|", placeholder)
     parts = [part.strip().replace(placeholder, "|") for part in protected.strip("|").split("|")]
@@ -54,6 +56,8 @@ def format_rows(question: str, answer: str) -> str:
     q = question.lower()
     headers, rows = parse_markdown_table(answer)
     if not rows:
+        # Some benchmark questions ask for evidence that is outside the loaded
+        # SQL tables. Return an explicit evidence boundary instead of inventing.
         if any(term in q for term in ("ceo", "cfo", "nps", "line works", "line oa", "อีเมล", "บันทึกการประชุม")):
             return "ไม่พบข้อมูลที่ยืนยันได้จากตาราง SQL ที่โหลดอยู่"
         return "0"
@@ -61,6 +65,8 @@ def format_rows(question: str, answer: str) -> str:
     r = rows[0]
     h = set(headers)
 
+    # Formatting is column-shape driven rather than question-id driven. That
+    # keeps it reusable for similar future questions without reading ground truth.
     if {"vendor_invoice_id", "payment_id", "duplicate_count"} <= h:
         payments = "; ".join(
             f"{x['payment_id']} ({x.get('business_event_date','')}/{x.get('posting_date','')}, {x.get('paid_amount_thb','')} THB)"

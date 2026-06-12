@@ -245,6 +245,8 @@ def bootstrap_database(db_path: Path, csv_dir: Path) -> None:
     try:
         for csv_path in sorted(csv_dir.glob("*.csv")):
             table_name = csv_path.stem
+            # Infer simple SQLite affinities from values while keeping the CSV
+            # table/column names intact for schema-grounded SQL generation.
             schema = infer_csv_schema(csv_path)
             with csv_path.open(newline="", encoding="utf-8-sig") as handle:
                 reader = csv.reader(handle)
@@ -2670,6 +2672,9 @@ def llm_generate_sql(
     api_key: str,
     model: str,
 ) -> tuple[str, str]:
+    # The LLM receives the live SQLite schema and must return JSON containing
+    # one SELECT. Python still validates read-only status and schema resolution
+    # before execution, so the model cannot silently invent columns.
     system_prompt = f"""
 You are a careful SQLite analyst for the FahMai public data bundle.
 Generate exactly one read-only SQLite SELECT query that answers the user's question.
@@ -2987,6 +2992,8 @@ def build_sql(plan: QueryPlan, columns: set[str]) -> str:
     select_parts: list[str] = []
     group_exprs: list[str] = []
 
+    # The rule planner only emits a small aggregate SQL shape: SELECT groups,
+    # one metric/count, optional validated filters, ORDER BY, LIMIT.
     for group in plan.group_by:
         if group == "event_year":
             select_parts.append("substr(business_event_date, 1, 4) AS event_year")
@@ -3119,6 +3126,8 @@ def execute_sql(conn: sqlite3.Connection, sql: str, query_timeout: int | None = 
     deadline = time.monotonic() + query_timeout
 
     def interrupt_if_expired() -> int:
+        # SQLite calls this progress handler periodically; returning 1 cancels
+        # runaway queries without terminating the whole Python process.
         return 1 if time.monotonic() >= deadline else 0
 
     conn.set_progress_handler(interrupt_if_expired, 10_000)
@@ -3134,6 +3143,8 @@ def markdown_table(rows: Iterable[sqlite3.Row]) -> str:
         if value is None:
             return ""
         text = str(value)
+        # Escape table delimiters so post-processors can parse markdown output
+        # without corrupting values that legitimately contain pipes.
         return text.replace("\\", "\\\\").replace("|", "\\|")
 
     rows = list(rows)

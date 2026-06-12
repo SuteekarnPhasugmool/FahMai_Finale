@@ -32,7 +32,7 @@ from fahmai_sql_agent import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUTPUT = ROOT / "final_answers.csv"
+DEFAULT_OUTPUT = ROOT / "artifacts" / "final_answers" / "final_answers.csv"
 DEFAULT_API_URL = "http://thaillm.or.th/api/v1/chat/completions"
 DEFAULT_MODEL = "typhoon-s-thaillm-8b-instruct"
 
@@ -85,6 +85,9 @@ def generate_rows(
     limit: int,
     query_timeout: int,
 ) -> tuple[str, list[sqlite3.Row]]:
+    # The batch path mirrors the single-question agent: trusted deterministic
+    # templates first, local rule planner for offline runs, then LLM SQL with
+    # schema-aware repair when the caller allows network/model usage.
     deterministic = deterministic_sql_for_question(question)
     if deterministic:
         sql, _ = deterministic
@@ -99,6 +102,8 @@ def generate_rows(
         last_error: Exception | None = None
         for attempt in range(3):
             try:
+                # Normalize common friendly aliases before asking SQLite to
+                # validate the query; only failed executions trigger LLM repair.
                 sql = repair_known_sql_aliases(sql)
                 rows = execute_sql(conn, sql, query_timeout=query_timeout)
                 if not rows:
@@ -175,6 +180,8 @@ def main() -> int:
                 continue
             print(f"[{index}/{len(questions)}] run {question_id}", file=sys.stderr, flush=True)
             try:
+                # Each question is isolated so one slow or broken query becomes
+                # one CSV error row instead of killing the whole benchmark run.
                 with question_timeout(args.question_timeout):
                     _, rows = generate_rows(
                         conn=conn,

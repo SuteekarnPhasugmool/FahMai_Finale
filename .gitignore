@@ -4,6 +4,14 @@
 *.sqlite
 *.sqlite3
 
+# Generated pipeline outputs
+artifacts/
+data_governance/*.csv
+final_answers*.csv
+submission*.csv
+*_accuracy_report*.csv
+*_gt.csv
+
 # Python/cache artifacts
 __pycache__/
 *.py[cod]

@@ -21,11 +21,8 @@
 | `README_AGENTIC_AI.md` | quick start และตัวอย่างคำสั่งใช้งาน |
 | `questions.csv` | ชุดคำถามจริงสำหรับทดสอบ agent |
 | `sample_submission.csv` | template submission format ในรูปแบบ `id,response` |
-| `artifacts/final_answers/` | raw batch outputs ในรูปแบบ `id,question,answer` |
-| `artifacts/submissions/` | submission-ready outputs ในรูปแบบ `id,response` |
-| `artifacts/ground_truth/` | ground truth CSVs สำหรับ evaluation เท่านั้น |
-| `artifacts/reports/` | accuracy/evaluation reports |
-| `fahmai_agentic.db` | SQLite database ที่ agent สร้างจาก CSV และใช้ query |
+| `artifacts/` | local generated outputs เช่น final answers, submissions, reports และ ground truth; ignored by git |
+| `fahmai_agentic.db` | local SQLite database ที่ agent สร้างจาก CSV และใช้ query; ignored by git |
 
 ## Data Flow
 
@@ -386,7 +383,7 @@ name_en
 
 ## Markdown Table Output
 
-pipeline ตอนนี้จบที่ markdown result table จาก SQL เท่านั้น ไม่มี final-answer formatter stage และไม่มี LLM รอบสองสำหรับจัดรูปคำตอบ
+core SQL pipeline จบที่ markdown result table จาก SQL เท่านั้น ไม่มี LLM รอบสองสำหรับจัดรูปคำตอบ ถ้าต้องการไฟล์ส่ง submission ให้ใช้ `agentic_ai/format_submission.py` เป็น deterministic post-process เพิ่มอีกขั้น
 
 หมายเหตุเรื่อง format: ค่า float ขนาดเล็กกว่า 1 จะแสดง 4 ตำแหน่งทศนิยม เช่น `0.0125` เพื่อไม่ให้ policy rate ถูกปัดเป็น `0.01`
 
@@ -422,19 +419,19 @@ python3 agentic_ai/fahmai_sql_agent.py --planner llm-sql --question-id L3-Q-MED-
 
 ```bash
 python3 agentic_ai/run_all_questions.py \
-  --output artifacts/final_answers/final_answers_rerun.csv \
+  --output artifacts/final_answers/final_answers.csv \
   --fallback-to-rules \
   --question-timeout 120 \
   --query-timeout 30
 ```
 
-รันรอบล่าสุดที่ใช้สร้าง markdown table answers:
+รันทุกคำถามผ่าน ThaiLLM SQL generation และ fallback-to-rules:
 
 ```bash
 export THAILLM_API_KEY="your-token"
 
 python3 agentic_ai/run_all_questions.py \
-  --output artifacts/final_answers/final_answers_dynamic_template_check_v2.csv \
+  --output artifacts/final_answers/final_answers_llm.csv \
   --overwrite \
   --fallback-to-rules \
   --question-timeout 120 \
@@ -453,40 +450,18 @@ id,question,answer
 
 ```bash
 python3 agentic_ai/format_submission.py \
-  --answers-csv artifacts/final_answers/final_answers_spray_v2_full_pipeline_rules_v2.csv \
-  --easy-med-formatted-csv artifacts/final_answers/final_answers_spray_v2_easy_med_formatted.csv \
+  --answers-csv artifacts/final_answers/final_answers.csv \
   --sample-csv sample_submission.csv \
-  --output artifacts/submissions/submission_spray_v2_full_pipeline_question_formatted.csv
+  --output artifacts/submissions/submission.csv
 ```
 
 ถ้าไม่ต้องการทับไฟล์เดิม ให้ใช้ชื่อไฟล์ใหม่ใน `--output` และไม่ใส่ `--overwrite`
 
-## Latest Accuracy Check
+## Evaluation Artifacts
 
-ตรวจ `artifacts/final_answers/final_answers_dynamic_template_check_v2.csv` เทียบกับ `artifacts/ground_truth/fahmai_easy_xhard_gt.csv` ด้วยเกณฑ์ strict:
+ไฟล์ evaluation เช่น ground truth, report CSV, final answer rerun และ submission output เป็น local artifacts เท่านั้น และไม่ commit เข้า main branch แล้ว เพื่อป้องกัน repo รกและลดความเสี่ยง ground-truth leakage. ถ้าต้องการตรวจ accuracy ให้เก็บไฟล์ไว้ใต้ `artifacts/ground_truth/` และ `artifacts/reports/` ในเครื่อง local.
 
-```text
-คำตอบต้องมีสาระสำคัญครบตาม ground truth
-partial answer ยังนับเป็น wrong
-```
-
-ผลล่าสุด:
-
-| Level | Correct | Total | Accuracy |
-|---|---:|---:|---:|
-| EASY | 25 | 25 | 100.00% |
-| MED | 20 | 20 | 100.00% |
-| HARD | 1 | 20 | 5.00% |
-| XHARD | 0 | 20 | 0.00% |
-| Total | 46 | 85 | 54.12% |
-
-report อยู่ที่:
-
-```text
-artifacts/reports/easy_xhard_accuracy_report_dynamic_template_check_v2.csv
-```
-
-ข้อสังเกต: EASY/MED เป็นคำถาม structured table จึงตอบได้ดีหลังเพิ่ม deterministic templates ส่วน HARD/XHARD หลายข้อ ground truth ต้องใช้ evidence นอก SQL tables เช่น policy memo, logs, reports, chat, recall/warranty trail และ reconciliation logic หลายขั้น จึงควรเพิ่ม retrieval/reconciliation layer ก่อนคาดหวัง accuracy สูงในกลุ่มนี้
+ข้อสังเกต: EASY/MED ส่วนใหญ่เป็น structured table questions จึงเหมาะกับ SQL pipeline นี้ ส่วน HARD/XHARD หลายข้อ ground truth ต้องใช้ evidence นอก SQL tables เช่น policy memo, logs, reports, chat, recall/warranty trail และ reconciliation logic หลายขั้น จึงควรเพิ่ม retrieval/reconciliation layer ก่อนคาดหวัง accuracy สูงในกลุ่มนี้
 
 ## Example Output
 
