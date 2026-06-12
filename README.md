@@ -10,6 +10,14 @@ The full project goal was to build an agentic AI pipeline for enterprise questio
 
 This repository focuses on **my part of the team project**: the tool-to-SQL agent for structured business tables. My scope was to build the component that selects relevant tables/views, generates and executes SQL queries, validates them against the live schema, and returns structured markdown-table answers. Retrieval over unstructured reports, documents, chat logs, and OCR outputs belongs to the broader Enterprise Data Agent system, but is not the main focus of this cleaned repository.
 
+## Data Source
+
+The dataset comes from the Kaggle competition **Fah Mai: The Finale - Enterprise Data Agentic Showdown**:
+
+https://www.kaggle.com/competitions/fah-mai-the-finale-enterprise-data-agentic-showdown/data
+
+This cleaned repository keeps the structured table bundle used by the SQL agent under `fah-mai-the-finale-enterprise-data-agentic-showdown/tables/`.
+
 ## Resume Highlights
 
 - Built a schema-aware SQL agent for enterprise FACT/DIM analytics data.

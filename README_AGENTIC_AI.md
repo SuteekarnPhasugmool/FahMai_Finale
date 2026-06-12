@@ -8,6 +8,12 @@ This repository is one part of a larger team project called **Enterprise Data Ag
 
 My part focused on the structured-data tool: a SQL agent that selects relevant tables or enriched views, generates and executes SQL queries, validates them against the live schema, and returns answers in structured markdown format.
 
+## Data Source
+
+The data comes from the Kaggle competition **Fah Mai: The Finale - Enterprise Data Agentic Showdown**:
+
+https://www.kaggle.com/competitions/fah-mai-the-finale-enterprise-data-agentic-showdown/data
+
 ## What Was Added
 
 - `sql/create_joined_views.sql`
