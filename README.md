@@ -8,7 +8,7 @@ This work is part of a larger team project: **Enterprise Data Agent**.
 
 The full project goal was to build an agentic AI pipeline for enterprise question answering across structured and unstructured business data. At the system level, the project combines SQL querying, retrieval, and reasoning components so answers can be grounded in enterprise data, traced back to source evidence, and extended across tables, reports, documents, and OCR-based sources.
 
-This repository focuses on **my part of the team project**: the tool-to-SQL agent for structured business tables. My scope was to build the component that selects relevant tables/views, generates and executes SQL queries, validates them against the live schema, and returns structured markdown-table answers. Retrieval over unstructured reports, documents, chat logs, and OCR outputs belongs to the broader Enterprise Data Agent system, but is not the main focus of this cleaned repository.
+This repository focuses on **my part of the team project**: harness engineering for the structured-data tool-to-SQL layer. My scope was to build the runnable harness and SQL agent component that selects relevant tables/views, generates and executes SQL queries, validates them against the live schema, batch-runs benchmark questions, and returns structured markdown-table answers. Retrieval over unstructured reports, documents, chat logs, and OCR outputs belongs to the broader Enterprise Data Agent system, but is not the main focus of this cleaned repository.
 
 ## Data Source
 
@@ -21,6 +21,7 @@ This cleaned repository keeps the structured table bundle used by the SQL agent 
 ## Resume Highlights
 
 - Built a schema-aware SQL agent for enterprise FACT/DIM analytics data.
+- Built part of the harness engineering layer for the larger Enterprise Data Agent system.
 - Designed enriched semantic views to make FACT-to-DIM joins safer and easier for downstream query generation.
 - Implemented deterministic routing, local rule planning, ThaiLLM SQL generation, read-only SQL validation, and SQLite execution.
 - Added live schema validation and repair paths to reduce hallucinated table or column references.
